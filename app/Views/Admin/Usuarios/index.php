@@ -7,6 +7,8 @@
 
 <!--Enviamos os estilos-->
 
+<link rel="stylesheet" href="<?php echo site_url('admin/vendors/auto-complete/jquery-ui.css'); ?>">
+
 <?php echo $this->endSection() ?>
 
 
@@ -21,6 +23,10 @@
               <div class="card">
                 <div class="card-body">
                   <h4 class="card-title"><?php echo $titulo; ?></h4>
+
+                  <div class="ui-widget">
+                        <input id="query" name="query" placeholder="Buscar usuário..." class="form-control bg-light"/>
+                  </div>
             
                   <div class="table-responsive">
                     <table class="table table-hover">
@@ -37,7 +43,8 @@
                       <?php foreach ($usuarios as $usuario) : ?>
 
                         <tr>
-                          <td><?php echo $usuario->nome; ?></td>
+                          <td>
+                            <a href="<?php echo site_url('admin/usuarios/show/' . $usuario->id); ?>"><?php echo $usuario->nome; ?></a></td>
                           <td><?php echo $usuario->email; ?></td>
                           <td><?php echo $usuario->cpf; ?></td>
                           <td><?php echo ($usuario->ativo ? '<label class="badge badge-primary">Ativo</label>' : '<label class="badge badge-danger">Inativo</label>') ?></td>
@@ -64,5 +71,44 @@
 <?php echo $this->section('scripts'); ?>
 
 <!--Enviamos os scripts-->
+
+<script src="<?php echo site_url('admin/vendors/auto-complete/jquery-ui.js'); ?>"></script>
+
+<script>
+    $(function(){
+        $("#query").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "<?php echo site_url('admin/usuarios/procurar'); ?>",
+                    dataType: "json",
+                    data: {
+                        term: request.term 
+                    },
+                    success: function(data) {
+                        if (data.length < 1) {
+                            response([
+                                {
+                                    label: 'Nenhum usuário encontrado',
+                                    value: -1
+                                }
+                            ]);
+                        } else {
+                            response(data);
+                        }
+                    }
+                });
+            },
+            minLength: 1,
+            select: function(event, ui){
+                if(ui.item.value == -1){
+                    $(this).val('');
+                    return false;
+                }else{
+                    window.location.href = "<?php echo site_url('admin/usuarios/show/'); ?>" + ui.item.id;
+                }
+            }
+        });
+    });
+</script>
 
 <?php echo $this->endSection() ?>
