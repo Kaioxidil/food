@@ -12,6 +12,7 @@ class UsuarioSeeder extends Seeder {
 
           'nome' => 'Kaio Gremaschi da Silva',
           'email' => 'kaiogremaschidasilva@gmail.com',
+          'cpf' => '326.013.440-91',
           'telefone' => '44 - 9724-9833',
 
         ];
@@ -22,6 +23,7 @@ class UsuarioSeeder extends Seeder {
 
           'nome' => 'admin',
           'email' => 'admin@gmail.com',
+          'cpf' => '368.407.480-22',
           'telefone' => '44 - 9724-9833',
 
         ];
