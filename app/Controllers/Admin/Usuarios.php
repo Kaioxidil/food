@@ -24,6 +24,8 @@ class Usuarios extends BaseController
 
         ];
 
+        session()->remove('sucesso');
+
         return view('Admin/Usuarios/index', $data);
     }
 
@@ -71,6 +73,21 @@ class Usuarios extends BaseController
         ];
 
         return view('Admin/Usuarios/editar', $data);
+    }
+
+    public function atualizar($id = null)
+    {
+        if ($this->request->getMethod() === 'post') {
+
+            $usuario = $this->buscaUsuarioOu404($id);
+
+            $post = $this->request->getPost();
+
+            dd($usuario);
+
+        } else {
+            return redirect()->back();
+        }
     }
 
     /**
