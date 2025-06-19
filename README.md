@@ -33,10 +33,4 @@ Um sistema de delivery online desenvolvido com PHP e CodeIgniter 4. Criado para 
 - MySQL/MariaDB
 - Apache/Nginx
 
-### Passos
 
-1. Clone o repositório:
-
-```bash
-git clone https://github.com/seu-usuario/sistema-delivery.git
-cd sistema-delivery
