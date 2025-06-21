@@ -79,7 +79,7 @@
             <!-- content-wrapper ends -->
         </div>
 
-<?php echo $titulo; ?> <?php echo $this->endSection(); ?>
+<?php echo $this->endSection(); ?>
 
 <?php echo $this->section('scripts'); ?>
 <!-- Aqui enviamos para o template principal os scripts --> <?php echo $this->endSection(); ?>

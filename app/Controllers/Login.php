@@ -26,6 +26,12 @@ class Login extends BaseController
                 // Pega o usuário logado (caso precise usar depois)
                 $usuario = $autenticacao->pegaUsuarioLogado();
 
+                if(!$usuario->is_admin){
+
+                   return redirect()->to(site_url('/'));
+
+                }
+
                 return redirect()->to(site_url('admin/home'))->with('sucesso',"Olá, $usuario->nome, que bom que está aqui!");
 
             } else {
@@ -40,6 +46,10 @@ class Login extends BaseController
 
     public function logout(){
         service('autenticacao')->logout();
-        return redirect()->to(site_url('login'));
+        return redirect()->to(site_url('login/mostraMensagemLogout'));
      }
+
+    public function mostraMensagemLogout(){
+        return redirect()->to(site_url('login'))->with('info', "Esperamos ver você novamente!");
+    }
 }
