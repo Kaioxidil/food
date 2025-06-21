@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -14,14 +12,11 @@ declare(strict_types=1);
 namespace CodeIgniter\Cache\Handlers;
 
 use CodeIgniter\Cache\Exceptions\CacheException;
-use CodeIgniter\I18n\Time;
 use Config\Cache;
 use Throwable;
 
 /**
  * File system cache handler
- *
- * @see \CodeIgniter\Cache\Handlers\FileHandlerTest
  */
 class FileHandler extends BaseHandler
 {
@@ -48,12 +43,17 @@ class FileHandler extends BaseHandler
     protected $mode;
 
     /**
-     * Note: Use `CacheFactory::getHandler()` to instantiate.
-     *
      * @throws CacheException
      */
     public function __construct(Cache $config)
     {
+        if (! property_exists($config, 'file')) {
+            $config->file = [
+                'storePath' => $config->storePath ?? WRITEPATH . 'cache',
+                'mode'      => 0640,
+            ];
+        }
+
         $this->path = ! empty($config->file['storePath']) ? $config->file['storePath'] : WRITEPATH . 'cache';
         $this->path = rtrim($this->path, '/') . '/';
 
@@ -63,8 +63,6 @@ class FileHandler extends BaseHandler
 
         $this->mode   = $config->file['mode'] ?? 0640;
         $this->prefix = $config->prefix;
-
-        helper('filesystem');
     }
 
     /**
@@ -93,18 +91,18 @@ class FileHandler extends BaseHandler
         $key = static::validateKey($key, $this->prefix);
 
         $contents = [
-            'time' => Time::now()->getTimestamp(),
+            'time' => time(),
             'ttl'  => $ttl,
             'data' => $value,
         ];
 
-        if (write_file($this->path . $key, serialize($contents))) {
+        if ($this->writeFile($this->path . $key, serialize($contents))) {
             try {
                 chmod($this->path . $key, $this->mode);
 
                 // @codeCoverageIgnoreStart
             } catch (Throwable $e) {
-                log_message('debug', 'Failed to set mode on cache file: ' . $e);
+                log_message('debug', 'Failed to set mode on cache file: ' . $e->getMessage());
                 // @codeCoverageIgnoreEnd
             }
 
@@ -126,8 +124,6 @@ class FileHandler extends BaseHandler
 
     /**
      * {@inheritDoc}
-     *
-     * @return int
      */
     public function deleteMatching(string $pattern)
     {
@@ -147,22 +143,21 @@ class FileHandler extends BaseHandler
      */
     public function increment(string $key, int $offset = 1)
     {
-        $prefixedKey = static::validateKey($key, $this->prefix);
-        $tmp         = $this->getItem($prefixedKey);
+        $key  = static::validateKey($key, $this->prefix);
+        $data = $this->getItem($key);
 
-        if ($tmp === false) {
-            $tmp = ['data' => 0, 'ttl' => 60];
-        }
-
-        ['data' => $value, 'ttl' => $ttl] = $tmp;
-
-        if (! is_int($value)) {
+        if ($data === false) {
+            $data = [
+                'data' => 0,
+                'ttl'  => 60,
+            ];
+        } elseif (! is_int($data['data'])) {
             return false;
         }
 
-        $value += $offset;
+        $newValue = $data['data'] + $offset;
 
-        return $this->save($key, $value, $ttl) ? $value : false;
+        return $this->save($key, $newValue, $data['ttl']) ? $newValue : false;
     }
 
     /**
@@ -170,7 +165,21 @@ class FileHandler extends BaseHandler
      */
     public function decrement(string $key, int $offset = 1)
     {
-        return $this->increment($key, -$offset);
+        $key  = static::validateKey($key, $this->prefix);
+        $data = $this->getItem($key);
+
+        if ($data === false) {
+            $data = [
+                'data' => 0,
+                'ttl'  => 60,
+            ];
+        } elseif (! is_int($data['data'])) {
+            return false;
+        }
+
+        $newValue = $data['data'] - $offset;
+
+        return $this->save($key, $newValue, $data['ttl']) ? $newValue : false;
     }
 
     /**
@@ -178,7 +187,7 @@ class FileHandler extends BaseHandler
      */
     public function clean()
     {
-        return delete_files($this->path, false, true);
+        return $this->deleteFiles($this->path, false, true);
     }
 
     /**
@@ -186,7 +195,7 @@ class FileHandler extends BaseHandler
      */
     public function getCacheInfo()
     {
-        return get_dir_file_info($this->path);
+        return $this->getDirFileInfo($this->path);
     }
 
     /**
@@ -219,7 +228,7 @@ class FileHandler extends BaseHandler
      * Does the heavy lifting of actually retrieving the file and
      * verifying it's age.
      *
-     * @return array{data: mixed, ttl: int, time: int}|false
+     * @return mixed
      */
     protected function getItem(string $filename)
     {
@@ -228,21 +237,15 @@ class FileHandler extends BaseHandler
         }
 
         $data = @unserialize(file_get_contents($this->path . $filename));
-
-        if (! is_array($data)) {
+        if (! is_array($data) || ! isset($data['ttl'])) {
             return false;
         }
 
-        if (! isset($data['ttl']) || ! is_int($data['ttl'])) {
-            return false;
-        }
-
-        if (! isset($data['time']) || ! is_int($data['time'])) {
-            return false;
-        }
-
-        if ($data['ttl'] > 0 && Time::now()->getTimestamp() > $data['time'] + $data['ttl']) {
-            @unlink($this->path . $filename);
+        if ($data['ttl'] > 0 && time() > $data['time'] + $data['ttl']) {
+            // If the file is still there then try to remove it
+            if (is_file($this->path . $filename)) {
+                @unlink($this->path . $filename);
+            }
 
             return false;
         }
@@ -252,8 +255,6 @@ class FileHandler extends BaseHandler
 
     /**
      * Writes a file to disk, or returns false if not successful.
-     *
-     * @deprecated 4.6.1 Use `write_file()` instead.
      *
      * @param string $path
      * @param string $data
@@ -269,9 +270,7 @@ class FileHandler extends BaseHandler
 
         flock($fp, LOCK_EX);
 
-        $result = 0;
-
-        for ($written = 0, $length = strlen($data); $written < $length; $written += $result) {
+        for ($result = $written = 0, $length = strlen($data); $written < $length; $written += $result) {
             if (($result = fwrite($fp, substr($data, $written))) === false) {
                 break;
             }
@@ -288,8 +287,6 @@ class FileHandler extends BaseHandler
      * Files must be writable or owned by the system in order to be deleted.
      * If the second parameter is set to TRUE, any directories contained
      * within the supplied base directory will be nuked as well.
-     *
-     * @deprecated 4.6.1 Use `delete_files()` instead.
      *
      * @param string $path   File path
      * @param bool   $delDir Whether to delete any directories found in the path
@@ -309,7 +306,7 @@ class FileHandler extends BaseHandler
             if ($filename !== '.' && $filename !== '..') {
                 if (is_dir($path . DIRECTORY_SEPARATOR . $filename) && $filename[0] !== '.') {
                     $this->deleteFiles($path . DIRECTORY_SEPARATOR . $filename, $delDir, $htdocs, $_level + 1);
-                } elseif (! $htdocs || preg_match('/^(\.htaccess|index\.(html|htm|php)|web\.config)$/i', $filename) !== 1) {
+                } elseif ($htdocs !== true || ! preg_match('/^(\.htaccess|index\.(html|htm|php)|web\.config)$/i', $filename)) {
                     @unlink($path . DIRECTORY_SEPARATOR . $filename);
                 }
             }
@@ -317,7 +314,7 @@ class FileHandler extends BaseHandler
 
         closedir($currentDir);
 
-        return ($delDir && $_level > 0) ? @rmdir($path) : true;
+        return ($delDir === true && $_level > 0) ? @rmdir($path) : true;
     }
 
     /**
@@ -325,8 +322,6 @@ class FileHandler extends BaseHandler
      * filesize, dates, and permissions
      *
      * Any sub-folders contained within the specified path are read as well.
-     *
-     * @deprecated 4.6.1 Use `get_dir_file_info()` instead.
      *
      * @param string $sourceDir    Path to source
      * @param bool   $topLevelOnly Look only at the top level directory specified?
@@ -340,17 +335,17 @@ class FileHandler extends BaseHandler
         $relativePath     = $sourceDir;
 
         if ($fp = @opendir($sourceDir)) {
-            // reset the array and make sure $sourceDir has a trailing slash on the initial call
+            // reset the array and make sure $source_dir has a trailing slash on the initial call
             if ($_recursion === false) {
                 $_filedata = [];
                 $sourceDir = rtrim(realpath($sourceDir) ?: $sourceDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
             }
 
-            // Used to be foreach (scandir($sourceDir, 1) as $file), but scandir() is simply not as fast
+            // Used to be foreach (scandir($source_dir, 1) as $file), but scandir() is simply not as fast
             while (false !== ($file = readdir($fp))) {
                 if (is_dir($sourceDir . $file) && $file[0] !== '.' && $topLevelOnly === false) {
                     $this->getDirFileInfo($sourceDir . $file . DIRECTORY_SEPARATOR, $topLevelOnly, true);
-                } elseif (! is_dir($sourceDir . $file) && $file[0] !== '.') {
+                } elseif ($file[0] !== '.') {
                     $_filedata[$file]                  = $this->getFileInfo($sourceDir . $file);
                     $_filedata[$file]['relative_path'] = $relativePath;
                 }
@@ -370,10 +365,8 @@ class FileHandler extends BaseHandler
      * Options are: name, server_path, size, date, readable, writable, executable, fileperms
      * Returns FALSE if the file cannot be found.
      *
-     * @deprecated 4.6.1 Use `get_file_info()` instead.
-     *
-     * @param string       $file           Path to file
-     * @param array|string $returnedValues Array or comma separated string of information returned
+     * @param string $file           Path to file
+     * @param mixed  $returnedValues Array or comma separated string of information returned
      *
      * @return array|false
      */

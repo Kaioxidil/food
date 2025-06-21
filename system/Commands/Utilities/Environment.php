@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * This file is part of CodeIgniter 4 framework.
  *
@@ -64,7 +62,7 @@ final class Environment extends BaseCommand
     /**
      * The Command's options
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $options = [];
 
@@ -74,13 +72,13 @@ final class Environment extends BaseCommand
      *
      * @var array<int, string>
      */
-    private static array $knownTypes = [
+    private static $knownTypes = [
         'production',
         'development',
     ];
 
     /**
-     * @return int
+     * {@inheritDoc}
      */
     public function run(array $params)
     {
@@ -88,7 +86,7 @@ final class Environment extends BaseCommand
             CLI::write(sprintf('Your environment is currently set as %s.', CLI::color($_SERVER['CI_ENVIRONMENT'] ?? ENVIRONMENT, 'green')));
             CLI::newLine();
 
-            return EXIT_ERROR;
+            return;
         }
 
         $env = strtolower(array_shift($params));
@@ -98,21 +96,21 @@ final class Environment extends BaseCommand
             CLI::error('You will not be able to run spark under a "testing" environment.', 'light_gray', 'red');
             CLI::newLine();
 
-            return EXIT_ERROR;
+            return;
         }
 
         if (! in_array($env, self::$knownTypes, true)) {
             CLI::error(sprintf('Invalid environment type "%s". Expected one of "%s".', $env, implode('" and "', self::$knownTypes)), 'light_gray', 'red');
             CLI::newLine();
 
-            return EXIT_ERROR;
+            return;
         }
 
         if (! $this->writeNewEnvironmentToEnvFile($env)) {
             CLI::error('Error in writing new environment to .env file.', 'light_gray', 'red');
             CLI::newLine();
 
-            return EXIT_ERROR;
+            return;
         }
 
         // force DotEnv to reload the new environment
@@ -124,8 +122,6 @@ final class Environment extends BaseCommand
         CLI::write(sprintf('Environment is successfully changed to "%s".', $env), 'green');
         CLI::write('The ENVIRONMENT constant will be changed in the next script execution.');
         CLI::newLine();
-
-        return EXIT_SUCCESS;
     }
 
     /**
@@ -153,7 +149,7 @@ final class Environment extends BaseCommand
 
         return file_put_contents(
             $envFile,
-            preg_replace($pattern, "\nCI_ENVIRONMENT = {$newEnv}", file_get_contents($envFile), -1, $count),
+            preg_replace($pattern, "\nCI_ENVIRONMENT = {$newEnv}", file_get_contents($envFile), -1, $count)
         ) !== false && $count > 0;
     }
 }
