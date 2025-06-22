@@ -24,9 +24,10 @@
                     <?php echo esc($usuario->email); ?>
                 </p>
                 <p class="card-text">
-                    <span class="font-weight-bold">Ativo: </span>
-                    <?php echo ($usuario->ativo) ? 'Sim' : 'Não'; ?>
+                    <span class="font-weight-bold">Status: </span>
+                    <?php echo ($usuario->ativo && $usuario->deletado_em === null) ? 'Ativo' : 'Inativo'; ?>
                 </p>
+
                 <p class="card-text">
                     <span class="font-weight-bold">Perfil: </span>
                     <?php echo ($usuario->is_admin) ? 'Administrador' : 'Cliente'; ?>
@@ -53,26 +54,26 @@
 
                         <a href="<?php echo site_url("admin/usuarios/editar/$usuario->id"); ?>"
                            class="btn btn-dark btn-sm mr-2">
-                            Editar
+                            <i class="mdi mdi-pencil mdi-18px"></i> Editar
                         </a>
                         <a href="<?php echo site_url("admin/usuarios/excluir/$usuario->id"); ?>"
                            class="btn btn-danger btn-sm mr-2">
-                            Excluir
+                            <i class="mdi mdi-delete mdi-18px"></i> Excluir
                         </a>
                         <a href="<?php echo site_url("admin/usuarios/"); ?>"
                            class="btn btn-light text-dark btn-sm mr-2">
-                            Voltar
+                            <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
                         </a>
                     <?php else: ?>
 
                         <a href="<?php echo site_url("admin/usuarios/desfazerexclusao/$usuario->id"); ?>"
                            class="btn btn-dark btn-sm mr-2">
-                            Desfazer exclusão
+                            <i class="mdi mdi-backup-restore mdi-18px"></i> Desfazer exclusão
                         </a>
 
                         <a href="<?php echo site_url("admin/usuarios/"); ?>"
                            class="btn btn-light text-dark btn-sm mr-2">
-                            Voltar
+                            <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
                         </a>
                     <?php endif; ?>
                 </div>

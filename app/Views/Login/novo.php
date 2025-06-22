@@ -67,6 +67,10 @@
                                 <div class="mt-3">
                                     <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">Logar</button>
                                 </div>
+
+                                <div class="my-2 d-flex justify-content-between align-items-center">
+                                <a href="<?php echo site_url('password/esqueci') ?>" class="auth-link text-black">Esqueceu a senha?</a>
+                                </div>
                             
                                 <div class="text-center mt-4 font-weight-light">
                                     Não tem uma conta? <a href="<?php echo site_url('registrar') ?>" class="text-primary">Criar conta</a>

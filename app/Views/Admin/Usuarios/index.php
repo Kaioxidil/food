@@ -19,8 +19,12 @@
                 </div>
 
                 <br />
+                <div class="d-flex justify-content-end mb-2">
+                    <a href="<?= site_url("admin/usuarios/criar"); ?>" class="btn btn-success d-flex align-items-center px-3 py-2" style="font-weight: bold;">
+                        <i class="mdi mdi-plus me-1"></i> Cadastrar
+                    </a>
+                </div>
 
-                <a href="<?=site_url("admin/usuarios/criar");?>" class="btn btn-success btn-sm mb-2">Cadastrar</a>
 
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -29,27 +33,26 @@
                                 <th>Nome</th>
                                 <th>E-mail</th>
                                 <th>Cpf</th>
-                                <th>Ativo</th>
+                                <th>Status</th>
                                 <th>Situação</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($usuarios as $usuario): ?>
-                            <tr>
+                            <tr style="cursor:pointer" onclick="window.location='<?=site_url("admin/usuarios/show/$usuario->id");?>'">
                                 <td>
-                                    <a
-                                        href='<?=site_url("admin/usuarios/show/$usuario->id");?>'><?=$usuario->nome;?></a>
+                                    <?=$usuario->nome;?>
                                 </td>
                                 <td><?=$usuario->email;?></td>
                                 <td><?=$usuario->cpf;?></td>
-                                <td><?=($usuario->ativo && null == $usuario->deletado_em) ? '<span class="badge badge-primary">Sim</span>' : '<span class="badge badge-danger">Não</span>';?>
+                                <td><?=($usuario->ativo && null == $usuario->deletado_em) ? '<span class="badge badge-primary">Ativo</span>' : '<span class="badge badge-danger">Inativo</span>';?>
                                 </td>
                                 <td>
                                     <?=(null == $usuario->deletado_em) ? '<span class="badge badge-primary">Disponível</span>' : '<span class="badge badge-danger">Excluído</span>';?>
 
                                     <?php if (null !== $usuario->deletado_em): ?>
                                     <a href="<?=site_url("admin/usuarios/desfazerexclusao/$usuario->id");?>"
-                                        class="badge badge-secondary">Desfazer</a>
+                                        class="badge badge-secondary" onclick="event.stopPropagation();">Desfazer</a>
                                     <?php endif;?>
                                 </td>
                             </tr>

@@ -5,11 +5,13 @@ namespace App\Models;
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Model;
 
+use App\Libraries\Token;
+
 class UsuarioModel extends Model
 {
     protected $table         = 'usuarios';
     protected $returnType    = 'App\Entities\Usuario';
-    protected $allowedFields = ['nome', 'email', 'telefone'];
+    protected $allowedFields = ['nome', 'email', 'cpf', 'telefone', 'reset_hash', 'password', 'reset_expira_em',];
 
     // Datas
     protected $useTimestamps  = true;
@@ -56,6 +58,7 @@ class UsuarioModel extends Model
 
         return $this->select('id, nome')
             ->like('nome', $term)
+            ->withDeleted(true)
             ->get()
             ->getResult();
     }
@@ -94,5 +97,26 @@ class UsuarioModel extends Model
     public function buscaUsuarioPorEmail(string $email)
     {
         return $this->where('email', $email)->first();
+    }
+
+    public function buscaUsuarioParaResetarSenha(string $token){
+
+        $token = new Token($token);
+
+        $tokenHash = $token->gethash();
+           
+        $usuario = $this->where('reset_hash', $tokenHash)->first();
+
+        if($usuario != null){
+
+            if($usuario->reset_expira_em < date('Y-m-d H:i:s')) {
+
+                $usuario = null;
+
+            }
+
+            return $usuario;
+
+        }
     }
 }
