@@ -51,8 +51,11 @@
                                     <?=(null == $usuario->deletado_em) ? '<span class="badge badge-primary">Disponível</span>' : '<span class="badge badge-danger">Excluído</span>';?>
 
                                     <?php if (null !== $usuario->deletado_em): ?>
-                                    <a href="<?=site_url("admin/usuarios/desfazerexclusao/$usuario->id");?>"
-                                        class="badge badge-secondary" onclick="event.stopPropagation();">Desfazer</a>
+                                  <a href="<?= site_url("admin/usuarios/desfazerexclusao/$usuario->id"); ?>"
+                                        class="badge badge-secondary"
+                                        onclick="event.stopPropagation();">
+                                        <i class="mdi mdi-undo"></i> Desfazer
+                                        </a>
                                     <?php endif;?>
                                 </td>
                             </tr>

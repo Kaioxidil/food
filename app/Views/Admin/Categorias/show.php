@@ -20,6 +20,10 @@
                     <?php echo esc($categoria->nome); ?>
                 </p>
                 <p class="card-text">
+                    <span class="font-weight-bold">Slug: </span>
+                    <?php echo esc($categoria->slug); ?>
+                </p>
+                <p class="card-text">
                     <span class="font-weight-bold">Status: </span>
                     <?php echo ($categoria->ativo) ? 'Ativo' : 'Inativo'; ?>
                 </p>

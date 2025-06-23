@@ -5,7 +5,7 @@
 <?php echo $this->endSection(); ?>
 
 <?php echo $this->section('estilos'); ?>
-<?php echo $this->endSection(); ?>
+<?php   echo $this->endSection(); ?>
 
 <?php echo $this->section('conteudo'); ?>
 <div class="row">
@@ -19,13 +19,13 @@
                 <ul>
                     <?php foreach (session('errors_model') as $error): ?>
                     <li class="text-danger"><?php echo $error; ?></li>
-                    <?php endforeach; ?>
+                    <?php endforeach;?>
                 </ul>
-                <?php endif; ?>
+                <?php endif;?>
 
-                <?php echo form_open("admin/usuarios/atualizar/$usuario->id"); ?>
-                <?php echo $this->include('Admin/Usuarios/form'); ?>
-                <a href="<?php echo site_url("admin/usuarios/show/$usuario->id"); ?>"
+                <?php echo form_open("admin/categorias/cadastrar"); ?>
+                <?php echo $this->include('Admin/Categorias/form'); ?>
+                <a href="<?php echo site_url("admin/categorias"); ?>"
                     class="btn btn-light text-dark btn-sm mr-2">
                     <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar</a>
                 <?php echo form_close(); ?>

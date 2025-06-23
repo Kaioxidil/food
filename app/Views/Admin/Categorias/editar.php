@@ -23,11 +23,12 @@
                 </ul>
                 <?php endif; ?>
 
-                <?php echo form_open("admin/usuarios/atualizar/$usuario->id"); ?>
-                <?php echo $this->include('Admin/Usuarios/form'); ?>
-                <a href="<?php echo site_url("admin/usuarios/show/$usuario->id"); ?>"
+                <?php echo form_open("admin/categorias/atualizar/$categoria->id"); ?>
+                <?php echo $this->include('Admin/Categorias/form'); ?>
+                <a href="<?php echo site_url("admin/categorias/"); ?>" 
                     class="btn btn-light text-dark btn-sm mr-2">
-                    <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar</a>
+                        <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
+                    </a>
                 <?php echo form_close(); ?>
             </div>
         </div>

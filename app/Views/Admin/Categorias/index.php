@@ -50,7 +50,8 @@
 
                                     <?php if (null !== $categoria->deletado_em): ?>
                                     <a href="<?=site_url("admin/categorias/desfazerexclusao/$categoria->id");?>"
-                                        class="badge badge-secondary" onclick="event.stopPropagation();">Desfazer</a>
+                                        class="badge badge-secondary" onclick="event.stopPropagation();"><i class="mdi mdi-undo"></i> Desfazer
+                                        </a>
                                     <?php endif;?>
                                 </td>
                             </tr>

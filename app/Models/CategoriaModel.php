@@ -30,6 +30,7 @@ class CategoriaModel extends Model
             'required'   => 'O campo nome é obrigatório.',
             'min_length' => 'O tamanho mínimo é de 2 caracteres.',
             'max_length' => 'O tamanho máximo é de 120 caracteres.',
+            'is_unique' => 'Essa categoria já existe!',
         ],
     ];
 
@@ -57,6 +58,14 @@ class CategoriaModel extends Model
             ->withDeleted(true)
             ->get()
             ->getResult();
+    }
+
+    public function desfazerExclusao(int $id)
+    {
+        return $this->protect(false)
+            ->where('id', $id)
+            ->set('deletado_em', null)
+            ->update();
     }
 
 }
