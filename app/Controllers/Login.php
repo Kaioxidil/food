@@ -25,6 +25,7 @@ class Login extends BaseController
 
                 // Pega o usuário logado (caso precise usar depois)
                 $usuario = $autenticacao->pegaUsuarioLogado();
+                
 
                 if(!$usuario->is_admin){
 

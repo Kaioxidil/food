@@ -70,10 +70,6 @@ class Usuarios extends BaseController
 
     public function editar($id = null)
     {
-        if ((int) $id === 1) {
-            return redirect()->back()->with('info', 'O usuário administrador principal não pode ser editado.');
-        }
-
         $usuario = $this->buscaUsuarioOu404($id);
 
         if (null != $usuario->deletado_em) {
@@ -107,16 +103,13 @@ class Usuarios extends BaseController
                     ->withInput();
             }
         } else {
+            // Não é POST
             return redirect()->back();
         }
     }
 
     public function atualizar($id = null)
     {
-        if ((int) $id === 1) {
-            return redirect()->back()->with('info', 'O usuário administrador principal não pode ser atualizado.');
-        }
-
         if ($this->request->getMethod() === 'post') {
             $usuario = $this->buscaUsuarioOu404($id);
 
@@ -153,16 +146,13 @@ class Usuarios extends BaseController
                     ->withInput();
             }
         } else {
+            // Não é POST
             return redirect()->back();
         }
     }
 
     public function excluir($id = null)
     {
-        if ((int) $id === 1) {
-            return redirect()->back()->with('info', 'O usuário administrador principal não pode ser excluído.');
-        }
-
         $usuario = $this->buscaUsuarioOu404($id);
 
         if (null != $usuario->deletado_em) {
@@ -192,10 +182,6 @@ class Usuarios extends BaseController
 
     public function desfazerExclusao($id = null)
     {
-        if ((int) $id === 1) {
-            return redirect()->back()->with('info', 'O usuário administrador principal não pode ser restaurado.');
-        }
-
         $usuario = $this->buscaUsuarioOu404($id);
 
         if (null == $usuario->deletado_em) {

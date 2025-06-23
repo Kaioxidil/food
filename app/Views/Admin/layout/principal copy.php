@@ -12,9 +12,8 @@
     <link rel="stylesheet" href="<?=site_url('admin/')?>vendors/datatables.net-bs4/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="<?=site_url('admin/')?>css/style.css">
 
+    <!-- Essa section renderizará os estilos específicos da view que estender esse layout -->
     <?=$this->renderSection('estilos')?>
-
-    
 </head>
 
 <body>
@@ -38,7 +37,7 @@
                 <ul class="navbar-nav navbar-nav-right">
                     <li class="nav-item dropdown me-1">
                         <a class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center"
-                            id="messageDropdown" href="#" data-toggle="dropdown">
+                            id="messageDropdown" href="#" data-bs-toggle="dropdown">
                             <i class="mdi mdi-message-text mx-0"></i>
                             <span class="count"></span>
                         </a>
@@ -82,13 +81,13 @@
                     </li>
                     <li class="nav-item dropdown me-4">
                         <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
-                            id="notificationDropdown" href="#" data-toggle="dropdown">
+                            id="notificationDropdown" href="#" data-bs-toggle="dropdown">
                             <i class="mdi mdi-bell mx-0"></i>
                             <span class="count"></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
                             aria-labelledby="notificationDropdown">
-                            <p class="mb-0 font-weight-normal float-left dropdown-header">Notificações</p>
+                            <p class="mb-0 font-weight-normal float-left dropdown-header">Notifications</p>
                             <a class="dropdown-item">
                                 <div class="item-thumbnail">
                                     <div class="item-icon bg-success">
@@ -109,7 +108,7 @@
                                     </div>
                                 </div>
                                 <div class="item-content">
-                                    <h6 class="font-weight-normal">Configurações</h6>
+                                    <h6 class="font-weight-normal">Settings</h6>
                                     <p class="font-weight-light small-text mb-0 text-muted">
                                         Private message
                                     </p>
@@ -131,30 +130,19 @@
                         </div>
                     </li>
                     <li class="nav-item nav-profile dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
-                            <img src="<?=site_url('admin/')?>images/faces/seudelivery.png" alt="profile" />
-                            <span class="nav-profile-name">
-                            <?php
-                                $autenticacao = service('autenticacao');
-                                $usuarioLogado = $autenticacao->pegaUsuarioLogado();
-
-                                if ($usuarioLogado) {
-                                    echo esc($usuarioLogado->nome);
-                                } else {
-                                    echo 'Visitante';
-                                }
-                            ?>
-                        </span>
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
+                            <img src="<?=site_url('admin/')?>images/faces/face5.jpg" alt="profile" />
+                            <span class="nav-profile-name">Louis Barnett</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
                             aria-labelledby="profileDropdown">
                             <a class="dropdown-item">
                                 <i class="mdi mdi-settings text-primary"></i>
-                                Configurações
+                                Settings
                             </a>
                             <a class="dropdown-item" href="<?php echo site_url("login/logout") ?>">
                                 <i class="mdi mdi-logout text-primary"></i>
-                                Sair
+                                Logout
                             </a>
                         </div>
                     </li>
@@ -191,32 +179,16 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="collapse" href="#produtos-submenu" aria-expanded="false" aria-controls="produtos-submenu">
-                            <i class="mdi mdi-food menu-icon"></i> <span class="menu-title">Produtos</span>
-                            <i class="menu-arrow"></i>
+                        <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
+                            <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
+                            <span class="menu-title">Extras</span>
                         </a>
-                        <div class="collapse" id="produtos-submenu">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/produtos") ?>">
-                                        <i class="mdi mdi-food-variant menu-icon"></i>
-                                        Todos os Produtos
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
-                                        <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
-                                        Extras
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/medidas") ?>">
-                                        <i class="mdi mdi-tape-measure menu-icon"></i>
-                                        Medidas
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
+                            <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
+                            <span class="menu-title">Produtos</span>
+                        </a>
                     </li>
                    
                     <li class="nav-item">
@@ -259,6 +231,7 @@
                     </div>
                     <?php endif;?>
 
+                    <!-- Captura os erros de CSRF - Ação não permitida -->
                     <?php if ($mensagem = session()->has('error')): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <strong>Erro!</strong> <?=session('error');?>
@@ -268,9 +241,12 @@
                     </div>
                     <?php endif;?>
 
+                    <!-- Essa section renderizará os conteúdos específicos  da view que estender esse layout -->
                     <?=$this->renderSection('conteudo')?>
 
                 </div>
+                <!-- content-wrapper ends -->
+                <!-- partial:partials/_footer.html -->
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
                         <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © <a
@@ -278,28 +254,37 @@
                       
                     </div>
                 </footer>
-                </div>
+                <!-- partial -->
             </div>
+            <!-- main-panel ends -->
         </div>
+        <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+
+    <!-- plugins:js -->
     <script src="<?=site_url('admin/')?>vendors/base/vendor.bundle.base.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page-->
     <script src="<?=site_url('admin/')?>vendors/chart.js/Chart.min.js"></script>
     <script src="<?=site_url('admin/')?>vendors/datatables.net/jquery.dataTables.js"></script>
     <script src="<?=site_url('admin/')?>vendors/datatables.net-bs4/dataTables.bootstrap4.js"></script>
+    <!-- End plugin js for this page-->
+    <!-- inject:js -->
     <script src="<?=site_url('admin/')?>js/off-canvas.js"></script>
     <script src="<?=site_url('admin/')?>js/hoverable-collapse.js"></script>
     <script src="<?=site_url('admin/')?>js/template.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
     <script src="<?=site_url('admin/')?>js/dashboard.js"></script>
     <script src="<?=site_url('admin/')?>js/data-table.js"></script>
     <script src="<?=site_url('admin/')?>js/jquery.dataTables.js"></script>
     <script src="<?=site_url('admin/')?>js/dataTables.bootstrap4.js"></script>
+    <!-- End custom js for this page-->
+
     <script src="<?=site_url('admin/')?>js/jquery.cookie.js" type="text/javascript"></script>
 
-    <script>
-        $(document).ready(function() {
-            $('.dropdown-toggle').dropdown();
-        });
-    </script>
-
+    <!-- Essa section renderizará os scripts específicos  da view que estender esse layout -->
     <?=$this->renderSection('scripts')?>
 </body>
 
