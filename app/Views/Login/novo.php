@@ -15,7 +15,7 @@
                         <div class="auth-form-light text-left py-5 px-4 px-sm-5">
                              <?php if ($mensagem = session()->has('sucesso')): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Perfeito!</strong> <?=session('sucesso');?>
+                        <?=session('sucesso');?>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -23,8 +23,8 @@
                     <?php endif;?>
 
                     <?php if ($mensagem = session()->has('info')): ?>
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <strong>Informação!</strong> <?=session('info');?>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <?=session('info');?>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>

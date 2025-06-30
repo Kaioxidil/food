@@ -41,8 +41,10 @@
 <script src="<?php echo site_url(); ?>admin/vendors/mask/app.js"></script>
 
 <script>
-    $(document).ready(function(){
+           $(document).ready(function(){
         $('#preco').mask('000.000.000,00', {reverse: true});
+
+        
     });
 </script>
 

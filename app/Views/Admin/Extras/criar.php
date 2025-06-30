@@ -38,4 +38,23 @@
 <?php echo $this->section('scripts'); ?>
 <script src="<?php echo site_url(); ?>admin/vendors/mask/jquery.mask.min.js"></script>
 <script src="<?php echo site_url(); ?>admin/vendors/mask/app.js"></script>
+<script>
+           $(document).ready(function(){
+        $('#preco').mask('000.000.000,00', {reverse: true});
+
+        $('#preco').on('blur', function() {
+            let valor = $(this).val();
+            if (valor && !valor.startsWith('R$')) {
+                $(this).val('R$ ' + valor);
+            }
+        });
+
+        $('#preco').on('focus', function() {
+            let valor = $(this).val();
+            if (valor.startsWith('R$ ')) {
+                $(this).val(valor.replace('R$ ', ''));
+            }
+        });
+    });
+</script>
 <?php echo $this->endSection(); ?>

@@ -14,6 +14,7 @@
 
     <?=$this->renderSection('estilos')?>
 
+
     
 </head>
 
@@ -23,8 +24,8 @@
         <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
             <div class="navbar-brand-wrapper d-flex justify-content-center">
                 <div class="navbar-brand-inner-wrapper d-flex justify-content-between align-items-center w-100">
-                    <a class="navbar-brand brand-logo" href="index.html"><img src="<?=site_url('admin/')?>images/logo.svg" alt="logo" /></a>
-                    <a class="navbar-brand brand-logo-mini" href="index.html">
+                    <a class="navbar-brand brand-logo" href="<?=site_url('admin/home')?>"><img src="<?=site_url('admin/')?>images/logo.svg" alt="logo" /></a>
+                    <a class="navbar-brand brand-logo-mini" href="<?=site_url('admin/home')?>">
                         <img src="<?=site_url('admin/')?>images/logo-mini.svg" alt="logo" />
                     </a>
                     <button class="navbar-toggler navbar-toggler align-self-center" type="button"
@@ -34,6 +35,8 @@
                 </div>
             </div>
             <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+
+               <div id="relogio-data" class="me-3 text-dark" style="font-weight: 500;"></div>
                
                 <ul class="navbar-nav navbar-nav-right">
                     <li class="nav-item dropdown me-1">
@@ -42,6 +45,7 @@
                             <i class="mdi mdi-message-text mx-0"></i>
                             <span class="count"></span>
                         </a>
+                        
                         <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
                             aria-labelledby="messageDropdown">
                             <p class="mb-0 font-weight-normal float-left dropdown-header">Messages</p>
@@ -55,6 +59,7 @@
                                         The meeting is cancelled
                                     </p>
                                 </div>
+                                
                             </a>
                             <a class="dropdown-item">
                                 <div class="item-thumbnail">
@@ -168,65 +173,68 @@
 
 
         <div class="container-fluid page-body-wrapper">
-            <nav class="sidebar sidebar-offcanvas" id="sidebar">
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/home") ?>">
-                            <i class="mdi mdi-home menu-icon"></i>
-                            <span class="menu-title">Dashboard</span>
-                        </a>
-                    </li>
+            <nav class="sidebar sidebar-offcanvas sidebar-fixed" id="sidebar">
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo site_url("admin/home") ?>">
+                <i class="mdi mdi-home menu-icon"></i>
+                <span class="menu-title">Dashboard</span>
+            </a>
+        </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/usuarios") ?>">
-                            <i class="mdi mdi-account menu-icon"></i>
-                            <span class="menu-title">Usuarios</span>
-                        </a>
-                    </li>
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo site_url("admin/usuarios") ?>">
+                <i class="mdi mdi-account menu-icon"></i>
+                <span class="menu-title">Usuarios</span>
+            </a>
+        </li>
 
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo site_url("admin/categorias") ?>">
+                <i class="mdi mdi-shape menu-icon"></i>
+                <span class="menu-title">Categorias</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="collapse" href="#produtos-submenu" aria-expanded="false" aria-controls="produtos-submenu">
+                <i class="mdi mdi-food menu-icon"></i> <span class="menu-title">Produtos</span>
+                <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="produtos-submenu">
+                <ul class="nav flex-column sub-menu">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/categorias") ?>">
-                            <i class="mdi mdi-shape menu-icon"></i>
-                            <span class="menu-title">Categorias</span>
+                        <a class="nav-link" href="<?php echo site_url("admin/produtos") ?>">
+                            <i class="mdi mdi-food-variant menu-icon"></i>
+                            Todos os Produtos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-toggle="collapse" href="#produtos-submenu" aria-expanded="false" aria-controls="produtos-submenu">
-                            <i class="mdi mdi-food menu-icon"></i> <span class="menu-title">Produtos</span>
-                            <i class="menu-arrow"></i>
+                        <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
+                            <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
+                            Extras
                         </a>
-                        <div class="collapse" id="produtos-submenu">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/produtos") ?>">
-                                        <i class="mdi mdi-food-variant menu-icon"></i>
-                                        Todos os Produtos
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
-                                        <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
-                                        Extras
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="<?php echo site_url("admin/medidas") ?>">
-                                        <i class="mdi mdi-tape-measure menu-icon"></i>
-                                        Medidas
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                     </li>
-                   
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("login/logout") ?>">
-                            <i class="mdi mdi-logout menu-icon"></i>
-                            <span class="menu-title">Sair</span>
+                        <a class="nav-link" href="<?php echo site_url("admin/medidas") ?>">
+                            <i class="mdi mdi-tape-measure menu-icon"></i>
+                            Medidas
                         </a>
                     </li>
                 </ul>
-            </nav>
+            </div>
+        </li>
+
+
+        <li class="nav-item">
+            <a class="nav-link" href="<?php echo site_url("admin/pagamentoforms") ?>">
+                <i class="mdi mdi-shape menu-icon"></i>
+                <span class="menu-title">Form. Pagemntos</span>
+            </a>
+        </li>
+
+        
+    </ul>
+</nav>
 
 
             <div class="main-panel">
@@ -234,7 +242,7 @@
 
                     <?php if ($mensagem = session()->has('sucesso')): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Perfeito!</strong> <?=session('sucesso');?>
+                        <?=session('sucesso');?>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -242,8 +250,8 @@
                     <?php endif;?>
 
                     <?php if ($mensagem = session()->has('info')): ?>
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <strong>Informação!</strong> <?=session('info');?>
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <?=session('info');?>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -274,7 +282,7 @@
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
                         <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © <a
-                                href="https://seudeliverybr.com.br" target="_blank">seudeliverybr.com.br </a>2025</span>
+                                href="https://seudeliverybr.com.br" target="_blank">seudeliverybr.com.br </a><?php echo date("Y"); ?></span>
                       
                     </div>
                 </footer>
@@ -298,7 +306,35 @@
         $(document).ready(function() {
             $('.dropdown-toggle').dropdown();
         });
+
+        function atualizarRelogioData() {
+        const agora = new Date();
+
+        const opcoesData = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        };
+
+        const opcoesHora = {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        };
+
+        const dataFormatada = agora.toLocaleDateString('pt-BR', opcoesData);
+        const horaFormatada = agora.toLocaleTimeString('pt-BR', opcoesHora);
+
+        document.getElementById('relogio-data').textContent = `${dataFormatada} ${horaFormatada}`;
+        document.getElementById('relogio-data').setAttribute('style', 'color: #9B9B9B;');
+    }
+
+    setInterval(atualizarRelogioData, 1000); // Atualiza a cada 1 segundo
+    atualizarRelogioData(); // Chamada inicial
+    
     </script>
+
+     
 
     <?=$this->renderSection('scripts')?>
 </body>

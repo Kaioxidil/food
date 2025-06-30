@@ -33,7 +33,7 @@ class Login extends BaseController
 
                 }
 
-                return redirect()->to(site_url('admin/home'))->with('sucesso',"Olá, $usuario->nome, que bom que está aqui!");
+                return redirect()->to(site_url('admin/home'))->with('sucesso',"Olá, <strong>$usuario->nome</strong>, que bom que está aqui!");
 
             } else {
                 // Retorna com mensagem de erro se falhar

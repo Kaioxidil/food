@@ -39,6 +39,7 @@
                         </thead>
                         <tbody>
                             <?php foreach ($usuarios as $usuario): ?>
+                                <?php if ($usuario->id == 1) continue; ?>
                             <tr style="cursor:pointer" onclick="window.location='<?=site_url("admin/usuarios/show/$usuario->id");?>'">
                                 <td>
                                     <?=$usuario->nome;?>
