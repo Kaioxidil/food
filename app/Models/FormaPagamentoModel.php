@@ -4,12 +4,12 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class MedidaModel extends Model
+class FormaPagamentoModel extends Model
 {
-    protected $table            = 'medidas';
-    protected $returnType       = 'App\Entities\Medida';
+    protected $table            = 'formas_pagamento';
+    protected $returnType       = 'App\Entities\FormaPagamento';
     protected $useSoftDeletes   = true;
-    protected $allowedFields    = ['nome','descricao', 'ativo',];
+    protected $allowedFields    = ['nome', 'ativo'];
 
     // Dates
     protected $useTimestamps = true;
@@ -18,17 +18,17 @@ class MedidaModel extends Model
     protected $updatedField  = 'atualizado_em';
     protected $deletedField  = 'deletado_em';
 
-      // Validações
+    // Validações
     protected $validationRules = [
-        'nome' => 'required|min_length[1]|is_unique[medidas.nome]|max_length[120]',
+        'nome' => 'required|min_length[2]|is_unique[formas_pagamento.nome]|max_length[120]',
     ];
 
     protected $validationMessages = [
         'nome'  => [
             'required'   => 'O campo nome é obrigatório.',
-            'min_length' => 'O tamanho mínimo é de 1 caracteres.',
+            'min_length' => 'O tamanho mínimo é de 2 caracteres.',
             'max_length' => 'O tamanho máximo é de 120 caracteres.',
-            'is_unique' => 'Essa medida já existe!',
+            'is_unique' => 'Essa forma de pagamento já existe!',
         ],
     ];
 
@@ -43,14 +43,6 @@ class MedidaModel extends Model
             ->withDeleted(true)
             ->get()
             ->getResult();
-    }
-
-    public function desfazerExclusao(int $id)
-    {
-        return $this->protect(false)
-            ->where('id', $id)
-            ->set('deletado_em', null)
-            ->update();
     }
 
 }

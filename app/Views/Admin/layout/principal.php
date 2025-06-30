@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="<?=site_url('admin/')?>vendors/base/vendor.bundle.base.css">
     <link rel="stylesheet" href="<?=site_url('admin/')?>vendors/datatables.net-bs4/dataTables.bootstrap4.css">
     <link rel="stylesheet" href="<?=site_url('admin/')?>css/style.css">
+    <link href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css" rel="stylesheet">
+
 
     <?=$this->renderSection('estilos')?>
 
@@ -174,67 +176,67 @@
 
         <div class="container-fluid page-body-wrapper">
             <nav class="sidebar sidebar-offcanvas sidebar-fixed" id="sidebar">
-    <ul class="nav">
-        <li class="nav-item">
-            <a class="nav-link" href="<?php echo site_url("admin/home") ?>">
-                <i class="mdi mdi-home menu-icon"></i>
-                <span class="menu-title">Dashboard</span>
-            </a>
-        </li>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo site_url("admin/home") ?>">
+                            <i class="mdi mdi-home menu-icon"></i>
+                            <span class="menu-title">Dashboard</span>
+                        </a>
+                    </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="<?php echo site_url("admin/usuarios") ?>">
-                <i class="mdi mdi-account menu-icon"></i>
-                <span class="menu-title">Usuarios</span>
-            </a>
-        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo site_url("admin/usuarios") ?>">
+                            <i class="mdi mdi-account menu-icon"></i>
+                            <span class="menu-title">Usuarios</span>
+                        </a>
+                    </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="<?php echo site_url("admin/categorias") ?>">
-                <i class="mdi mdi-shape menu-icon"></i>
-                <span class="menu-title">Categorias</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-toggle="collapse" href="#produtos-submenu" aria-expanded="false" aria-controls="produtos-submenu">
-                <i class="mdi mdi-food menu-icon"></i> <span class="menu-title">Produtos</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse" id="produtos-submenu">
-                <ul class="nav flex-column sub-menu">
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/produtos") ?>">
-                            <i class="mdi mdi-food-variant menu-icon"></i>
-                            Todos os Produtos
+                        <a class="nav-link" href="<?php echo site_url("admin/categorias") ?>">
+                            <i class="mdi mdi-shape menu-icon"></i>
+                            <span class="menu-title">Categorias</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
-                            <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
-                            Extras
+                        <a class="nav-link" data-toggle="collapse" href="#produtos-submenu" aria-expanded="false" aria-controls="produtos-submenu">
+                            <i class="mdi mdi-food menu-icon"></i> <span class="menu-title">Produtos</span>
+                            <i class="menu-arrow"></i>
                         </a>
+                        <div class="collapse" id="produtos-submenu">
+                            <ul class="nav flex-column sub-menu">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="<?php echo site_url("admin/produtos") ?>">
+                                        <i class="mdi mdi-food-variant menu-icon"></i>
+                                        Todos os Produtos
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="<?php echo site_url("admin/extras") ?>">
+                                        <i class="mdi mdi-pencil-plus-outline menu-icon"></i>
+                                        Extras
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="<?php echo site_url("admin/medidas") ?>">
+                                        <i class="mdi mdi-tape-measure menu-icon"></i>
+                                        Medidas
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </li>
+
+
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo site_url("admin/medidas") ?>">
-                            <i class="mdi mdi-tape-measure menu-icon"></i>
-                            Medidas
+                        <a class="nav-link" href="<?php echo site_url("admin/formas") ?>">
+                            <i class="mdi mdi-credit-card-settings-outline menu-icon"></i>
+                            <span class="menu-title">Formas de Pagamento</span>
                         </a>
                     </li>
+
+                    
                 </ul>
-            </div>
-        </li>
-
-
-        <li class="nav-item">
-            <a class="nav-link" href="<?php echo site_url("admin/pagamentoforms") ?>">
-                <i class="mdi mdi-shape menu-icon"></i>
-                <span class="menu-title">Form. Pagemntos</span>
-            </a>
-        </li>
-
-        
-    </ul>
-</nav>
+            </nav>
 
 
             <div class="main-panel">
