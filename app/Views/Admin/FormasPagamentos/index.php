@@ -75,7 +75,7 @@ $(function() {
     $("#query").autocomplete({
         source: function(request, response) {
             $.ajax({
-                url: "<?=site_url('/admin/formas/procurar');?>",
+                url: "<?=site_url('/admin/FormasPagamentos/procurar');?>",
                 dataType: "json",
                 data: {
                     term: request.term

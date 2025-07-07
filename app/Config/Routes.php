@@ -36,7 +36,21 @@ $routes->get('login', 'Login::novo', ['filter' => 'visitante']);
 
 $routes->group('admin', function($routes){
     $routes->add('formas', 'Admin\FormasPagamentos::index');
+    $routes->add('formas/criar', 'Admin\FormasPagamentos::criar');
+    $routes->post('formas/cadastrar', 'Admin\FormasPagamentos::cadastrar');
+    
+    $routes->add('formas/show/(:num)', 'Admin\FormasPagamentos::show/$1');
+    $routes->add('formas/editar/(:num)', 'Admin\FormasPagamentos::editar/$1');
+    $routes->post('formas/atualizar/(:num)', 'Admin\FormasPagamentos::atualizar/$1');
+
+    $routes->add('formas/excluir/(:num)', 'Admin\FormasPagamentos::excluir/$1');
+    $routes->post('formas/excluir/(:num)', 'Admin\FormasPagamentos::excluir/$1');
+
+    $routes->get('formas/desfazerexclusao/(:num)', 'Admin\FormasPagamentos::desfazerExclusao/$1');
+
+    $routes->get('formas/procurar', 'Admin\FormasPagamentos::procurar'); 
 });
+
 
 /*
  * --------------------------------------------------------------------

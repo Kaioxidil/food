@@ -23,9 +23,9 @@
                 </ul>
                 <?php endif;?>
 
-                <?php echo form_open("admin/extras/cadastrar"); ?>
-                <?php echo $this->include('Admin/Extras/form'); ?>
-                <a href="<?php echo site_url("admin/extras"); ?>"
+                <?php echo form_open("admin/formas/cadastrar"); ?>
+                <?php echo $this->include('Admin/FormasPagamentos/form'); ?>
+                <a href="<?php echo site_url("admin/formas"); ?>"
                     class="btn btn-light text-dark btn-sm mr-2">
                     <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar</a>
                 <?php echo form_close(); ?>

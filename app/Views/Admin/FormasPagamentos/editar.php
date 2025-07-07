@@ -23,9 +23,9 @@
                 </ul>
                 <?php endif; ?>
 
-                <?php echo form_open("admin/extras/atualizar/$extra->id"); ?>
-                <?php echo $this->include('Admin/Extras/form'); ?>
-                <a href="<?php echo site_url("admin/extras/show/$extra->id"); ?>" 
+                <?php echo form_open("admin/formas/atualizar/$forma->id"); ?>
+                <?php echo $this->include('Admin/FormasPagamentos/form'); ?>
+                <a href="<?php echo site_url("admin/formas/show/$forma->id"); ?>" 
                     class="btn btn-light text-dark btn-sm mr-2">
                         <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
                     </a>

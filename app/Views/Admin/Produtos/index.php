@@ -6,6 +6,7 @@
 
 <?=$this->section('estilos');?>
 <link rel="stylesheet" href="<?=site_url();?>admin/vendors/auto-complete/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 <?=$this->endSection();?>
 
 <?=$this->section('conteudo');?>
@@ -22,6 +23,12 @@
                 <div class="d-flex justify-content-end mb-2">
                     <a href="<?= site_url("admin/produtos/criar"); ?>" class="btn btn-success d-flex align-items-center px-3 py-2" style="font-weight: bold;">
                         <i class="mdi mdi-plus me-1"></i> Cadastrar
+                    </a>
+
+                    &nbsp;
+
+                    <a href="<?= site_url('admin/produtos/relatorio') ?>" target="_blank" class="btn btn-outline-primary d-flex align-items-center px-3 py-2">
+                        <i class="fa fa-file-pdf-o me-2" aria-hidden="true"></i>  &nbsp; Visualizar Relatório
                     </a>
                 </div>
 
@@ -57,6 +64,13 @@
                                         class="badge badge-secondary" onclick="event.stopPropagation();"><i class="mdi mdi-undo"></i> Desfazer
                                         </a>
                                     <?php endif;?>
+                                </td>
+
+                                <td>
+                                    
+                                    <a href="<?= site_url('admin/produtos/cupom') ?>" target="_blank" class="btn btn-sm btn-dark" onclick="event.stopPropagation();">
+                                        <i class="mdi mdi-printer"></i> 
+                                    </a>
                                 </td>
                             </tr>
                             <?php endforeach;?>

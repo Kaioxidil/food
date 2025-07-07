@@ -6,6 +6,8 @@
 
 <?=$this->section('estilos');?>
 <link rel="stylesheet" href="<?=site_url();?>admin/vendors/auto-complete/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
 <?=$this->endSection();?>
 
 <?=$this->section('conteudo');?>
@@ -19,9 +21,15 @@
                 </div>
 
                 <br />
-                <div class="d-flex justify-content-end mb-2">
-                    <a href="<?= site_url("admin/usuarios/criar"); ?>" class="btn btn-success d-flex align-items-center px-3 py-2" style="font-weight: bold;">
-                        <i class="mdi mdi-plus me-1"></i> Cadastrar
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a href="<?= site_url("admin/usuarios/criar"); ?>" class="btn btn-success d-flex align-items-center px-3 py-2 fw-bold">
+                        <i class="mdi mdi-plus me-2"></i> Cadastrar
+                    </a>
+
+                    &nbsp;
+
+                    <a href="<?= site_url('admin/usuarios/relatorio') ?>" target="_blank" class="btn btn-outline-primary d-flex align-items-center px-3 py-2">
+                        <i class="fa fa-file-pdf-o me-2" aria-hidden="true"></i>  &nbsp; Visualizar Relatório
                     </a>
                 </div>
 

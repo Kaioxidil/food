@@ -32,4 +32,46 @@ class MinhasValidacoes
             return true;
         }
     }
+
+    public function validaCnh(string $cnh): bool
+    {
+        // Verifica se tem 11 dígitos numéricos
+        if (!preg_match('/^[0-9]{11}$/', $cnh)) {
+            return false;
+        }
+
+        // Verifica se todos os dígitos são iguais (inválido)
+        if (preg_match('/^(\d)\1{10}$/', $cnh)) {
+            return false;
+        }
+
+        $soma = 0;
+
+        // Primeiro dígito verificador
+        for ($i = 0, $j = 9; $i < 9; $i++, $j--) {
+            $soma += $cnh[$i] * $j;
+        }
+
+        $digito1 = $soma % 11;
+        $digito1 = $digito1 >= 10 ? 0 : $digito1;
+
+        // Segundo dígito verificador
+        $soma = 0;
+        for ($i = 0, $j = 1; $i < 9; $i++, $j++) {
+            $soma += $cnh[$i] * $j;
+        }
+
+        $digito2 = $soma % 11;
+        $digito2 = $digito2 >= 10 ? 0 : $digito2;
+
+        return $cnh[9] == $digito1 && $cnh[10] == $digito2;
+    }
+
+    public function validaPlaca(string $placa): bool
+    {
+        // Remove hífen
+        $placa = strtoupper(str_replace('-', '', $placa));
+
+        return (bool) preg_match('/^([A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$/', $placa);
+    }
 }

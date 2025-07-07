@@ -4,6 +4,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Entities\Produto;
+use Dompdf\Dompdf;
 
 class Produtos extends BaseController
 {
@@ -558,7 +559,55 @@ class Produtos extends BaseController
         }
     }
 
-        
+
+    public function relatorio()
+    {
+       $produtos = $this->produtoModel->select('produtos.*, categorias.nome AS categoria')
+                    ->join('categorias', 'categorias.id = produtos.categoria_id')
+                    ->withDeleted(true) 
+                    ->findAll();
+
+        $data = [
+        'titulo'   => 'Relatório de Produtos',
+        'produtos' => $produtos,
+    ];
+
+        $dompdf = new \App\Libraries\Pdf(); 
+        $html = view('Admin/Produtos/relatorio', $data);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $dompdf->render();
+        $dompdf->stream('relatorio-produtos.pdf', false);
+    }
+
+
+    public function cupom()
+    {
+        $produtos = $this->produtoModel->select('produtos.*, categorias.nome AS categoria')
+            ->join('categorias', 'categorias.id = produtos.categoria_id')
+            ->withDeleted(true)
+            ->findAll();
+
+        $data = [
+            'titulo'   => 'CUPOM PARA COZINHA',
+            'produtos' => $produtos,
+        ];
+
+        $dompdf = new \App\Libraries\Pdf();
+        $html = view('Admin/Produtos/cupom', $data);
+
+        $dompdf->loadHtml($html);
+
+        // Define tamanho personalizado de papel para cupom térmico (80mm)
+        $dompdf->setPaper([0, 0, 226.77, 600]); // 80mm x altura dinâmica
+        $dompdf->render();
+
+        $dompdf->stream('cupom-cozinha.pdf', false);
+    }
+
 
     private function buscaProdutoOu404(int $id = null)
     {

@@ -45,4 +45,12 @@ class FormaPagamentoModel extends Model
             ->getResult();
     }
 
+    public function desfazerExclusao(int $id): bool
+    {
+        return $this->protect(false)
+                    ->where('id', $id)
+                    ->set('deletado_em', null)
+                    ->update();
+    }
+
 }

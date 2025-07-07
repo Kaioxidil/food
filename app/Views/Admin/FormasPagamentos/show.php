@@ -15,70 +15,72 @@
                 <h4 class="card-title text-white"><?php echo esc($titulo); ?></h4>
             </div>
             <div class="card-body">
-                <p class="card-text">
-                    <span class="font-weight-bold">Nome: </span>
-                    <?php echo esc($extra->nome); ?>
-                </p>
-                <p class="card-text">
-                    <span class="font-weight-bold">Slug: </span>
-                    <?php echo esc($extra->slug); ?>
-                </p>
-                <p class="card-text">
-                    <span class="font-weight-bold">Descrição: </span>
-                    <?php echo esc($extra->descricao); ?>
-                </p>
+
+                <?php if($forma->id == 1) :?>
+
+                    <div class="alert alert-warning" role="alert">
+                        A forma de pagamento <strong><?php echo esc($forma->nome); ?></strong>
+                        não pode ser <strong><span class="text-danger">editada ou excluída</span></strong>, pois essa opção estará vinculada ou não o envio de
+                        troco para o cliente quando o mesmo estiver no <strong>checkout</strong>
+                    </div>
+
+                    <?php endif; ?>
 
                 <p class="card-text">
-                    <span class="font-weight-bold">Preço: R$ </span>
-                    <?php echo esc($extra->preco); ?>
+                    <span class="font-weight-bold">Nome: </span>
+                    <?php echo esc($forma->nome); ?>
                 </p>
+               
                 <p class="card-text">
                     <span class="font-weight-bold">Status: </span>
-                    <?php echo ($extra->ativo) ? 'Ativo' : 'Inativo'; ?>
+                    <?php echo ($forma->ativo) ? 'Ativo' : 'Inativo'; ?>
                 </p>
                 <p class="card-text">
                     <span class="font-weight-bold">Criado: </span>
-                    <?php echo $extra->criado_em->humanize(); ?>
+                    <?php echo $forma->criado_em->humanize(); ?>
                 </p>
 
-                <?php if ($extra->deletado_em == null): ?>
+                <?php if ($forma->deletado_em == null): ?>
                     <p class="card-text">
                         <span class="font-weight-bold">Atualizado: </span>
-                        <?php echo $extra->atualizado_em->humanize(); ?>
+                        <?php echo $forma->atualizado_em->humanize(); ?>
                     </p>
                 <?php else: ?>
                     <p class="card-text">
                         <span class="font-weight-bold text-danger">Excluído: </span>
-                        <?php echo $extra->deletado_em->humanize(); ?>
+                        <?php echo $forma->deletado_em->humanize(); ?>
                     </p>
                 <?php endif; ?>
 
                 <div class="mt-4">
-                    <?php if ($extra->deletado_em == null): ?>
+                    <?php if ($forma->deletado_em == null): ?>
 
-                       <a href="<?php echo site_url("admin/extras/editar/$extra->id"); ?>"
+                       <?php if ($forma->id != 1): ?>
+
+                        <a href="<?php echo site_url("admin/formas/editar/$forma->id"); ?>"
                         class="btn btn-dark btn-sm mr-2">
                             <i class="mdi mdi-pencil mdi-18px"></i> Editar
                         </a>
 
-                        <a href="<?php echo site_url("admin/extras/excluir/$extra->id"); ?>"
+                        <a href="<?php echo site_url("admin/formas/excluir/$forma->id"); ?>"
                         class="btn btn-danger btn-sm mr-2">
                             <i class="mdi mdi-delete mdi-18px"></i> Excluir
                         </a>
+                        <?php endif; ?>
 
-                        <a href="<?php echo site_url("admin/extras/"); ?>"
+                        <a href="<?php echo site_url("admin/formas/"); ?>"
                         class="btn btn-light text-dark btn-sm mr-2">
                             <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
                         </a>
 
                         <?php else: ?>
 
-                        <a href="<?php echo site_url("admin/extras/desfazerexclusao/$extra->id"); ?>"
+                        <a href="<?php echo site_url("admin/formas/desfazerexclusao/$forma->id"); ?>"
                         class="btn btn-dark btn-sm mr-2">
                             <i class="mdi mdi-backup-restore mdi-18px"></i> Desfazer exclusão
                         </a>
 
-                        <a href="<?php echo site_url("admin/extras/"); ?>"
+                        <a href="<?php echo site_url("admin/formas/"); ?>"
                         class="btn btn-light text-dark btn-sm mr-2">
                             <i class="mdi mdi-arrow-left mdi-18px"></i> Voltar
                         </a>
