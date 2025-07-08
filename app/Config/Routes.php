@@ -34,6 +34,7 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 $routes->get('login', 'Login::novo', ['filter' => 'visitante']);
 
+
 $routes->group('admin', function($routes){
     $routes->add('formas', 'Admin\FormasPagamentos::index');
     $routes->add('formas/criar', 'Admin\FormasPagamentos::criar');

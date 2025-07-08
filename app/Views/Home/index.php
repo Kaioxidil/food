@@ -177,7 +177,7 @@
         <div class="row">
             <div class="col-12">
                 <div id="banner-adv2" class="banner-adv2">
-                    <img src="<?php echo site_url('web/') ?>assets/img/restaurants/1110x100/vbanner-2.jpg" class="img-fluid full-width" alt="banner"> <span class="text">Unlimited Free Delivery with. <img src="assets/img/tag.jpg" alt="logo"> <a href="restaurant.html" class="btn-second btn-submit">Try 30 Days FREE</a></span>
+                    <img src="<?php echo site_url('web/') ?>assets/img/restaurants/1110x100/vbanner-2.jpg" class="img-fluid full-width" alt="banner"> <span class="text">Unlimited Free Delivery with. <img src="<?php echo site_url('web/') ?>assets/logo-mini.svg" alt="logo"> <a href="restaurant.html" class="btn-second btn-submit">Try 30 Days FREE</a></span>
                     <span class="close-banner"></span>
                     <div class="overlay overlay-bg"></div>
                 </div>

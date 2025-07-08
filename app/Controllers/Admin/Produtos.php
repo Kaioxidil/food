@@ -602,7 +602,7 @@ class Produtos extends BaseController
         $dompdf->loadHtml($html);
 
         // Define tamanho personalizado de papel para cupom térmico (80mm)
-        $dompdf->setPaper([0, 0, 226.77, 600]); // 80mm x altura dinâmica
+        $dompdf->setPaper([0, 0, 226.77, 300]); // 80mm x altura dinâmica
         $dompdf->render();
 
         $dompdf->stream('cupom-cozinha.pdf', false);

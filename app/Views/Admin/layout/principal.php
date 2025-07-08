@@ -233,6 +233,12 @@
                             <span class="menu-title">Formas de Pagamento</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo site_url("admin/entregadores") ?>">
+                            <i class="mdi mdi-account-tie menu-icon"></i>
+                            <span class="menu-title">Entregadores</span>
+                        </a>
+                    </li>
 
                     
                 </ul>
