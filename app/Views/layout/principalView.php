@@ -53,14 +53,7 @@
                     <div class="main-search mainNavCol">
                         <form class="main-search search-form full-width">
                             <div class="row">
-                                <div class="col-lg-6 col-md-5">
-                                    <a href="#" class="delivery-add p-relative"> <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
-                                        <span class="address">Terra Roxa - Paraná</span>
-                                    </a>
-                                    <div class="location-picker">
-                                        <input type="text" class="form-control" placeholder="Enter a new address">
-                                    </div>
-                                </div>
+                                
                                 <div class="col-lg-6 col-md-7">
                                     <div class="search-box padding-10">
                                         <input type="text" class="form-control" placeholder="Pizza, Burger, Chinese">
@@ -69,113 +62,14 @@
                                 </div>
                         </form>
                     </div>
+                    
                     <div class="right-side fw-700 mainNavCol">
                         <div class="gem-points">
                             <a href="#"> <i class="fas fa-concierge-bell"></i>
                                 <span>Minhas Ordens</span>
                             </a>
                         </div>
-                        <div class="catring parent-megamenu">
-                            <a href="#"> <span>Ver Mais <i class="fas fa-caret-down"></i></span>
-                                <i class="fas fa-bars"></i>
-                            </a>
-                            <div class="megamenu">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="row">
-                                            <div class="col-lg-4 col-md-5">
-                                                <div class="ex-collection-box h-100">
-                                                    <a href="#">
-                                                        <img src="<?php echo site_url('web/') ?>assets/img/nav-1.jpg" class="img-fluid full-width h-100" alt="image">
-                                                    </a>
-                                                    <div class="category-type overlay padding-15"> <a href="restaurant.html" class="category-btn">Mais votados</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-8 col-md-7">
-                                                <div class="row">
-                                                    <div class="col-lg-3 col-sm-6">
-                                                        <div class="menu-style">
-                                                            <div class="menu-title">
-                                                                <h6 class="cat-name"><a href="#" class="text-light-black">Páginas iniciais</a></h6>
-                                                            </div>
-                                                            <ul>
-                                                                <li><a href="index-2.html" class="text-light-white fw-500">Página de destino</a>
-                                                                </li>
-                                                                <li><a href="homepage-1.html" class="text-light-white fw-500">Página inicial 1</a>
-                                                                </li>
-                                                                <li class="active"><a href="homepage-2.html" class="text-light-white fw-500">Página inicial 2</a>
-                                                                </li>
-                                                                <li><a href="homepage-3.html" class="text-light-white fw-500">Página inicial 3</a>
-                                                                </li>
-                                                                <li><a href="homepage-4.html" class="text-light-white fw-500">Página inicial 4</a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-sm-6">
-                                                        <div class="menu-style">
-                                                            <div class="menu-title">
-                                                                <h6 class="cat-name"><a href="#" class="text-light-black">Páginas internas</a></h6>
-                                                            </div>
-                                                            <ul>
-                                                                <li><a href="blog.html" class="text-light-white fw-500">Visualização em grade do blog</a>
-                                                                </li>
-                                                                <li><a href="blog-style-2.html" class="text-light-white fw-500">Visualização em grade do blog 2</a>
-                                                                </li>
-                                                                <li><a href="blog-details.html" class="text-light-white fw-500">Detalhes do blog</a>
-                                                                </li>
-                                                                <li><a href="ex-deals.html" class="text-light-white fw-500">Ofertas</a>
-                                                                </li>
-                                                                <li><a href="about.html" class="text-light-white fw-500">Sobre nós</a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-sm-6">
-                                                        <div class="menu-style">
-                                                            <div class="menu-title">
-                                                                <h6 class="cat-name"><a href="#" class="text-light-black">Páginas relacionadas</a></h6>
-                                                            </div>
-                                                            <ul>
-                                                                <li><a href="restaurant.html" class="text-light-white fw-500">Restaurante</a>
-                                                                <li><a href="restaurant-style-1.html" class="text-light-white fw-500">Restaurante 1</a>
-                                                                </li>
-                                                                <li><a href="restaurant-style-2.html" class="text-light-white fw-500">Restaurante 2</a>
-                                                                </li>
-                                                                <li><a href="add-restaurant.html" class="text-light-white fw-500">Adicionar restaurante</a>
-                                                                </li>
-                                                                <li><a href="list-view.html" class="text-light-white fw-500">Visualização em lista</a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-3 col-sm-6">
-                                                        <div class="menu-style">
-                                                            <div class="menu-title">
-                                                                <h6 class="cat-name"><a href="#" class="text-light-black">Páginas adicionais</a></h6>
-                                                            </div>
-                                                            <ul>
-                                                                <li><a href="login.html" class="text-light-white fw-500">Login</a>
-                                                                </li>
-                                                                <li><a href="register.html" class="text-light-white fw-500">Registrar</a>
-                                                                </li>
-                                                                <li><a href="checkout.html" class="text-light-white fw-500">Finalizar compra</a>
-                                                                </li>
-                                                                <li><a href="order-details.html" class="text-light-white fw-500">Detalhes do pedido</a>
-                                                                </li>
-                                                                <li><a href="geo-locator.html" class="text-light-white fw-500">Localizador geográfico</a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                       
                         <div class="mobile-search">
                             <a href="#" data-toggle="modal" data-target="#search-box"> <i class="fas fa-search"></i>
                             </a>
@@ -339,23 +233,16 @@
                         </div>
                         </div>
                 </div>
-                <div class="col-sm-12 mobile-search">
-                    <div class="mobile-address">
-                        <a href="#" class="delivery-add" data-toggle="modal" data-target="#address-box"> <span class="address">Terra Roxa - Paraná</span>
-                        </a>
-                    </div>
-                </div>
+                <div class="restaurent-tabs u-line bg-white"> 
+
+    
             </div>
         </div>
     </header>
 
 </div>
-<br>
-<br>
-<br>
 
 
-   
         <?php $this->renderSection('conteudo'); ?>
 
     <!-- footer -->

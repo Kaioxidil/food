@@ -30,6 +30,7 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
+                                <th>Imagem</th>
                                 <th>Nome</th>
                                 <th>Data de criação</th>
                                 <th>Status</th>
@@ -39,6 +40,13 @@
                         <tbody>
                             <?php foreach ($categorias as $categoria): ?>
                             <tr style="cursor:pointer" onclick="window.location='<?=site_url("admin/categorias/show/$categoria->id");?>'">
+                            <td class="py-1">
+                                <?php if ($categoria->imagem): ?>
+                                    <img src="<?php echo site_url("admin/categorias/imagem/$categoria->imagem") ?>" alt="<?php echo esc($categoria->nome); ?>">
+                                <?php else: ?>
+                                    <img src="<?php echo site_url('admin/images/sem-foto.jpg'); ?>"  alt="categoria sem imagem">
+                                <?php endif; ?>
+                                </td>
                                 <td>
                                     <?=$categoria->nome;?>
                                 </td>

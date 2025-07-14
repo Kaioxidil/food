@@ -9,7 +9,7 @@ class CategoriaModel extends Model
     protected $table            = 'categorias';
     protected $returnType       = 'App\Entities\Categoria';
     protected $useSoftDeletes   = true;
-    protected $allowedFields    = ['nome', 'ativo', 'slug'];
+    protected $allowedFields    = ['nome', 'ativo', 'slug', 'imagem'];
 
     // Dates
     protected $useTimestamps = true;
@@ -65,6 +65,17 @@ class CategoriaModel extends Model
             ->where('id', $id)
             ->set('deletado_em', null)
             ->update();
+    }
+
+
+    public function BuscaCategoriasPublicHome(){
+
+
+        return $this->select('categorias.id, categorias.nome, categorias.slug, categorias.imagem')
+                    ->join('produtos','produtos.categoria_id = categorias.id', )
+                    ->groupBy('categorias.id')
+                    ->findAll();
+            
     }
 
 }

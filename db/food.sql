@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 07/07/2025 às 18:05
+-- Tempo de geração: 12/07/2025 às 02:27
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -39,6 +39,13 @@ CREATE TABLE `bairros` (
   `deletado_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+--
+-- Despejando dados para a tabela `bairros`
+--
+
+INSERT INTO `bairros` (`id`, `nome`, `cidade`, `slug`, `valor_entrega`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(1, 'Jardim Veneza', 'Terra Roxa - PR', 'jardim-veneza', 5.00, 1, '2025-07-07 18:54:45', '2025-07-07 18:54:45', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -52,18 +59,18 @@ CREATE TABLE `categorias` (
   `ativo` tinyint(1) NOT NULL DEFAULT 1,
   `criado_em` datetime DEFAULT NULL,
   `atualizado_em` datetime DEFAULT NULL,
-  `deletado_em` datetime DEFAULT NULL
+  `deletado_em` datetime DEFAULT NULL,
+  `imagem` varchar(240) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Despejando dados para a tabela `categorias`
 --
 
-INSERT INTO `categorias` (`id`, `nome`, `slug`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 'Pizza doce', 'pizza-doce', 1, '2025-06-22 17:31:02', '2025-06-22 20:49:12', NULL),
-(2, 'Pizza Salgada', 'pizza-salgada', 1, '2025-06-22 21:01:48', '2025-06-23 20:09:52', NULL),
-(3, 'Porções', 'porcoes', 1, '2025-06-22 21:04:29', '2025-06-22 21:19:11', NULL),
-(5, 'Salgados', 'salgados', 1, '2025-06-30 21:50:58', '2025-06-30 21:50:58', NULL);
+INSERT INTO `categorias` (`id`, `nome`, `slug`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`, `imagem`) VALUES
+(1, 'Pizza doce', 'pizza-doce', 1, '2025-06-22 17:31:02', '2025-07-09 22:10:55', NULL, '1752109855_f7e66c3ba80f74eb9a7e.jpg'),
+(2, 'Pizza Salgada', 'pizza-salgada', 1, '2025-06-22 21:01:48', '2025-07-09 22:16:07', NULL, '1752110167_9596d54eccaa51105249.jpg'),
+(3, 'Porções', 'porcoes', 1, '2025-06-22 21:04:29', '2025-07-09 22:16:17', NULL, '1752110177_f0c066970646675b672f.jpg');
 
 -- --------------------------------------------------------
 
@@ -93,7 +100,7 @@ CREATE TABLE `entregadores` (
 --
 
 INSERT INTO `entregadores` (`id`, `nome`, `cpf`, `cnh`, `email`, `telefone`, `endereco`, `imagem`, `veiculo`, `placa`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 'Pedro', '264.143.320-62', '74988079002', 'pedro@gmail.com', '(44) 9999-9999', 'Rua do trabalhador, centro - TRX', NULL, 'Fan 125', 'ARD-7485', 1, '2025-07-03 20:12:20', '2025-07-03 20:12:20', NULL);
+(1, 'Kaio Gremaschi da Silva', '115.439.429-89', '11526591889', 'kaiogremaschidasilva@gmail.com', '(44) 99724-9833', 'Rua Simão Rodrigues Da Silva', '1752014874_de7e21fe6845421bffa8.png', 'Biz 125', 'JPP-1785', 1, '2025-07-08 19:40:02', '2025-07-08 19:47:55', NULL);
 
 -- --------------------------------------------------------
 
@@ -202,7 +209,8 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (9, '2025-06-26-221800', 'App\\Database\\Migrations\\CriaTabelaProdutoEspecificacoes', 'default', 'App', 1751233138, 7),
 (10, '2025-06-30-154807', 'App\\Database\\Migrations\\CriaTabelaFormasPagamento', 'default', 'App', 1751298643, 8),
 (11, '2025-07-03-230235', 'App\\Database\\Migrations\\CriaTabelaEsntregadores', 'default', 'App', 1751584292, 9),
-(12, '2025-07-07-155506', 'App\\Database\\Migrations\\Bairro', 'default', 'App', 1751904239, 10);
+(12, '2025-07-07-155506', 'App\\Database\\Migrations\\Bairro', 'default', 'App', 1751904239, 10),
+(13, '2025-07-11-015103', 'App\\Database\\Migrations\\AddRestauranteSlugToProdutos', 'default', 'App', 1752198705, 11);
 
 -- --------------------------------------------------------
 
@@ -214,6 +222,7 @@ CREATE TABLE `produtos` (
   `id` int(5) UNSIGNED NOT NULL,
   `categoria_id` int(5) UNSIGNED NOT NULL,
   `nome` varchar(128) NOT NULL,
+  `restaurante_slug` varchar(255) NOT NULL,
   `slug` varchar(128) NOT NULL,
   `ingredientes` text NOT NULL,
   `descricao` text NOT NULL,
@@ -228,10 +237,11 @@ CREATE TABLE `produtos` (
 -- Despejando dados para a tabela `produtos`
 --
 
-INSERT INTO `produtos` (`id`, `categoria_id`, `nome`, `slug`, `ingredientes`, `descricao`, `ativo`, `imagem`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 1, 'Pizza doce de brigadeiro', 'pizza-doce-de-brigadeiro', '<p><strong>Farinha</strong><br><span style=\"text-decoration: underline;\"><strong>Ovo</strong></span><br><em><strong>Doce de Leite </strong></em></p>\r\n<p><span style=\"text-decoration: underline;\">Uisuiodus</span></p>', 'aaaaaaaaaaasssssssssss', 1, '1751302917_284e30c2363bf8908e63.jpg', '2025-06-23 20:36:10', '2025-06-30 14:01:58', NULL),
-(2, 2, 'Pizza Calabresa', 'pizza-calabresa', '<p data-start=\"187\" data-end=\"206\"><strong>Calabresa fatiada</strong></p>\r\n<p data-start=\"209\" data-end=\"236\"><em><strong>Molho de tomate artesanal</strong></em></p>\r\n<p data-start=\"239\" data-end=\"257\"><span style=\"text-decoration: underline;\">Queijo mussarela</span></p>\r\n<p data-start=\"260\" data-end=\"284\"><em>Cebola roxa em rodelas</em></p>\r\n<p data-start=\"287\" data-end=\"296\">Or&eacute;gano</p>\r\n<p>Massa fina e crocante</p>', 'A tradicional e irresistível! Uma explosão de sabor com calabresa levemente picante, queijo derretido e a suavidade da cebola, finalizada com um toque especial de orégano. Ideal para quem ama o clássico.', 1, '', '2025-06-24 22:04:52', '2025-07-01 20:29:02', NULL),
-(5, 3, 'Porção de tilapias', 'porcao-de-tilapias', '<p><strong>500g de Tilapia</strong></p>', 'Porçao de tilapias finas com molho verde', 1, '1751331250_cc6af003863d53b0d285.jpg', '2025-06-30 21:53:34', '2025-06-30 21:54:11', NULL);
+INSERT INTO `produtos` (`id`, `categoria_id`, `nome`, `restaurante_slug`, `slug`, `ingredientes`, `descricao`, `ativo`, `imagem`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(1, 1, 'Pizza doce de brigadeiro', '', 'pizza-doce-de-brigadeiro', '<p><strong>Farinha</strong><br><span style=\"text-decoration: underline;\"><strong>Ovo</strong></span><br><em><strong>Doce de Leite </strong></em></p>\r\n<p><span style=\"text-decoration: underline;\">Uisuiodus</span></p>', 'aaaaaaaaaaasssssssssss', 1, '1752113046_711209e81a8e6acb598e.jpg', '2025-06-23 20:36:10', '2025-07-09 23:04:06', NULL),
+(2, 2, 'Pizza Calabresa', '', 'pizza-calabresa', '<p data-start=\"187\" data-end=\"206\"><strong>Calabresa fatiada</strong></p>\r\n<p data-start=\"209\" data-end=\"236\"><em><strong>Molho de tomate artesanal</strong></em></p>\r\n<p data-start=\"239\" data-end=\"257\"><span style=\"text-decoration: underline;\">Queijo mussarela</span></p>\r\n<p data-start=\"260\" data-end=\"284\"><em>Cebola roxa em rodelas</em></p>\r\n<p data-start=\"287\" data-end=\"296\">Or&eacute;gano</p>\r\n<p>Massa fina e crocante</p>', 'A tradicional e irresistível! Uma explosão de sabor com calabresa levemente picante, queijo derretido e a suavidade da cebola, finalizada com um toque especial de orégano. Ideal para quem ama o clássico.', 1, '1752114101_66a8aca884c20f48e21e.jpg', '2025-06-24 22:04:52', '2025-07-09 23:21:41', NULL),
+(5, 3, 'Porção de tilapias', '', 'porcao-de-tilapias', '<p><strong>500g de Tilapia</strong></p>', 'Porçao de tilapias finas com molho verde', 1, '1751331250_cc6af003863d53b0d285.jpg', '2025-06-30 21:53:34', '2025-06-30 21:54:11', NULL),
+(6, 2, 'Moda da Casa', '', 'moda-da-casa', '<p><strong>Ovo</strong></p>', 'Moda da Casa', 1, '1752114263_68420d7d01cc8ce8e8dc.jpg', '2025-07-09 23:23:56', '2025-07-09 23:24:23', NULL);
 
 -- --------------------------------------------------------
 
@@ -256,7 +266,8 @@ INSERT INTO `produtos_especificacoes` (`id`, `produto_id`, `medida_id`, `preco`,
 (2, 1, 2, 10.00, 1),
 (5, 2, 1, 15.00, 1),
 (6, 2, 2, 25.00, 1),
-(7, 5, 3, 35.00, 0);
+(7, 5, 3, 35.00, 0),
+(8, 6, 3, 55.00, 0);
 
 -- --------------------------------------------------------
 
@@ -276,7 +287,8 @@ CREATE TABLE `produtos_extras` (
 
 INSERT INTO `produtos_extras` (`id`, `produto_id`, `extra_id`) VALUES
 (6, 2, 3),
-(7, 1, 3);
+(7, 1, 3),
+(8, 6, 3);
 
 -- --------------------------------------------------------
 
@@ -307,10 +319,7 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `cpf`, `telefone`, `is_admin`, `ativo`, `password_hash`, `ativacao_hash`, `reset_hash`, `reset_expira_em`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
 (1, 'Suporte', 'seudeliverytrx@gmail.com', '', '(44) 9724-9833', 1, 1, '$2y$10$Yvxhj2n.BF.eQ8WohuSDyu9xLYwK9is.XdstkMWnNvrWo3gQ13WIO', NULL, NULL, NULL, '2025-06-20 00:53:18', '2025-06-23 18:51:25', NULL),
-(2, 'Kaio', 'kaiogremaschidasilva@gmail.com', '368.407.480-22', '(44) 9724-9833', 1, 1, '$2y$10$5roag9kAc8J2MyDJdP7jrOoRgcwIVGXf00l.p2gl55stEbc/euPNK', NULL, NULL, NULL, '2025-06-20 00:53:18', '2025-06-24 13:15:12', NULL),
-(5, 'Fabio', 'petitecloe.finenceiro@gmail.com', '440.820.270-33', '(44) 9923-0790', 0, 1, '$2y$10$KJvRujPZYokG93SezRj/neVay7DTr9ma4JllJM5sjwd0H/jGpgWLK', NULL, NULL, NULL, '2025-06-22 00:04:40', '2025-06-22 21:15:23', NULL),
-(6, 'Gaby', 'gabrielasouzacaiado@gmail.com', '104.026.419-06', '(44) 98868-9729', 0, 1, '$2y$10$hpj0WYpEAPxeZsUOx4jF8.qRWe1AE4dDnjL6R9WlkwppTb9hnh0Oq', NULL, NULL, NULL, '2025-06-22 17:11:18', '2025-06-23 08:23:21', NULL),
-(10, 'Usuario ', 'usuario@gmail.com', '115.439.429-89', '(44) 99724-9833', 0, 1, '$2y$10$bYIt08CpmYkHxa0od6zE3OnJzVcGzuiTcHMzA6XnhY/KAV8VRusVG', NULL, NULL, NULL, '2025-06-25 21:01:30', '2025-07-01 17:12:16', NULL);
+(2, 'Kaio', 'kaiogremaschidasilva@gmail.com', '368.407.480-22', '(44) 9724-9833', 1, 1, '$2y$10$5roag9kAc8J2MyDJdP7jrOoRgcwIVGXf00l.p2gl55stEbc/euPNK', NULL, NULL, NULL, '2025-06-20 00:53:18', '2025-06-24 13:15:12', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -409,19 +418,19 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `bairros`
 --
 ALTER TABLE `bairros`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `entregadores`
 --
 ALTER TABLE `entregadores`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `extras`
@@ -445,31 +454,31 @@ ALTER TABLE `medidas`
 -- AUTO_INCREMENT de tabela `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT de tabela `produtos`
 --
 ALTER TABLE `produtos`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de tabela `produtos_especificacoes`
 --
 ALTER TABLE `produtos_especificacoes`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `produtos_extras`
 --
 ALTER TABLE `produtos_extras`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Restrições para tabelas despejadas

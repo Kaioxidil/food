@@ -28,6 +28,11 @@ class CriaTabelaCategorias extends Migration
                 'null' => false,
                 'default' => true
             ],
+            'imagem' => [
+                'type' => 'VARCHAR',
+                'constraint' => '240',
+                'null' => true
+            ],
             'criado_em' => [
                 'type' => 'DATETIME',
                 'null' => true,

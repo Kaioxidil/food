@@ -6,10 +6,10 @@ use CodeIgniter\Model;
 
 class ProdutoModel extends Model
 {
-    protected $table            = 'produtos';
-    protected $returnType       = 'App\Entities\Produto';
-    protected $useSoftDeletes   = true;
-    protected $allowedFields    = [
+    protected $table          = 'produtos';
+    protected $returnType     = 'App\Entities\Produto';
+    protected $useSoftDeletes = true;
+    protected $allowedFields  = [
         'categoria_id',
         'nome',
         'slug',
@@ -17,6 +17,7 @@ class ProdutoModel extends Model
         'ingredientes',
         'ativo',
         'imagem',
+        'preco', // Adicionado 'preco' aqui, se ele for uma coluna direta na tabela 'produtos'
     ];
 
     // Dates
@@ -26,19 +27,21 @@ class ProdutoModel extends Model
     protected $updatedField  = 'atualizado_em';
     protected $deletedField  = 'deletado_em';
 
-        // Validações
+    // Validações
     protected $validationRules = [
-        'nome' => 'required|min_length[4]|is_unique[produtos.nome,id,{id}]|max_length[120]',
+        'nome'         => 'required|min_length[4]|is_unique[produtos.nome,id,{id}]|max_length[120]',
         'ingredientes' => 'required|min_length[10]|max_length[1000]',
         'categoria_id' => 'required|integer',
+        // Se 'preco' for uma coluna direta em 'produtos', adicione uma validação aqui também:
+        // 'preco'        => 'required|numeric|greater_than[0]', 
     ];
 
     protected $validationMessages = [
-        'nome'  => [
+        'nome'         => [
             'required'   => 'O campo nome é obrigatório.',
             'min_length' => 'O tamanho mínimo é de 4 caracteres.',
             'max_length' => 'O tamanho máximo é de 120 caracteres.',
-            'is_unique' => 'Esse nome já existe!',
+            'is_unique'  => 'Esse nome já existe!',
         ],
         'ingredientes' => [
             'required'   => 'O campo ingredientes é obrigatório.',
@@ -48,6 +51,17 @@ class ProdutoModel extends Model
         'categoria_id' => [
             'required'   => 'O campo categoria é obrigatório.',
         ],
+        // Se 'preco' for uma coluna direta em 'produtos':
+        // 'preco'        => [
+        //     'required'     => 'O campo preço é obrigatório.',
+        //     'numeric'      => 'O preço deve ser um número.',
+        //     'greater_than' => 'O preço deve ser maior que zero.',
+        // ],
+    ];
+
+    // Adicionado para garantir que o 'preco' seja sempre tratado como float
+    protected $casts = [
+        'preco' => 'float', 
     ];
 
     // Eventos callback
@@ -82,5 +96,34 @@ class ProdutoModel extends Model
             ->where('id', $id)
             ->set('deletado_em', null)
             ->update();
+    }
+
+    public function BuscaProdutosPublicHome()
+    {
+        return $this->select([
+            'produtos.id',
+            'produtos.nome',
+            'produtos.slug',
+            'produtos.descricao',
+            'produtos.ingredientes',
+            'produtos.ativo',
+            'produtos.imagem',
+            // Seleciona o menor preço das especificações e dá um alias de 'preco'
+            'MIN(produtos_especificacoes.preco) AS preco', 
+            'categorias.id AS categoria_id',
+            'categorias.nome AS categoria',
+            'categorias.slug AS categoria_slug',
+            // Adicione aqui outros campos de avaliação, tags, etc. se existirem no seu banco de dados
+            // Exemplo:
+            // 'AVG(avaliacoes.estrelas) AS avaliacao_media', 
+            // 'COUNT(avaliacoes.id) AS total_avaliacoes',
+        ])
+        ->join('categorias', 'categorias.id = produtos.categoria_id')
+        ->join('produtos_especificacoes', 'produtos_especificacoes.produto_id = produtos.id')
+        ->where('produtos.ativo', true)
+        ->groupBy('produtos.id, produtos.nome, produtos.slug, produtos.descricao, produtos.ingredientes, produtos.ativo, produtos.imagem, categorias.id, categorias.nome, categorias.slug') // Agrupa por todas as colunas não agregadas
+        ->orderBy('categorias.nome', 'ASC')
+        ->orderBy('produtos.nome', 'ASC') // Adicionado para ordenar produtos dentro da categoria
+        ->findAll();
     }
 }
