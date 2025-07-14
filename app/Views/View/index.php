@@ -58,12 +58,7 @@
             }
         }
 
-        .restaurent-meals .card {
-            margin-bottom: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+        
 
         .restaurent-meals .card-header {
             background-color: #f8f8f8;
@@ -337,7 +332,7 @@
                                         <a class="nav-link text-light-white fw-700" data-toggle="collapse" href="#mapgallerycollapse">Mapa & Galeria</a>
                                     </li>
                                 </ul>
-                        
+                            
                             </div>
                         </div>
                     </div>
@@ -369,7 +364,7 @@
                                     $preco_medio = $restaurante->preco_medio ?? 3;
                                     for ($i = 1; $i <= 5; $i++): 
                                 ?>
-                                        <span class="text-<?= $preco_medio >= $i ? 'success' : 'dark-white'; ?> fs-16">$</span>
+                                    <span class="text-<?= $preco_medio >= $i ? 'success' : 'dark-white'; ?> fs-16">$</span>
                                 <?php endfor; ?>
                                 <ul class="about-restaurent">
                                     <li> <i class="fas fa-map-marker-alt"></i>
@@ -589,16 +584,13 @@
                                     <?php foreach ($data_categoria['produtos'] as $produto): ?>
                                         <div class="col-lg-12">
                                             <div class="restaurent-product-list">
-                                                <div class="restaurent-product-detail" 
-                                                     data-toggle="modal" 
-                                                     data-target="#produtoModal"
-                                                     data-produto='<?= json_encode($produto); ?>'>
+                                                <a class="restaurent-product-detail" href="<?= site_url("produto/$produto->slug") ?>">
                                                     <div class="restaurent-product-left">
                                                         <div class="restaurent-product-title-box">
                                                             <div class="restaurent-product-box">
                                                                 <div class="restaurent-product-title">
                                                                     <h6 class="mb-2">
-                                                                        <a href="javascript:void(0)" class="text-light-black fw-600"><?= esc($produto->nome); ?></a>
+                                                                        <span class="text-light-black fw-600"><?= esc($produto->nome); ?></span>
                                                                     </h6>
                                                                 </div>
                                                                 <div class="restaurent-product-label">
@@ -663,7 +655,7 @@
                                                         ?>
                                                         <img src="<?= $imagemPath; ?>" class="img-fluid" alt="<?= esc($produto->nome); ?>">
                                                     </div>
-                                                </div>
+                                                </a>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
@@ -798,7 +790,7 @@
       <div class="modal-header">
         <h5 class="modal-title" id="produtoModalLabel"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
+          <span aria-hidden="true">×</span>
         </button>
       </div>
       <div class="modal-body text-center">
@@ -856,32 +848,7 @@
             });
         }
  
-        $('#produtoModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var produtoData = button.data('produto');
- 
-            var modal = $(this);
-            modal.find('.modal-title').text(produtoData.nome);
-            modal.find('#modalProdutoDescricao').text(produtoData.descricao);
-             
-            var precoFormatado = 'R$ ' + parseFloat(produtoData.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            modal.find('#modalProdutoPreco').text(precoFormatado);
- 
-            var imagemPath = '<?= site_url('admin/images/sem-imagem.jpg'); ?>';
-            if (produtoData.imagem) {
-                imagemPath = '<?= site_url('home/imagemProduto/'); ?>' + produtoData.imagem;
-            }
-            modal.find('#modalProdutoImagem').attr('src', imagemPath);
- 
-            var tagsContainer = modal.find('#modalProdutoTags');
-            tagsContainer.empty();
-            if (produtoData.label_personalizada) {
-                tagsContainer.append('<span class="rectangle-tag bg-gradient-red text-custom-white">' + produtoData.label_personalizada + '</span>');
-            }
-            if (produtoData.tipo_combo) {
-                tagsContainer.append('<span class="rectangle-tag bg-dark text-custom-white">' + produtoData.tipo_combo + '</span>');
-            }
-        });
+        // A PARTIR DAQUI, O SCRIPT DO MODAL FOI REMOVIDO
     });
 </script>
 <?php echo $this->endSection(); ?>

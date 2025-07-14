@@ -245,43 +245,7 @@
 
         <?php $this->renderSection('conteudo'); ?>
 
-    <!-- footer -->
-    <div class="footer-top section-padding">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-2 col-sm-4 col-6 mb-sm-20">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-credit-card-1"></i></span>
-                        <span class="text-light-black">Pagamento 100%<br>seguro</span>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-sm-20">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-wallet-1"></i></span>
-                        <span class="text-light-black">Suporta vários<br> pagamentos</span>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-sm-20">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-help"></i></span>
-                        <span class="text-light-black">Suporte<br> 8 horas / 6 dias</span>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-truck"></i></span>
-                        <span class="text-light-black">Entrega grátis<br> com R$ 100 em compra</span>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-guarantee"></i></span>
-                        <span class="text-light-black">Melhor preço<br>garantido</span>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6">
-                    <div class="icon-box"> <span class="text-light-green"><i class="flaticon-app-file-symbol"></i></span>
-                        <span class="text-light-black">Pronto para <br> mobile</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
     <footer class="section-padding bg-light-theme pt-0 u-line">
         <div class="u-line instagram-slider swiper-container">
             <ul class="hm-list hm-instagram swiper-wrapper">

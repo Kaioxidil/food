@@ -34,7 +34,7 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 $routes->get('Vizualizar', 'Home::Vizualizar');
 $routes->get('login', 'Login::novo', ['filter' => 'visitante']);
-
+$routes->get('produto/(:segment)', 'Produto::detalhes/$1');
 
 $routes->group('admin', function($routes){
     $routes->add('formas', 'Admin\FormasPagamentos::index');

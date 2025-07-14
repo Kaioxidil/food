@@ -78,7 +78,7 @@
                 ?>
                         <div class="col-md-6">
                             <div class="ex-collection-box mb-xl-20">
-                                <a href="<?= site_url("produto/detalhes/$produto->slug") ?>">
+                                <a href="<?= site_url("produto/$produto->slug") ?>">
                                     <img src="<?= site_url('home/imagemProduto/' . $produto->imagem); ?>" class="img-fluid full-width" style="max-height: 200px; object-fit: cover;" alt="<?= esc($produto->nome); ?>">
                                     <div class="category-type overlay padding-15">
                                         <span class="category-btn "><?= esc($produto->nome); ?></span>
@@ -107,7 +107,7 @@
                             <div class="col-lg-3 col-md-6 col-sm-6">
                                 <div class="product-box mb-xl-20">
                                     <div class="product-img">
-                                        <a href="<?= site_url("produto/detalhes/$produto->slug") ?>">
+                                        <a href="<?= site_url("produto/$produto->slug") ?>">
                                             <?php
                                             $imagemPath = site_url('admin/images/sem-imagem.jpg'); 
                                             if ($produto->imagem && !empty($produto->imagem)) {
@@ -136,7 +136,7 @@
                                     <div class="product-caption">
                                         <div class="title-box">
                                             <h6 class="product-title">
-                                                <a href="<?= site_url("produto/detalhes/$produto->slug") ?>" class="text-light-black">
+                                                <a href="<?= site_url("produto/$produto->slug") ?>" class="text-light-black">
                                                     <?= esc($produto->nome) ?>
                                                 </a>
                                             </h6>
@@ -150,7 +150,7 @@
                                                 <?php if (isset($produto->preco)): ?>
                                                     <span class="text-light-white price">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
                                                 <?php endif; ?>
-                                                <a href="<?= site_url("produto/detalhes/$produto->slug") ?>" class="btn btn-sm mt-2" style="background-color: #dc3545; color: white; border-color: #dc3545;">Ver mais</a>
+                                                <a href="<?= site_url("produto/$produto->slug") ?>" class="btn btn-sm mt-2" style="background-color: #dc3545; color: white; border-color: #dc3545;">Ver mais</a>
                                             </div>
                                         </div>
                                     </div>
