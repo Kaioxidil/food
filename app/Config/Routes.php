@@ -35,6 +35,22 @@ $routes->get('/', 'Home::index');
 $routes->get('Vizualizar', 'Home::Vizualizar');
 $routes->get('login', 'Login::novo', ['filter' => 'visitante']);
 $routes->get('produto/(:segment)', 'Produto::detalhes/$1');
+$routes->get('registro', 'Registro::novo');
+$routes->post('registro/criar', 'Registro::criar');
+
+
+$routes->group('carrinho', function ($routes) {
+    // Rota para exibir a página do carrinho de compras.
+    // Ex: www.seusite.com/carrinho
+    $routes->get('/', 'Carrinho::index', ['as' => 'carrinho']);
+    $routes->post('adicionar', 'Carrinho::adicionar', ['as' => 'carrinho.adicionar']);
+
+    $routes->get('remover/(:any)', 'Carrinho::remover/$1', ['as' => 'carrinho.remover']);
+
+});
+
+$routes->get('/finalizar', 'Finalizar::index'); 
+$routes->post('/finalizar/enviar', 'Finalizar::enviar');
 
 $routes->group('admin', function($routes){
     $routes->add('formas', 'Admin\FormasPagamentos::index');
@@ -51,6 +67,8 @@ $routes->group('admin', function($routes){
     $routes->get('formas/desfazerexclusao/(:num)', 'Admin\FormasPagamentos::desfazerExclusao/$1');
 
     $routes->get('formas/procurar', 'Admin\FormasPagamentos::procurar'); 
+
+    $routes->get('usuarios/relatorio', 'Admin\Usuarios::relatorio');
 });
 
 

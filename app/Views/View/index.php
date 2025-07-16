@@ -350,7 +350,7 @@
 
 <div class="container main-content-wrapper">
     <div class="row w-100"> 
-        <div class="col-xl-9 col-lg-8"> 
+        <div class="row"> 
             
             <div id="accordion" class="content-after-sticky-menu">
                 <section class="section-padding restaurent-about collapse" id="aboutcollapse" data-parent="#accordion"> 
@@ -565,7 +565,7 @@
                 </section>
             </div>
 
-            <section class="section-padding restaurent-meals">
+<section class="section-padding restaurent-meals">
     <div class="container-fluid">
         <div class="row">
             <?php if (!empty($produtosPorCategoria)): ?>
@@ -675,94 +675,13 @@
 
 
         </div> 
-        <div class="col-xl-3 col-lg-4"> 
-            <div class="sidebar sidebar3">
-                <div class="cart-detail-box">
-                    <div class="card">
-                        <div class="card-header padding-15 fw-700">Seu Pedido</div>
-                        <div class="card-body no-padding" id="scrollstyle-4">
-                            <div class="cat-product-box">
-                                <div class="cat-product">
-                                    <div class="cat-name">
-                                        <a href="#">
-                                            <p class="text-light-green fw-700"><span class="text-dark-white">1</span> Chilli Chicken Pizza</p> <span class="text-light-white fw-700">pequena, frango chilli</span>
-                                        </a>
-                                    </div>
-                                    <div class="delete-btn">
-                                        <a href="#" class="text-dark-white"> <i class="far fa-trash-alt"></i>
-                                        </a>
-                                    </div>
-                                    <div class="price"> <a href="#" class="text-dark-white fw-500">
-                                        $2.25
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cat-product-box">
-                                <div class="cat-product">
-                                    <div class="cat-name">
-                                        <a href="#">
-                                            <p class="text-light-green fw-700"><span class="text-dark-white">1</span> Cheesy Backed Tao</p> <span class="text-light-white fw-700">pequena, frango chilli</span>
-                                        </a>
-                                    </div>
-                                    <div class="delete-btn">
-                                        <a href="#" class="text-dark-white"> <i class="far fa-trash-alt"></i>
-                                        </a>
-                                    </div>
-                                    <div class="price"> <a href="#" class="text-dark-white fw-500">
-                                        $2.25
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cat-product-box">
-                                <div class="cat-product">
-                                    <div class="cat-name">
-                                        <a href="#">
-                                            <p class="text-light-green fw-700"><span class="text-dark-white">1</span> Crispy Chicken Piza</p> <span class="text-light-white fw-700">pequena, frango chilli</span>
-                                        </a>
-                                    </div>
-                                    <div class="delete-btn">
-                                        <a href="#" class="text-dark-white"> <i class="far fa-trash-alt"></i>
-                                        </a>
-                                    </div>
-                                    <div class="price"> <a href="#" class="text-dark-white fw-500">
-                                        $2.25
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cat-product-box">
-                                <div class="cat-product">
-                                    <div class="cat-name">
-                                        <a href="#">
-                                            <p class="text-light-green fw-700"><span class="text-dark-white">1</span> Chilli Chicken Pizza</p> <span class="text-light-white fw-700">pequena, frango chilli</span>
-                                        </a>
-                                    </div>
-                                    <div class="delete-btn">
-                                        <a href="#" class="text-dark-white"> <i class="far fa-trash-alt"></i>
-                                        </a>
-                                    </div>
-                                    <div class="price"> <a href="#" class="text-dark-white fw-500">
-                                        $2.25
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item-total">
-                                <div class="total-price border-0"> <span class="text-dark-white fw-700">Subtotal dos itens:</span>
-                                    <span class="text-dark-white fw-700">$8.50</span>
-                                </div>
-                                <div class="empty-bag padding-15 fw-700"> <a href="#">Esvaziar sacola</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer padding-15"> <a href="checkout.html" class="btn-first green-btn text-custom-white full-width fw-500">Continuar para o Checkout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+       
+
+
+
+
+        
     </div> 
 </div> 
 <div class="restaurent-address u-line">

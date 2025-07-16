@@ -2,18 +2,26 @@
 
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
 use App\Models\CategoriaModel;
 use App\Models\ProdutoModel;
 
 class Home extends BaseController
 {
+    private $cart;
+
     private $categoriaModel;
     private $produtoModel;
 
     public function __construct()
     {
+        // Esta linha foi removida para resolver o erro "Cannot call constructor"
+        // parent::__construct(); 
+        
         $this->categoriaModel = new CategoriaModel();
         $this->produtoModel = new ProdutoModel();
+        
+        $this->cart = \Config\Services::cart();
     }
 
     public function index()
@@ -29,13 +37,11 @@ class Home extends BaseController
     public function Vizualizar()
     {
         $categorias = $this->categoriaModel->orderBy('nome', 'ASC')->findAll();
-
         $produtosPorCategoria = [];
+        $produtosParaSlider = []; 
+        
         foreach ($categorias as $categoria) {
             $produtos = $this->produtoModel
-                // Removemos o select('*') pois o Model já define o que é selecionado em BuscaProdutosPublicHome()
-                // Aqui, você deve usar um método que traga os produtos de uma categoria específica.
-                // Como você já tem a categoria, podemos buscar direto:
                 ->select([
                     'produtos.id',
                     'produtos.nome',
@@ -44,39 +50,25 @@ class Home extends BaseController
                     'produtos.ingredientes',
                     'produtos.ativo',
                     'produtos.imagem',
-                    'MIN(produtos_especificacoes.preco) AS preco', // Garante que o preço venha aqui
+                    'MIN(produtos_especificacoes.preco) AS preco',
                 ])
                 ->join('produtos_especificacoes', 'produtos_especificacoes.produto_id = produtos.id')
                 ->where('produtos.categoria_id', $categoria->id)
                 ->where('produtos.ativo', true)
-                ->groupBy('produtos.id, produtos.nome, produtos.slug, produtos.descricao, produtos.ingredientes, produtos.ativo, produtos.imagem') // Agrupa pelas colunas do produto
+                ->groupBy('produtos.id, produtos.nome, produtos.slug, produtos.descricao, produtos.ingredientes, produtos.ativo, produtos.imagem')
                 ->orderBy('produtos.nome', 'ASC')
                 ->findAll();
-
-            // Atenção: Removi a correção do foreach ($produtos as &$produto)
-            // pois o $casts no Model e o AS preco no selectMin já farão o trabalho.
-            // Mantenha as atribuições abaixo APENAS SE elas não vierem do seu banco de dados
-            // ou se forem realmente dados dummy para testes.
-            // foreach ($produtos as &$produto) {
-            //     $produto->tags = [
-            //         '005-chili' => 'Picante',
-            //         '006-ketchup' => 'Com Ketchup'
-            //     ];
-            //     $produto->label_personalizada = 'Novo!'; 
-            //     $produto->tipo_combo = 'Combo Família'; 
-            //     $produto->avaliacao_media = 4.5; 
-            //     $produto->total_avaliacoes = 25; 
-            // }
-            // unset($produto);
 
             if (!empty($produtos)) {
                 $produtosPorCategoria[$categoria->id] = [
                     'categoria' => $categoria,
                     'produtos'  => $produtos
                 ];
+                
+                $produtosParaSlider = array_merge($produtosParaSlider, $produtos);
             }
         }
-
+        
         // Dados de restaurante (mantidos como dummy data)
         $restaurante = (object) [
             'nome'                => 'Hamburgada',
@@ -95,7 +87,7 @@ class Home extends BaseController
             'percent_comida_boa'  => 90,
             'percent_entrega_pontual' => 95,
             'percent_pedido_preciso'  => 88,
-            'preco_medio'         => 3, // Adicionado para a seção 'Sobre'
+            'preco_medio'         => 3,
             'horarios'            => [
                 'monday' => '7:00am - 10:59pm',
                 'tuesday' => '7:00am - 10:00pm',
@@ -125,6 +117,8 @@ class Home extends BaseController
             'restaurante'          => $restaurante,
             'categorias'           => $categorias,
             'produtosPorCategoria' => $produtosPorCategoria,
+            'produtos'             => $produtosParaSlider,
+            'carrinho'             => $this->cart,
         ];
 
         return view('View/index', $data);
@@ -167,5 +161,4 @@ class Home extends BaseController
         $this->response->setContentType(mime_content_type($path));
         readfile($path);
     }
-    
 }

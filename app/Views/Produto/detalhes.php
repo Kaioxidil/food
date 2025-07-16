@@ -127,8 +127,8 @@
     background-color: #fff;
 }
 
-/* Estilos para os Extras (Cartões e Botões) */
-.extra-card {
+/* Estilos para os Extras e Customização (Cartões e Botões) */
+.extra-card, .customizacao-card {
     background-color: #f9f9f9;
     border: 1px solid #eee;
     border-radius: 10px;
@@ -142,6 +142,27 @@
 .extra-card:has(input[type="checkbox"]:checked) {
     border-color: #28a745;
     box-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
+}
+.customizacao-card {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.customizacao-card .form-label {
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+.customizacao-card .form-control {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 0.95rem;
+    resize: vertical;
+}
+.customizacao-card .form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
 }
 
 .extra-info {
@@ -243,11 +264,7 @@
 <?php echo $this->endSection(); ?>
 
 <?php echo $this->section('conteudo'); ?>
-
-<br>
-<br>
-<br>
-
+<br><br><br>
 
 <section class="section-padding">
     <div class="container">
@@ -257,52 +274,78 @@
                     alt="<?= esc($produto->nome) ?>" 
                     class="produto-detalhes-img">
             </div>
-            <div class="col-lg-6 produto-info">
-                <h2><?= esc($produto->nome) ?></h2>
-                <hr>
-                <p class="produto-descricao"><?= esc($produto->descricao) ?></p>
-                <hr>
+           <div class="col-lg-6 produto-info">
+                <form id="form-adicionar" action="<?= site_url('carrinho/adicionar') ?>" method="post">
+                    <?= csrf_field() ?>
 
-                <?php if (isset($produto->preco)): ?>
-                    <p class="produto-preco" id="preco-base">R$ <?= number_format($produto->preco ?? 0, 2, ',', '.') ?></p>
-                <?php endif; ?>
+                    <h2><?= esc($produto->nome) ?></h2>
+                    <hr>
+                    <p class="produto-descricao"><strong>Descrição:</strong> <?= esc($produto->descricao) ?></p>
+                    <hr>
 
-                <hr>
-
-                <div class="accordion mt-4" id="accordionDetalhes">
-                    <?php if (!empty($produto->ingredientes)): ?>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingIngredientes">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngredientes" aria-expanded="true" aria-controls="collapseIngredientes">
-                                    Ingredientes
-                                </button>
-                            </h2>
-                            <div id="collapseIngredientes" class="accordion-collapse collapse show" aria-labelledby="headingIngredientes" data-bs-parent="#accordionDetalhes">
-                                <div class="accordion-body">
-                                    <?= $produto->ingredientes ?>
-                                </div>
-                            </div>
-                        </div>
+                    <?php if (isset($produto->preco)): ?>
+                        <p class="produto-preco" id="preco-base" data-preco-base="<?= $produto->preco ?>">R$ <?= number_format($produto->preco ?? 0, 2, ',', '.') ?></p>
                     <?php endif; ?>
 
-                    <?php if (!empty($extras)): ?>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingExtras">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExtras" aria-expanded="false" aria-controls="collapseExtras">
-                                    Extras
-                                </button>
-                            </h2>
-                            <div id="collapseExtras" class="accordion-collapse collapse" aria-labelledby="headingExtras" data-bs-parent="#accordionDetalhes">
-                                <div class="accordion-body">
-                                    <form id="form-extras">
+                    <hr>
+
+                    <div class="accordion mt-4" id="accordionDetalhes">
+
+                        <?php if (!empty($especificacoes)): ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingEspecificacoes">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEspecificacoes" aria-expanded="false" aria-controls="collapseEspecificacoes">
+                                        Escolha o Tamanho
+                                    </button>
+                                </h2>
+                                <div id="collapseEspecificacoes" class="accordion-collapse collapse" aria-labelledby="headingEspecificacoes" data-bs-parent="#accordionDetalhes">
+                                    <div class="accordion-body" id="form-especificacoes">
+                                        <?php foreach ($especificacoes as $i => $esp): ?>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" 
+                                                    name="especificacao_id" 
+                                                    id="esp<?= $esp->id ?>" 
+                                                    value="<?= $esp->id ?>" 
+                                                    data-preco="<?= $esp->preco ?>"
+                                                    data-customizavel="<?= $esp->customizavel ?>" <?= ($i === 0 ? 'checked' : '') ?>>
+                                                <label class="form-check-label" for="esp<?= $esp->id ?>">
+                                                    <?= esc($esp->descricao) ?> — R$ <?= number_format($esp->preco, 2, ',', '.') ?>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($produto->ingredientes)): ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingIngredientes">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIngredientes" aria-expanded="false" aria-controls="collapseIngredientes">
+                                        Ingredientes
+                                    </button>
+                                </h2>
+                                <div id="collapseIngredientes" class="accordion-collapse collapse" aria-labelledby="headingIngredientes" data-bs-parent="#accordionDetalhes">
+                                    <div class="accordion-body">
+                                        <?= $produto->ingredientes ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($extras)): ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingExtras">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExtras" aria-expanded="false" aria-controls="collapseExtras">
+                                        Adicionar Extras
+                                    </button>
+                                </h2>
+                                <div id="collapseExtras" class="accordion-collapse collapse" aria-labelledby="headingExtras" data-bs-parent="#accordionDetalhes">
+                                    <div class="accordion-body" id="form-extras">
                                         <?php foreach ($extras as $extra): ?>
                                             <div class="extra-card">
                                                 <div class="extra-info">
-                                                    <input type="checkbox" name="extra_id[]"
-                                                        id="extra-<?= $extra->id ?>"
-                                                        value="<?= $extra->id ?>"
-                                                        data-preco="<?= $extra->preco ?>"
-                                                        data-nome="<?= esc($extra->nome) ?>">
+                                                    <input type="checkbox" name="extras[<?= $extra->id ?>]" id="extra-<?= $extra->id ?>" value="<?= $extra->id ?>" data-preco="<?= $extra->preco ?>">
                                                     <label class="extra-label" for="extra-<?= $extra->id ?>">
                                                         <?= esc($extra->nome) ?> <span class="extra-price">— R$ <?= number_format($extra->preco, 2, ',', '.') ?></span>
                                                     </label>
@@ -312,64 +355,45 @@
                                                     <span class="qtd-display" id="extra-qtd-<?= $extra->id ?>">0</span>
                                                     <button class="qtd-btn" type="button" onclick="alterarExtraQtd(this, 1)">+</button>
                                                 </div>
+                                                <input type="hidden" name="extras_quantidade[<?= $extra->id ?>]" id="extra-quantidade-<?= $extra->id ?>" value="0">
                                             </div>
                                         <?php endforeach; ?>
-                                    </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <div id="div-customizacao" style="display: none;">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingCustomizacao">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomizacao" aria-expanded="false" aria-controls="collapseCustomizacao">
+                                        Observações (Ex: Dois Sabores)
+                                    </button>
+                                </h2>
+                                <div id="collapseCustomizacao" class="accordion-collapse collapse" aria-labelledby="headingCustomizacao" data-bs-parent="#accordionDetalhes">
+                                    <div class="accordion-body">
+                                        <textarea name="customizacao" class="form-control" id="customizacao" rows="3" style="height: 100px; resize: none;" placeholder="Ex: Metade Calabresa, Metade Quatro Queijos"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
+                        
+                    </div> <hr>
+                    <input type="hidden" name="produto_id" value="<?= esc($produto->id) ?>">
 
-                    <?php if (!empty($especificacoes)): ?>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingEspecificacoes">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEspecificacoes" aria-expanded="false" aria-controls="collapseEspecificacoes">
-                                    Especificações
-                                </button>
-                            </h2>
-                           <div id="collapseEspecificacoes" class="accordion-collapse collapse" aria-labelledby="headingEspecificacoes" data-bs-parent="#accordionDetalhes">
-                            <div class="accordion-body">
-                                <form id="form-especificacoes">
-                                    <?php foreach ($especificacoes as $i => $esp): ?>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" 
-                                                 name="especificacao_id" 
-                                                 id="esp<?= $esp->id ?>" 
-                                                 value="<?= $esp->id ?>" 
-                                                 data-preco="<?= $esp->preco ?>"
-                                                 <?= ($i === 0 ? 'checked' : '') ?>>
-                                            <label class="form-check-label" for="esp<?= $esp->id ?>">
-                                                <?= esc($esp->descricao) ?> — R$ <?= number_format($esp->preco, 2, ',', '.') ?>
-                                            </label>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </form>
-                            </div>
-                        </div>
-                        </div>
-                    <?php endif; ?>
+                    <div class="qtd-control">
+                        <button class="qtd-btn" type="button" onclick="alterarQtd(-1)">-</button>
+                        <span class="qtd-display" id="qtd">1</span>
+                        <button class="qtd-btn" type="button" onclick="alterarQtd(1)">+</button>
+                    </div>
+                    <input type="hidden" name="quantidade_produto" id="quantidade_produto_input" value="1">
+                    
+                    <button class="btn-adicionar" type="submit">
+                        Adicionar • <span id="preco-final">R$ <?= number_format($produto->preco ?? 0, 2, ',', '.') ?></span>
+                    </button>
+                </form>
+                
                 </div>
-
-                <hr>
-
-                <div class="qtd-control">
-                    <button class="qtd-btn" onclick="alterarQtd(-1)">-</button>
-                    <span class="qtd-display" id="qtd">1</span>
-                    <button class="qtd-btn" onclick="alterarQtd(1)">+</button>
-                </div>
-
-                <button class="btn-adicionar" onclick="adicionarCarrinho()">
-                    Adicionar • <span id="preco-final">R$ <?= number_format($produto->preco ?? 0, 2, ',', '.') ?></span>
-                </button>
-
-                <div class="mt-3">
-                    <p><strong>Slug:</strong> <?= esc($produto->slug) ?></p>
-                    <?php if (isset($produto->quantidade)): ?>
-                        <p><strong>Quantidade disponível:</strong> <?= esc($produto->quantidade) ?></p>
-                    <?php endif; ?>
-                </div>
-
-                <a href="<?= previous_url() ?>" class="btn btn-outline-secondary mt-3">Voltar para a loja</a>
             </div>
         </div>
 
@@ -383,93 +407,125 @@
         <?php endif; ?>
     </div>
 </section>
-
 <?php echo $this->endSection(); ?>
 
 <?php echo $this->section('scripts'); ?>
 <script>
-let qtd = 1;
-
-function alterarQtd(change) {
-    qtd += change;
-    if (qtd < 1) qtd = 1;
-    document.getElementById('qtd').innerText = qtd;
-    atualizarPreco();
-}
-
-function alterarExtraQtd(button, change) {
-    const extraItem = button.closest('.extra-card');
-    const extraCheckbox = extraItem.querySelector('input[type="checkbox"]');
-    const extraQtdDisplay = extraItem.querySelector('.qtd-display');
-    
-    let extraQtd = parseInt(extraQtdDisplay.innerText);
-    extraQtd += change;
-
-    if (extraQtd < 0) {
-        extraQtd = 0;
+    /**
+     * Altera a quantidade principal do produto.
+     * @param {number} change - O valor a ser adicionado ou subtraído (1 ou -1).
+     */
+    function alterarQtd(change) {
+        const qtdDisplay = document.getElementById('qtd');
+        // Lê a quantidade atual diretamente da tela, garantindo que temos o valor real
+        let qtdAtual = parseInt(qtdDisplay.innerText, 10);
+        
+        qtdAtual += change;
+        
+        // Garante que a quantidade nunca seja menor que 1
+        if (qtdAtual < 1) {
+            qtdAtual = 1;
+        }
+        
+        qtdDisplay.innerText = qtdAtual;
+        document.getElementById('quantidade_produto_input').value = qtdAtual;
+        
+        atualizarPreco();
     }
 
-    if (extraQtd === 0) {
-        extraCheckbox.checked = false;
-    } else {
-        extraCheckbox.checked = true;
+    /**
+     * Altera a quantidade de um item extra.
+     * @param {HTMLElement} button - O botão clicado (+ ou -).
+     * @param {number} change - O valor a ser alterado (1 ou -1).
+     */
+    function alterarExtraQtd(button, change) {
+        const extraCard = button.closest('.extra-card');
+        const extraCheckbox = extraCard.querySelector('input[type="checkbox"]');
+        const extraQtdDisplay = extraCard.querySelector('.qtd-display');
+        const extraQtdInputHidden = extraCard.querySelector('input[type="hidden"]');
+
+        let extraQtd = parseInt(extraQtdDisplay.innerText, 10) || 0;
+        extraQtd += change;
+        if (extraQtd < 0) {
+            extraQtd = 0;
+        }
+
+        extraQtdDisplay.innerText = extraQtd;
+        extraQtdInputHidden.value = extraQtd;
+        extraCheckbox.checked = extraQtd > 0;
+        
+        atualizarPreco();
     }
 
-    extraQtdDisplay.innerText = extraQtd;
-    atualizarPreco();
-}
+    /**
+     * Recalcula e atualiza todos os preços na tela com base nas seleções do usuário.
+     */
+    function atualizarPreco() {
+        // Lê o preço base de um atributo 'data-preco-base'
+        const precoBaseEl = document.getElementById('preco-base');
+        const precoBase = parseFloat(precoBaseEl.getAttribute('data-preco-base')) || 0;
 
-function atualizarPreco() {
-    let precoTotal = 0;
+        // Calcula o preço com base na especificação selecionada
+        let precoEspecificacao = 0;
+        const espRadio = document.querySelector('input[name="especificacao_id"]:checked');
+        if (espRadio) {
+            precoEspecificacao = parseFloat(espRadio.getAttribute('data-preco')) || 0;
+        }
 
-    const espRadio = document.querySelector('input[name="especificacao_id"]:checked');
-    if (espRadio) {
-        precoTotal = parseFloat(espRadio.getAttribute('data-preco'));
-    } else {
-        const precoBaseText = document.getElementById('preco-base').innerText;
-        precoTotal = parseFloat(precoBaseText.replace('R$ ', '').replace('.', '').replace(',', '.'));
-    }
+        // O preço exibido será o da especificação, ou o base se nenhuma for escolhida
+        const precoDisplay = precoEspecificacao > 0 ? precoEspecificacao : precoBase;
+        precoBaseEl.innerText = 'R$ ' + precoDisplay.toFixed(2).replace('.', ',');
 
-    const checkedExtras = document.querySelectorAll('#form-extras input[type="checkbox"]:checked');
-    checkedExtras.forEach(extra => {
-        const extraPreco = parseFloat(extra.getAttribute('data-preco'));
-        const extraQtd = parseInt(document.getElementById(`extra-qtd-${extra.value}`).innerText);
-        precoTotal += extraPreco * extraQtd;
-    });
+        // Lógica de customização
+        const divCustomizacao = document.getElementById('div-customizacao');
+        if (divCustomizacao) {
+            const inputCustomizacao = document.getElementById('customizacao');
+            if (espRadio && espRadio.getAttribute('data-customizavel') == '1') {
+                divCustomizacao.style.display = 'block';
+            } else {
+                divCustomizacao.style.display = 'none';
+                if (inputCustomizacao) inputCustomizacao.value = '';
+            }
+        }
 
-    const precoFinal = precoTotal * qtd;
-    document.getElementById('preco-final').innerText = 'R$ ' + precoFinal.toFixed(2).replace('.', ',');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const formEsp = document.getElementById('form-especificacoes');
-    if (formEsp) {
-        formEsp.addEventListener('change', atualizarPreco);
-    }
-    
-    const formExtras = document.getElementById('form-extras');
-    if (formExtras) {
-        formExtras.addEventListener('change', atualizarPreco);
-    }
-
-    atualizarPreco();
-});
-
-function adicionarCarrinho() {
-    const espRadio = document.querySelector('input[name="especificacao_id"]:checked');
-    const especificacaoId = espRadio ? espRadio.value : null;
-
-    const extrasSelecionados = [];
-    document.querySelectorAll('#form-extras input[type="checkbox"]:checked').forEach(extra => {
-        const extraQtd = parseInt(document.getElementById(`extra-qtd-${extra.value}`).innerText);
-        extrasSelecionados.push({
-            id: extra.value,
-            quantidade: extraQtd,
+        // Calcula o preço total de um item, incluindo os extras
+        let precoTotalItem = precoDisplay;
+        const extrasSelecionados = document.querySelectorAll('#form-extras input[type="checkbox"]:checked');
+        extrasSelecionados.forEach(extra => {
+            const precoExtra = parseFloat(extra.getAttribute('data-preco')) || 0;
+            const extraQtd = parseInt(document.getElementById(`extra-quantidade-${extra.value}`).value, 10) || 0;
+            precoTotalItem += precoExtra * extraQtd;
         });
-    });
+        
+        // Lê a quantidade principal direto da tela para o cálculo final
+        const qtdFinal = parseInt(document.getElementById('qtd').innerText, 10) || 1;
+        const precoFinalBotao = precoTotalItem * qtdFinal;
 
-    alert(`Produto adicionado ao carrinho!\nQuantidade do produto: ${qtd}\nEspecificação ID: ${especificacaoId}\nExtras: ${JSON.stringify(extrasSelecionados, null, 2)}`);
-}
+        document.getElementById('preco-final').innerText = 'R$ ' + precoFinalBotao.toFixed(2).replace('.', ',');
+    }
+
+    /**
+     * Adiciona os "escutadores" de eventos quando a página termina de carregar.
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Escutadores de eventos para mudanças nos formulários
+        const formEspecificacoes = document.getElementById('form-especificacoes');
+        if (formEspecificacoes) {
+            formEspecificacoes.addEventListener('change', atualizarPreco);
+        }
+        
+        const formExtras = document.getElementById('form-extras');
+        if (formExtras) {
+            formExtras.addEventListener('change', atualizarPreco);
+        }
+        
+        // Garante que o valor inicial da quantidade seja 1
+        document.getElementById('quantidade_produto_input').value = 1;
+        document.getElementById('qtd').innerText = 1;
+
+        // Chama a função uma vez para garantir que os preços sejam exibidos corretamente
+        atualizarPreco();
+    });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <?php echo $this->endSection(); ?>

@@ -12,6 +12,59 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-height: 3em;
+    -webkit-line-clamp: 2;
+    line-height: 1.5em;
+}
+
+.product-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    line-height: 1.4em;
+    max-height: 2.8em;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.product-title a {
+    display: block;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.cat-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    line-height: 1.3em;
+    max-height: 2.6em;
+    word-wrap: break-word;
+    word-break: break-word;
+    text-align: center;
+}
+
+
+
+/* Container do rótulo do produto */
+.product-label {
+    position: absolute; /* Posiciona o elemento de forma absoluta */
+    bottom: 20px; /* Distância da parte inferior */
+    left: 20px; /* Distância da esquerda */
+}
+
+/* Estilo do botão de categoria (o texto) */
+.category-btn {
+    background-color: rgba(200, 200, 200, 0.6);
+    color: #fff; 
+    padding: 8px 12px; 
+    border-radius: 5px; 
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase; 
 }
 </style>
 <?php echo $this->endSection(); ?>
@@ -77,11 +130,11 @@
                         $count++;
                 ?>
                         <div class="col-md-6">
-                            <div class="ex-collection-box mb-xl-20">
+                            <div class="ex-collection-box mb-xl-20 position-relative overflow-hidden">
                                 <a href="<?= site_url("produto/$produto->slug") ?>">
                                     <img src="<?= site_url('home/imagemProduto/' . $produto->imagem); ?>" class="img-fluid full-width" style="max-height: 200px; object-fit: cover;" alt="<?= esc($produto->nome); ?>">
-                                    <div class="category-type overlay padding-15">
-                                        <span class="category-btn "><?= esc($produto->nome); ?></span>
+                                    <div class="product-label">
+                                        <span class="category-btn"><?= esc($produto->nome); ?></span>
                                     </div>
                                 </a>
                             </div>
@@ -150,7 +203,7 @@
                                                 <?php if (isset($produto->preco)): ?>
                                                     <span class="text-light-white price">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
                                                 <?php endif; ?>
-                                                <a href="<?= site_url("produto/$produto->slug") ?>" class="btn btn-sm mt-2" style="background-color: #dc3545; color: white; border-color: #dc3545;">Ver mais</a>
+                                                <a href="<?= site_url("produto/$produto->slug") ?>" class="btn btn-sm mt-2" style="background-color: #dc3545; color: white; border-color: #dc3545;">Mais detalhes</a>
                                             </div>
                                         </div>
                                     </div>

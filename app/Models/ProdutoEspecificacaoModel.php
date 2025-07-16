@@ -38,4 +38,12 @@ class ProdutoEspecificacaoModel extends Model
             ->where('produtos_especificacoes.produto_id', $produto_id)
             ->paginate($quantidade_paginacao);
     }
+
+    public function getEspecificacaoComDescricao(int $especificacao_id)
+    {
+        return $this->select('produtos_especificacoes.*, medidas.nome AS descricao')
+                    ->join('medidas', 'medidas.id = produtos_especificacoes.medida_id')
+                    ->where('produtos_especificacoes.id', $especificacao_id)
+                    ->first();
+    }
 }
