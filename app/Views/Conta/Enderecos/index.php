@@ -38,7 +38,7 @@
                 <div class="alert alert-danger"><?php echo session('erro'); ?></div>
             <?php endif; ?>
 
-            <a href="<?php echo route_to('enderecos.criar'); ?>" class="btn btn-primary mb-3">Adicionar Novo Endereço</a>
+            <a href="<?php echo site_url('conta/enderecos/criar'); ?>" class="btn btn-primary mb-3">Adicionar Novo Endereço</a>
 
             <?php if (empty($enderecos)): ?>
                 <p>Você ainda não tem nenhum endereço cadastrado.</p>
@@ -54,7 +54,7 @@
                                         <?php echo esc($endereco->cidade); ?> - <?php echo esc($endereco->estado); ?>, CEP: <?php echo esc($endereco->cep); ?>
                                     </p>
                                 </div>
-                                <div class="text-nowrap"> <a href="<?php echo route_to('enderecos.editar', $endereco->id); ?>" class="btn btn-sm btn-outline-primary me-1">Editar</a>
+                                <div class="text-nowrap"> <a href="<?php echo site_url('conta/enderecos/editar/' . $endereco->id); ?>" class="btn btn-sm btn-outline-primary me-1">Editar</a>
                                     
                                     <?php echo form_open("conta/enderecos/excluir/{$endereco->id}", ['class' => 'd-inline', 'onsubmit' => 'return confirm("Tem certeza que deseja excluir este endereço?");']); ?>
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>

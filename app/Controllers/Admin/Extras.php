@@ -12,7 +12,7 @@ class Extras extends BaseController{
 
     public function __construct(){
 
-        $this->extraModel = new \App\Models\extraModel();
+        $this->extraModel = new \App\Models\ExtraModel();
 
     }
 

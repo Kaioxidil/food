@@ -68,8 +68,23 @@ $routes->group('admin', function($routes){
 
     $routes->get('formas/procurar', 'Admin\FormasPagamentos::procurar'); 
 
-    $routes->get('usuarios/relatorio', 'Admin\Usuarios::relatorio');
+    $routes->get('relatorios/relatoriousuario/gerarpdf', 'Admin\Relatorios\RelatorioUsuario::gerarPdf');
+
+    $routes->get('bairros', 'Admin\Bairros::index');
+    $routes->get('bairros/sincronizar', 'Admin\Bairros::sincronizar');
+
+
 });
+
+
+$routes->group('admin', static function ($routes) {
+
+    $routes->get('home/atualizar', 'Admin\Home::atualizarDashboard'); 
+});
+
+
+
+
 
 
 // Rotas da Conta do Usuário (requer login)

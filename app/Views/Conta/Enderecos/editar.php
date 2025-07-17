@@ -1,5 +1,6 @@
 <?php echo $this->extend('layout/principalView'); ?>
 
+<?= $this->section('titulo') ?> <?= esc($titulo) ?> <?= $this->endSection() ?>
 <?php echo $this->section('conteudo'); ?>
 <br>
 <br>

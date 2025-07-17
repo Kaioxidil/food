@@ -213,25 +213,7 @@ class Usuarios extends BaseController
         }
     }
 
-    public function relatorio()
-    {
-        $usuarios = $this->usuarioModel->withDeleted(true)->findAll();
-
-        $data = [
-            'titulo'   => 'Relatório de Usuários',
-            'usuarios' => $usuarios,
-        ];
-
-        $dompdf = new \App\Libraries\Pdf(); // usa tua lib customizada se já estiver
-        $html = view('Admin/Usuarios/relatorio', $data);
-
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        $dompdf->stream('relatorio-usuarios.pdf', false);
-    }
-
+    
 
     private function buscaUsuarioOu404(int $id = null)
     {

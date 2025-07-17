@@ -8,7 +8,8 @@ class UsuarioEnderecoModel extends Model
 {
     protected $table            = 'usuarios_enderecos';
     protected $primaryKey       = 'id';
-    protected $returnType       = 'object';
+    // ✅ CORREÇÃO APLICADA AQUI
+    protected $returnType       = \App\Entities\UsuarioEndereco::class;
     protected $useSoftDeletes   = true;
     protected $allowedFields    = [
         'usuario_id',

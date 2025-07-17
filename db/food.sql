@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 16/07/2025 às 18:16
+-- Tempo de geração: 17/07/2025 às 02:25
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -212,7 +212,9 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (11, '2025-07-03-230235', 'App\\Database\\Migrations\\CriaTabelaEsntregadores', 'default', 'App', 1751584292, 9),
 (12, '2025-07-07-155506', 'App\\Database\\Migrations\\Bairro', 'default', 'App', 1751904239, 10),
 (13, '2025-07-11-015103', 'App\\Database\\Migrations\\AddRestauranteSlugToProdutos', 'default', 'App', 1752198705, 11),
-(14, '2025-07-16-154303', 'App\\Database\\Migrations\\CriaTabelaPedidos', 'default', 'App', 1752680600, 12);
+(14, '2025-07-16-154303', 'App\\Database\\Migrations\\CriaTabelaPedidos', 'default', 'App', 1752680600, 12),
+(15, '2025-07-16-232746', 'App\\Database\\Migrations\\CreateUsuariosEnderecos', 'default', 'App', 1752708482, 13),
+(16, '2025-07-17-000115', 'App\\Database\\Migrations\\AddObservacaoToPedidosItens', 'default', 'App', 1752710497, 14);
 
 -- --------------------------------------------------------
 
@@ -237,7 +239,13 @@ CREATE TABLE `pedidos` (
 --
 
 INSERT INTO `pedidos` (`id`, `usuario_id`, `forma_pagamento_id`, `valor_total`, `status`, `observacoes`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 13, 1, 0.00, 'pendente', NULL, '2025-07-16 12:52:00', NULL, NULL);
+(1, 13, 1, 0.00, 'pendente', NULL, '2025-07-16 12:52:00', NULL, NULL),
+(2, 1, 1, 0.00, 'pendente', 'tes tes teste teste', '2025-07-16 13:31:46', NULL, NULL),
+(3, 1, 1, 0.00, 'pendente', '', '2025-07-16 18:14:35', NULL, NULL),
+(4, 1, 1, 0.00, 'pendente', '', '2025-07-16 18:56:14', NULL, NULL),
+(8, 1, 1, 70.00, 'pendente', '100', '2025-07-16 21:14:49', NULL, NULL),
+(9, 1, 1, 60.00, 'pendente', '100', '2025-07-16 21:20:37', NULL, NULL),
+(10, 1, 2, 70.00, 'pendente', '', '2025-07-16 21:24:09', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -252,6 +260,7 @@ CREATE TABLE `pedidos_itens` (
   `especificacao_id` int(5) UNSIGNED DEFAULT NULL,
   `quantidade` int(11) NOT NULL,
   `preco_unitario` decimal(10,2) NOT NULL,
+  `observacao` text DEFAULT NULL,
   `preco_extras` decimal(10,2) DEFAULT 0.00,
   `subtotal` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
@@ -260,8 +269,15 @@ CREATE TABLE `pedidos_itens` (
 -- Despejando dados para a tabela `pedidos_itens`
 --
 
-INSERT INTO `pedidos_itens` (`id`, `pedido_id`, `produto_id`, `especificacao_id`, `quantidade`, `preco_unitario`, `preco_extras`, `subtotal`) VALUES
-(1, 1, 5, NULL, 1, 0.00, 0.00, 0.00);
+INSERT INTO `pedidos_itens` (`id`, `pedido_id`, `produto_id`, `especificacao_id`, `quantidade`, `preco_unitario`, `observacao`, `preco_extras`, `subtotal`) VALUES
+(1, 1, 5, NULL, 1, 0.00, NULL, 0.00, 0.00),
+(2, 2, 6, NULL, 1, 0.00, NULL, 0.00, 0.00),
+(3, 3, 1, NULL, 1, 0.00, NULL, 0.00, 0.00),
+(4, 4, 7, NULL, 2, 0.00, NULL, 0.00, 0.00),
+(5, 4, 7, NULL, 3, 0.00, NULL, 0.00, 0.00),
+(9, 8, 7, 9, 1, 65.00, NULL, 0.00, 0.00),
+(10, 9, 1, 1, 1, 55.00, NULL, 0.00, 0.00),
+(11, 10, 7, 9, 1, 65.00, NULL, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -276,6 +292,16 @@ CREATE TABLE `pedidos_itens_extras` (
   `quantidade` int(11) NOT NULL,
   `preco` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Despejando dados para a tabela `pedidos_itens_extras`
+--
+
+INSERT INTO `pedidos_itens_extras` (`id`, `pedido_item_id`, `extra_id`, `quantidade`, `preco`) VALUES
+(7, 9, 3, 1, 10.00),
+(8, 9, 4, 1, 5.00),
+(9, 11, 3, 1, 10.00),
+(10, 11, 4, 1, 5.00);
 
 -- --------------------------------------------------------
 
@@ -334,7 +360,8 @@ INSERT INTO `produtos_especificacoes` (`id`, `produto_id`, `medida_id`, `preco`,
 (6, 2, 2, 25.00, 1),
 (7, 5, 3, 35.00, 0),
 (8, 6, 3, 55.00, 0),
-(9, 7, 1, 50.00, 1);
+(9, 7, 1, 50.00, 1),
+(10, 7, 2, 55.00, 0);
 
 -- --------------------------------------------------------
 
@@ -390,6 +417,37 @@ INSERT INTO `usuarios` (`id`, `nome`, `email`, `cpf`, `telefone`, `is_admin`, `a
 (1, 'Suporte', 'seudeliverytrx@gmail.com', '', '(44) 9724-9833', 1, 1, '$2y$10$Yvxhj2n.BF.eQ8WohuSDyu9xLYwK9is.XdstkMWnNvrWo3gQ13WIO', NULL, NULL, NULL, '2025-06-20 00:53:18', '2025-06-23 18:51:25', NULL),
 (2, 'Kaio', 'kaiogremaschidasilva@gmail.com', '368.407.480-22', '(44) 9724-9833', 1, 1, '$2y$10$5roag9kAc8J2MyDJdP7jrOoRgcwIVGXf00l.p2gl55stEbc/euPNK', NULL, NULL, NULL, '2025-06-20 00:53:18', '2025-06-24 13:15:12', NULL),
 (13, 'Html', 'htmlnapratica@gmail.com', '035.124.790-49', '(44) 99724-9833', 0, 1, '$2y$10$8jgCFM8vm69tlkBji9HD6.IMjJJAYcb8.sHCBQDwDO2W5gs1EWdKK', NULL, NULL, NULL, '2025-07-15 13:14:17', '2025-07-15 13:14:17', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `usuarios_enderecos`
+--
+
+CREATE TABLE `usuarios_enderecos` (
+  `id` int(5) UNSIGNED NOT NULL,
+  `usuario_id` int(5) UNSIGNED NOT NULL,
+  `titulo` varchar(100) NOT NULL,
+  `cep` varchar(20) NOT NULL,
+  `logradouro` varchar(255) NOT NULL,
+  `numero` varchar(50) NOT NULL,
+  `bairro` varchar(100) NOT NULL,
+  `cidade` varchar(100) NOT NULL,
+  `estado` varchar(2) NOT NULL,
+  `complemento` varchar(100) DEFAULT NULL,
+  `referencia` varchar(255) DEFAULT NULL,
+  `criado_em` datetime DEFAULT NULL,
+  `atualizado_em` datetime DEFAULT NULL,
+  `deletado_em` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Despejando dados para a tabela `usuarios_enderecos`
+--
+
+INSERT INTO `usuarios_enderecos` (`id`, `usuario_id`, `titulo`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `estado`, `complemento`, `referencia`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(1, 1, 'Casa', '85990000', 'Simão Rodrigues da SIlva', '134', 'JARDIM VENEZA', 'Terra Roxa', 'PR', '', '', '2025-07-16 20:43:28', '2025-07-16 20:43:28', NULL),
+(2, 1, 'Trabalho', '85990000', 'Rua Sao paulo', '171', 'CENTRO', 'Terra Roxa', 'PR', '', '', '2025-07-16 20:55:18', '2025-07-16 20:55:18', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -506,6 +564,13 @@ ALTER TABLE `usuarios`
   ADD UNIQUE KEY `reset_hash` (`reset_hash`);
 
 --
+-- Índices de tabela `usuarios_enderecos`
+--
+ALTER TABLE `usuarios_enderecos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `usuarios_enderecos_usuario_id_foreign` (`usuario_id`);
+
+--
 -- AUTO_INCREMENT para tabelas despejadas
 --
 
@@ -549,25 +614,25 @@ ALTER TABLE `medidas`
 -- AUTO_INCREMENT de tabela `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens`
 --
 ALTER TABLE `pedidos_itens`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens_extras`
 --
 ALTER TABLE `pedidos_itens_extras`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `produtos`
@@ -579,7 +644,7 @@ ALTER TABLE `produtos`
 -- AUTO_INCREMENT de tabela `produtos_especificacoes`
 --
 ALTER TABLE `produtos_especificacoes`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `produtos_extras`
@@ -592,6 +657,12 @@ ALTER TABLE `produtos_extras`
 --
 ALTER TABLE `usuarios`
   MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT de tabela `usuarios_enderecos`
+--
+ALTER TABLE `usuarios_enderecos`
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restrições para tabelas despejadas
@@ -638,6 +709,12 @@ ALTER TABLE `produtos_especificacoes`
 ALTER TABLE `produtos_extras`
   ADD CONSTRAINT `produtos_extras_extra_id_foreign` FOREIGN KEY (`extra_id`) REFERENCES `extras` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `produtos_extras_produto_id_foreign` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Restrições para tabelas `usuarios_enderecos`
+--
+ALTER TABLE `usuarios_enderecos`
+  ADD CONSTRAINT `usuarios_enderecos_usuario_id_foreign` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
