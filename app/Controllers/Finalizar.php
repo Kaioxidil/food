@@ -3,257 +3,219 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\BairroModel;
 use App\Models\FormaPagamentoModel;
-use App\Models\ProdutoModel;
-use App\Models\ProdutoEspecificacaoModel;
-use App\Models\ExtraModel;
+use App\Models\PedidoItemExtraModel;
+use App\Models\PedidoItemModel;
+use App\Models\PedidoModel;
+use App\Models\UsuarioEnderecoModel;
+use App\Services\CarrinhoService;
 
 class Finalizar extends BaseController
 {
+    private const VALOR_ENTREGA_FIXO = 5.00; // <-- TAXA DE ENTREGA FIXA DEFINIDA AQUI
+
     private $formaPagamentoModel;
-    private $produtoModel;
-    private $produtoEspecificacaoModel;
-    private $extraModel;
+    private $bairroModel;
+    private $usuarioEnderecoModel;
     private $session;
+    private $autenticacao;
+    private $carrinhoService;
 
     public function __construct()
     {
         $this->formaPagamentoModel = new FormaPagamentoModel();
-        $this->produtoModel = new ProdutoModel();
-        $this->produtoEspecificacaoModel = new ProdutoEspecificacaoModel();
-        $this->extraModel = new ExtraModel();
+        $this->bairroModel = new BairroModel();
+        $this->usuarioEnderecoModel = new UsuarioEnderecoModel();
         $this->session = session();
+        $this->autenticacao = service('autenticacao');
+        $this->carrinhoService = new CarrinhoService();
     }
 
-    /**
-     * Exibe a página de finalização do pedido.
-     */
     public function index()
     {
-        $carrinho = $this->session->get('carrinho');
-
-        if (empty($carrinho)) {
-            return redirect()->to(site_url('/'))->with('info', 'Seu carrinho está vazio.');
+        if (!$this->session->has('carrinho') || empty($this->session->get('carrinho'))) {
+            return redirect()->to(site_url('/carrinho'))->with('info', 'Seu carrinho está vazio.');
         }
 
-        $itensDetalhados = [];
-        $total = 0;
+        $carrinhoData = $this->carrinhoService->getCarrinho();
+        $totalComEntrega = $carrinhoData['total'] + self::VALOR_ENTREGA_FIXO; // Soma a taxa fixa
 
-        foreach ($carrinho as $key => $item) {
-            $produto = $this->produtoModel->find($item['produto_id']);
-            if (!$produto) {
-                continue;
-            }
-
-            $precoItem = $produto->preco;
-            $especificacao = null;
-
-            if (!empty($item['especificacao_id'])) {
-                $especificacao = $this->produtoEspecificacaoModel->getEspecificacaoComDescricao($item['especificacao_id']);
-                if ($especificacao) {
-                    $precoItem = $especificacao->preco;
-                }
-            }
-
-            $extrasDetalhados = [];
-            if (!empty($item['extras'])) {
-                foreach ($item['extras'] as $extraId => $quantidadeExtra) {
-                    $extra = $this->extraModel->find($extraId);
-                    if ($extra) {
-                        $extrasDetalhados[] = ['extra' => $extra, 'quantidade' => $quantidadeExtra];
-                        $precoItem += $extra->preco * $quantidadeExtra;
-                    }
-                }
-            }
-
-            $itensDetalhados[$key] = [
-                'produto'          => $produto,
-                'quantidade'       => $item['quantidade'],
-                'especificacao'    => $especificacao,
-                'extras'           => $extrasDetalhados,
-                'preco_total_item' => $precoItem * $item['quantidade'],
-            ];
-
-            $total += $itensDetalhados[$key]['preco_total_item'];
-        }
-
-        $formasPagamento = $this->formaPagamentoModel->where('ativo', true)->findAll();
-
-        return view('Finalizar/index', [
+        $data = [
             'titulo'           => 'Finalizar Pedido',
-            'carrinho'         => $itensDetalhados,
-            'total'            => $total,
-            'formas_pagamento' => $formasPagamento,
-        ]);
-    }
-
-    /**
-     * Envia o pedido via WhatsApp. (MÉTODO CORRIGIDO)
-     */
-    public function enviar()
-{
-    if ($this->request->getMethod() !== 'post') {
-        return redirect()->back();
-    }
-
-    $carrinho = $this->session->get('carrinho');
-
-    if (empty($carrinho)) {
-        return redirect()->to(site_url('/'))->with('info', 'Seu carrinho expirou. Por favor, tente novamente.');
-    }
-
-    // Validação do formulário
-    $validation = $this->validate([
-        'forma_pagamento_id' => 'required',
-        // Adicionamos uma regra simples para a observação
-        'observacoes' => 'max_length[500]' 
-    ]);
-
-    if (!$validation) {
-        return redirect()->back()->with('errors', $this->validator->getErrors());
-    }
-    
-    // Captura os dados do POST
-    $formaPagamentoId = $this->request->getPost('forma_pagamento_id');
-    $observacoes = $this->request->getPost('observacoes'); // <-- CAPTURANDO A OBSERVAÇÃO
-
-    $formaPagamento = $this->formaPagamentoModel->find($formaPagamentoId);
-    if (!$formaPagamento) {
-        return redirect()->back()->with('erro', 'Forma de pagamento inválida.');
-    }
-
-    // Models
-    $pedidoModel = new \App\Models\PedidoModel();
-    $pedidoItemModel = new \App\Models\PedidoItemModel();
-    $pedidoItemExtraModel = new \App\Models\PedidoItemExtraModel();
-
-    $db = \Config\Database::connect();
-    $db->transStart();
-
-    // Service de autenticação
-    $autenticacao = service('autenticacao');
-    $usuario = $autenticacao->pegaUsuarioLogado();
-    $usuarioId = $usuario ? $usuario->id : null;
-
-    $totalPedido = 0;
-
-    $pedidoData = [
-        'usuario_id'         => $usuarioId,
-        'forma_pagamento_id' => $formaPagamentoId,
-        'observacoes'        => $observacoes, // <-- SALVANDO A OBSERVAÇÃO NO BANCO
-        'valor_total'        => 0, // provisório
-        'status'             => 'pendente',
-        'criado_em'          => date('Y-m-d H:i:s'),
-    ];
-
-    $pedidoModel->insert($pedidoData);
-    $pedidoId = $pedidoModel->getInsertID();
-
-    $mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-
-    foreach ($carrinho as $item) {
-        $produto = $this->produtoModel->find($item['produto_id']);
-        if (!$produto) {
-            continue;
-        }
-
-        $precoUnitario = (float) $produto->preco;
-        $tamanho = 'Padrão';
-        $especificacaoId = null;
-
-        if (!empty($item['especificacao_id'])) {
-            $especificacao = $this->produtoEspecificacaoModel->getEspecificacaoComDescricao($item['especificacao_id']);
-            if ($especificacao && isset($especificacao->medida_nome)) {
-                $precoUnitario = (float) $especificacao->preco;
-                $tamanho = $especificacao->medida_nome;
-                $especificacaoId = $item['especificacao_id'];
-            }
-        }
-
-        $precoTotalExtras = 0;
-        if (!empty($item['extras'])) {
-            foreach ($item['extras'] as $extraId => $quantidadeExtra) {
-                $extra = $this->extraModel->find($extraId);
-                if ($extra) {
-                    $precoTotalExtras += (float) $extra->preco * $quantidadeExtra;
-                }
-            }
-        }
-
-        $subtotal = ($precoUnitario + $precoTotalExtras) * $item['quantidade'];
-        $totalPedido += $subtotal;
-
-        // Insere item do pedido
-        $pedidoItemData = [
-            'pedido_id'        => $pedidoId,
-            'produto_id'       => $item['produto_id'],
-            'especificacao_id' => $especificacaoId,
-            'quantidade'       => $item['quantidade'],
-            'preco_unitario'   => $precoUnitario,
-            'preco_extras'     => $precoTotalExtras,
-            'subtotal'         => $subtotal,
+            'carrinho'         => $carrinhoData['itens'],
+            'subtotal'         => $carrinhoData['total'],
+            'taxa_entrega'     => self::VALOR_ENTREGA_FIXO, // Passa a taxa para a view
+            'total'            => $totalComEntrega, // Passa o total final para a view
+            'formas_pagamento' => $this->formaPagamentoModel->where('ativo', true)->findAll(),
+            'bairros'          => $this->bairroModel->where('ativo', true)->findAll(),
         ];
 
-        $pedidoItemModel->insert($pedidoItemData);
-        $pedidoItemId = $pedidoItemModel->getInsertID();
+        if ($this->autenticacao->estaLogado()) {
+            $data['enderecos'] = $this->usuarioEnderecoModel->where('usuario_id', $this->autenticacao->pegaUsuarioLogado()->id)->findAll();
+        }
 
-        // Insere extras do item
-        if (!empty($item['extras'])) {
-            foreach ($item['extras'] as $extraId => $quantidadeExtra) {
-                $extra = $this->extraModel->find($extraId);
-                if ($extra) {
+        return view('Finalizar/index', $data);
+    }
+
+    public function enviar()
+    {
+        if ($this->request->getMethod() !== 'post') {
+            return redirect()->back();
+        }
+
+        $regras = [
+            'forma_pagamento_id' => ['label' => 'Forma de Pagamento', 'rules' => 'required|integer'],
+            'bairro_id'          => ['label' => 'Bairro para Entrega', 'rules' => 'required|integer'],
+            'endereco'           => ['label' => 'Endereço de Entrega', 'rules' => 'required|max_length[255]'],
+        ];
+
+        if (!$this->validate($regras)) {
+            return redirect()->back()->with('errors', $this->validator->getErrors())->withInput();
+        }
+
+        $carrinhoData = $this->carrinhoService->getCarrinho();
+        $bairro = $this->bairroModel->find($this->request->getPost('bairro_id')); // Bairro ainda é necessário para saber onde entregar
+        
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        $usuario = $this->autenticacao->pegaUsuarioLogado();
+        $totalPedido = $carrinhoData['total'] + self::VALOR_ENTREGA_FIXO; // Usa a taxa fixa
+
+        $pedidoData = [
+            'usuario_id'         => $usuario->id ?? null,
+            'forma_pagamento_id' => $this->request->getPost('forma_pagamento_id'),
+            'bairro'             => $bairro->nome,
+            'valor_entrega'      => self::VALOR_ENTREGA_FIXO, // Salva a taxa fixa
+            'endereco'           => $this->request->getPost('endereco'),
+            'observacoes'        => $this->request->getPost('observacoes'),
+            'valor_produtos'     => $carrinhoData['total'],
+            'valor_total'        => $totalPedido,
+            'status'             => 'pendente',
+            'criado_em'          => date('Y-m-d H:i:s'),
+        ];
+        
+        $pedidoModel = new PedidoModel();
+        $pedidoModel->insert($pedidoData);
+        $pedidoId = $pedidoModel->getInsertID();
+
+        $this->_insereItensDoPedido($pedidoId, $carrinhoData['itens']);
+        $mensagem = $this->_montaMensagemWhatsApp($pedidoId, $carrinhoData, $pedidoData);
+        
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return redirect()->back()->with('erro', 'Não foi possível processar seu pedido.')->withInput();
+        }
+
+        $this->session->remove('carrinho');
+        $numeroWhatsapp = '5544997249833';
+        $urlWhatsapp = "https://wa.me/{$numeroWhatsapp}?text=" . rawurlencode($mensagem);
+
+        return redirect()->to($urlWhatsapp);
+    }
+    
+    private function _insereItensDoPedido(int $pedidoId, array $itens)
+    {
+        $pedidoItemModel = new PedidoItemModel();
+        $pedidoItemExtraModel = new PedidoItemExtraModel();
+
+        foreach ($itens as $item) {
+            $precoUnitario = ($item['quantidade'] > 0) ? $item['preco_total_item'] / $item['quantidade'] : 0;
+            $itemData = [
+                'pedido_id'        => $pedidoId,
+                'produto_id'       => $item['produto']->id,
+                'especificacao_id' => $item['especificacao']->id ?? null,
+                'quantidade'       => $item['quantidade'],
+                'preco_unitario'   => $precoUnitario,
+                'observacao'       => $item['customizacao'],
+            ];
+            $pedidoItemModel->insert($itemData);
+            $pedidoItemId = $pedidoItemModel->getInsertID();
+
+            if (!empty($item['extras'])) {
+                foreach ($item['extras'] as $extraItem) {
                     $pedidoItemExtraModel->insert([
                         'pedido_item_id' => $pedidoItemId,
-                        'extra_id'       => $extraId,
-                        'quantidade'     => $quantidadeExtra,
-                        'preco'          => $extra->preco,
+                        'extra_id'       => $extraItem['extra']->id,
+                        'quantidade'     => $extraItem['quantidade'],
+                        'preco'          => $extraItem['extra']->preco,
                     ]);
                 }
             }
         }
+    }
+
+    private function _montaMensagemWhatsApp(int $pedidoId, array $carrinhoData, array $pedidoData): string
+{
+    // --- CABEÇALHO ---
+    // Usamos emojis para dar um destaque inicial e festivo.
+    $mensagem = "📦 *Novo Pedido Recebido!* 📦\n";
+    $mensagem .= "🆔 *ID do Pedido:* {$pedidoId}\n";
+    $mensagem .= "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
+
+    // --- ITENS DO PEDIDO ---
+    // Um cabeçalho para a seção de itens.
+    $mensagem .= "🛒 *Itens do Pedido:*\n\n";
+
+    foreach ($carrinhoData['itens'] as $item) {
+        // Emoji de seta para indicar cada item principal.
+        $mensagem .= "➡️ *{$item['produto']->nome}* (x{$item['quantidade']})\n";
+
+        // Emoji de régua para o tamanho/especificação.
+        if ($item['especificacao']) {
+            $mensagem .= "   📏 *Tamanho:* {$item['especificacao']->medida_nome}\n";
+        }
         
-        // Monta mensagem do item
-        $mensagem .= "➡️ *Produto:* {$produto->nome}\n";
-        $mensagem .= "   - *Tamanho:* {$tamanho}\n";
-        $mensagem .= "   - *Quantidade:* {$item['quantidade']}\n";
+        // Emoji de estrelas para os extras.
         if (!empty($item['extras'])) {
-            $mensagem .= "   - *Extras:*\n";
-            foreach ($item['extras'] as $extraId => $quantidadeExtra) {
-                $extra = $this->extraModel->find($extraId);
-                if ($extra) {
-                    $mensagem .= "     • {$extra->nome} (x{$quantidadeExtra})\n";
-                }
+            $mensagem .= "   ✨ *Extras:*\n";
+            foreach ($item['extras'] as $extraInfo) {
+                $mensagem .= "      • {$extraInfo['extra']->nome} (x{$extraInfo['quantidade']})\n";
             }
         }
-        $mensagem .= "\n"; // Adiciona uma linha em branco para separar os itens
+        
+        // Emoji de anotação para customizações.
+        if (!empty($item['customizacao'])) {
+            $mensagem .= "   📝 _Observação do item: {$item['customizacao']}_\n";
+        }
+        $mensagem .= "\n"; // Espaçamento entre os itens
     }
 
-    // Atualiza total do pedido
-    $pedidoModel->update($pedidoId, ['valor_total' => $totalPedido]);
+    $mensagem .= "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-    $db->transComplete();
+    // --- RESUMO DA ENTREGA E CLIENTE ---
+    $mensagem .= "📋 *Resumo da Entrega:*\n\n";
 
-    $mensagem .= "----------------------------------\n";
-    // <-- ADICIONANDO OBSERVAÇÃO NA MENSAGEM WHATSAPP -->
-    if (!empty($observacoes)) {
-        $mensagem .= "*Observações:* " . esc($observacoes) . "\n\n";
+    // Busca o nome do usuário logado de forma segura.
+    $nomeCliente = $this->autenticacao->pegaUsuarioLogado()->nome ?? 'Não informado';
+    $mensagem .= "👤 *Cliente:* {$nomeCliente}\n";
+    
+    // Emojis de localização para endereço.
+    $mensagem .= "📍 *Endereço:* " . esc($pedidoData['endereco']) . "\n";
+    $mensagem .= "🏘️ *Bairro:* " . esc($pedidoData['bairro']) . "\n\n";
+
+    // Emoji de balão de diálogo para observações gerais.
+    if (!empty($pedidoData['observacoes'])) {
+        $mensagem .= "💬 *Observações Gerais (Troco):* " . esc($pedidoData['observacoes']) . "\n\n";
     }
-    // <-- FIM DA ADIÇÃO -->
-    $mensagem .= "*Forma de Pagamento:* {$formaPagamento->nome}\n";
-    $mensagem .= "*Total do Pedido:* R$ " . number_format($totalPedido, 2, ',', '.') . "\n";
-    if ($usuario && $usuario->nome) {
-        $mensagem .= "*Cliente:* " . esc($usuario->nome) . "\n";
-    }
-    $mensagem .= "\nObrigado(a)!";
 
-    // Remove carrinho
-    $this->session->remove('carrinho');
+    // --- DETALHES FINANCEIROS ---
+    $mensagem .= "💰 *Detalhes do Pagamento:*\n\n";
 
-    $numeroWhatsapp = '5544997249833'; // Substitua pelo número correto, se necessário
-    $textoCodificado = rawurlencode($mensagem);
-    $urlWhatsapp = "https://wa.me/{$numeroWhatsapp}?text={$textoCodificado}";
+    $mensagem .= "   *Subtotal dos Produtos:* R$ " . number_format($carrinhoData['total'], 2, ',', '.') . "\n";
+    $mensagem .= "   *Taxa de Entrega:* R$ " . number_format($pedidoData['valor_entrega'], 2, ',', '.') . "\n";
+    $mensagem .= "   *Valor Total:* *R$ " . number_format($pedidoData['valor_total'], 2, ',', '.') . "*\n"; // Total em negrito
 
-    return redirect()->to($urlWhatsapp);
+    // Busca a forma de pagamento
+    $formaPagamento = $this->formaPagamentoModel->find($pedidoData['forma_pagamento_id']);
+    $mensagem .= "💳 *Forma de Pagamento:* {$formaPagamento->nome}\n\n";
+    
+
+    // --- ENCERRAMENTO ---
+    $mensagem .= "Agradecemos a preferência! 🙏";
+
+    return $mensagem;
 }
-
 }

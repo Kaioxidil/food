@@ -274,7 +274,7 @@
             <div class="col-md-12">
                 <div class="heading padding-tb-10">
                     <h3 class="text-light-black title fw-700 no-margin"><?= esc($restaurante->nome); ?></h3>
-                    <p class="text-light-black sub-title no-margin"><?= esc($restaurante->endereco); ?> <span><a href="<?= site_url('checkout/endereco'); ?>" class="text-success">Mudar localização</a></span>
+                    <p class="text-light-black sub-title no-margin"><?= esc($restaurante->endereco); ?> <span><a href="<?= route_to('conta.enderecos'); ?>" class="text-success">Mudar localização</a></span></p>
                     </p>
                     <div class="head-rating">
                         <div class="rating"> 

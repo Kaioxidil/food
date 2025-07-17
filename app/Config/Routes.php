@@ -72,6 +72,19 @@ $routes->group('admin', function($routes){
 });
 
 
+// Rotas da Conta do Usuário (requer login)
+$routes->group('conta', ['filter' => 'login'], static function ($routes) {
+    
+    // ... outras rotas da conta podem vir aqui ...
+
+    $routes->get('enderecos', 'EnderecoController::index', ['as' => 'conta.enderecos']);
+    $routes->get('enderecos/criar', 'EnderecoController::criar', ['as' => 'enderecos.criar']);
+    $routes->post('enderecos/cadastrar', 'EnderecoController::cadastrar', ['as' => 'enderecos.cadastrar']);
+    $routes->get('enderecos/editar/(:num)', 'EnderecoController::editar/$1', ['as' => 'enderecos.editar']);
+    $routes->post('enderecos/atualizar/(:num)', 'EnderecoController::atualizar/$1', ['as' => 'enderecos.atualizar']);
+    $routes->post('enderecos/excluir/(:num)', 'EnderecoController::excluir/$1', ['as' => 'enderecos.excluir']);
+});
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing

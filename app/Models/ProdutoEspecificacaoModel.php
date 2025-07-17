@@ -41,7 +41,7 @@ class ProdutoEspecificacaoModel extends Model
 
     public function getEspecificacaoComDescricao(int $especificacao_id)
     {
-        return $this->select('produtos_especificacoes.*, medidas.nome AS descricao')
+        return $this->select('produtos_especificacoes.*, medidas.nome AS medida_nome')
                     ->join('medidas', 'medidas.id = produtos_especificacoes.medida_id')
                     ->where('produtos_especificacoes.id', $especificacao_id)
                     ->first();

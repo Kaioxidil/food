@@ -6,14 +6,15 @@ use App\Controllers\BaseController;
 use App\Models\ProdutoModel;
 use App\Models\ProdutoEspecificacaoModel;
 use App\Models\ProdutoExtraModel;
-use App\Models\ExtraModel; // 1. ADICIONADO: Para buscar detalhes dos extras
+use App\Models\ExtraModel;
+use App\Services\CarrinhoService;
 
 class Carrinho extends BaseController
 {
     private $produtoModel;
     private $produtoEspecificacaoModel;
     private $produtoExtraModel;
-    private $extraModel; // 2. ADICIONADO: Propriedade para o ExtraModel
+    private $extraModel;
     private $session;
     private $autenticacao;
 
@@ -23,7 +24,7 @@ class Carrinho extends BaseController
         $this->produtoModel = new ProdutoModel();
         $this->produtoEspecificacaoModel = new ProdutoEspecificacaoModel();
         $this->produtoExtraModel = new ProdutoExtraModel();
-        $this->extraModel = new ExtraModel(); // 3. ADICIONADO: Instancia o ExtraModel
+        $this->extraModel = new ExtraModel();
         
         // Inicia o serviço de sessão e um serviço de autenticação personalizado
         $this->session = session();
@@ -47,12 +48,13 @@ class Carrinho extends BaseController
             }
 
             $especificacao = null;
-            // O preço inicial é o do produto base. Se uma especificação for escolhida, o seu preço irá sobrepor-se.
+            // O preço inicial é o do produto base, que será sobreposto pelo preço da especificação se houver uma.
             $precoItem = $produto->preco; 
 
             if (!empty($item['especificacao_id'])) {
-                // CORRIGIDO: Busca a especificação junto com a sua descrição (nome da medida)
+                // ALTERAÇÃO 1: Usando o método do model para uma busca mais limpa e centralizada.
                 $especificacao = $this->produtoEspecificacaoModel->getEspecificacaoComDescricao($item['especificacao_id']);
+                
                 if ($especificacao) {
                     $precoItem = $especificacao->preco; // Preço da especificação sobrepõe-se
                 }
@@ -61,29 +63,26 @@ class Carrinho extends BaseController
             $extrasDetalhados = [];
             if (!empty($item['extras']) && is_array($item['extras'])) {
                 foreach ($item['extras'] as $extraId => $quantidadeExtra) {
-    
-    // AQUI: O código tenta encontrar o extra com o ID que veio da sessão (ex: ID 9)
-    $extra = $this->extraModel->find($extraId); 
+                    $extra = $this->extraModel->find($extraId); 
 
-    // AQUI: Esta condição resulta em 'falso', porque $extra é nulo (não encontrou na base de dados)
-    if ($extra) { 
-        
-        // CONSEQUÊNCIA: Este bloco de código nunca é executado.
-        $extrasDetalhados[] = [
-            'extra' => $extra,
-            'quantidade' => $quantidadeExtra,
-        ];
-        $precoItem += $extra->preco * $quantidadeExtra; 
-    }
-}
+                    if ($extra) { 
+                        $extrasDetalhados[] = [
+                            'extra' => $extra,
+                            'quantidade' => $quantidadeExtra,
+                        ];
+                        // Soma o preço dos extras ao preço do item
+                        $precoItem += $extra->preco * $quantidadeExtra; 
+                    }
+                }
             }
 
             // Adiciona o item com todos os detalhes ao array final
             $itensDetalhados[$key] = [
-                'produto'       => $produto,
-                'quantidade'    => $item['quantidade'],
-                'especificacao' => $especificacao,
-                'extras'        => $extrasDetalhados,
+                'produto'         => $produto,
+                'quantidade'      => $item['quantidade'],
+                'especificacao'   => $especificacao,
+                'extras'          => $extrasDetalhados,
+                'customizacao'    => $item['customizacao'] ?? null, // ALTERAÇÃO 2: Passa a customização para a view.
                 'preco_total_item' => $precoItem * $item['quantidade'],
             ];
             
@@ -96,8 +95,6 @@ class Carrinho extends BaseController
             'total'    => $total,
         ]);
     }
-
-    // --- O resto do seu código (adicionar, remover) continua igual, pois já estava correto. ---
 
     /**
      * Adiciona um item ao carrinho.
@@ -116,18 +113,20 @@ class Carrinho extends BaseController
         $produtoId = $dados['produto_id'] ?? null;
         $quantidadeProduto = (int) ($dados['quantidade_produto'] ?? 1);
         $especificacaoId = $dados['especificacao_id'] ?? null;
+        $customizacao = $dados['customizacao'] ?? null; // ALTERAÇÃO 3: Captura a observação do formulário.
+        
         $extras = $dados['extras_quantidade'] ?? [];
-            $extras = array_filter($extras, function($qtd) {
-                return (int)$qtd > 0;
-            });
-
-
+        $extras = array_filter($extras, function($qtd) {
+            return (int)$qtd > 0;
+        });
 
         if (!$produtoId) {
             return redirect()->back()->with('erro', 'Produto inválido.');
         }
 
         $carrinho = $this->session->get('carrinho') ?? [];
+        
+        // Cria uma chave única para o item no carrinho
         $itemKey = $produtoId;
         if ($especificacaoId) {
             $itemKey .= '_esp_' . $especificacaoId;
@@ -136,6 +135,10 @@ class Carrinho extends BaseController
             ksort($extras);
             $extrasKey = http_build_query($extras);
             $itemKey .= '_ext_' . $extrasKey;
+        }
+        // ALTERAÇÃO 4: Adiciona a customização à chave para diferenciar itens.
+        if (!empty($customizacao)) {
+            $itemKey .= '_obs_' . md5($customizacao);
         }
 
         if (isset($carrinho[$itemKey])) {
@@ -146,6 +149,7 @@ class Carrinho extends BaseController
                 'quantidade'       => $quantidadeProduto,
                 'especificacao_id' => $especificacaoId,
                 'extras'           => $extras,
+                'customizacao'     => $customizacao, // ALTERAÇÃO 5: Salva a customização na sessão.
             ];
         }
 

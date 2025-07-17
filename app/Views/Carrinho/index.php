@@ -4,9 +4,9 @@
 <?= esc($titulo ?? 'Meu Carrinho') ?>
 <?php echo $this->endSection(); ?>
 
-
 <?php echo $this->section('estilos'); ?>
 <style>
+    /* Estilos para um carrinho de compras moderno e limpo */
     .cart-item {
         display: flex;
         align-items: flex-start;
@@ -14,9 +14,7 @@
         margin-bottom: 2rem;
         padding-bottom: 2rem;
         border-bottom: 1px solid #eee;
-        transition: all 0.3s;
     }
-    
     .cart-item-img img {
         width: 120px;
         height: 120px;
@@ -32,14 +30,62 @@
         font-size: 1.3rem;
         margin-bottom: 0.5rem;
     }
-    .cart-item-spec, .cart-item-extra, .cart-item-qty {
+    .cart-item-info {
         font-size: 0.95rem;
         color: #555;
+        margin-bottom: 0.5rem;
     }
-    .cart-item-extra ul {
-        padding-left: 18px;
-        margin-top: 4px;
-        margin-bottom: 0;
+    
+    /* Estilos da lista de Extras */
+    .cart-item-extras {
+        font-size: 0.9rem;
+        margin-top: 1rem;
+        background-color: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+    }
+    .cart-item-extras strong {
+        font-weight: 600;
+        color: #333;
+    }
+    .cart-item-extras ul {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    .cart-item-extras li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Alinha verticalmente */
+        flex-wrap: wrap; /* Permite que os itens quebrem a linha */
+        padding: 0.4rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    .cart-item-extras li:last-child {
+        border-bottom: none;
+    }
+    .cart-item-extras .extra-name {
+        color: #555;
+        margin-right: 0.5rem; /* Espaço entre o nome e a quantidade */
+    }
+    .cart-item-extras .extra-qty {
+        color: #777;
+        font-size: 0.85rem;
+    }
+    .cart-item-extras .extra-price {
+        font-weight: 600;
+        color: #222;
+    }
+    
+    .cart-item-customization {
+        margin-top: 0.75rem;
+        font-size: 0.9rem;
+        color: #495057;
+        background-color: #f8f9fa;
+        border-left: 3px solid #6c757d;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
     }
     .cart-item-price {
         min-width: 120px;
@@ -72,6 +118,49 @@
         background-color: #218838;
         border-color: #1e7e34;
     }
+
+    /* --- INÍCIO DOS AJUSTES PARA CELULAR --- */
+    @media (max-width: 767px) {
+        .cart-item {
+            flex-wrap: wrap; /* Permite que os blocos quebrem a linha */
+            gap: 0.5rem; /* Reduz o espaço */
+        }
+        .cart-item-img img {
+            width: 80px; /* Imagem um pouco menor */
+            height: 80px;
+        }
+        .cart-item-details {
+            /* Faz os detalhes ocuparem o espaço restante ao lado da imagem */
+            flex-basis: calc(100% - 80px - 1rem); 
+        }
+        .cart-item-title {
+            font-size: 1.1rem; /* Título um pouco menor */
+        }
+        .cart-item-price {
+            /* Ocupa 100% da largura, movendo-o para uma nova linha */
+            flex-basis: 100%; 
+            min-width: auto;
+            margin-top: 1rem;
+            text-align: right; /* Mantém o alinhamento à direita */
+        }
+
+        /* Ajustes na lista de extras */
+        .cart-item-extras li {
+            justify-content: flex-start; /* Alinha tudo à esquerda para começar */
+        }
+        .extra-details {
+            display: flex;
+            flex-direction: column; /* Coloca nome e quantidade um sob o outro */
+            align-items: flex-start;
+            flex-basis: 70%; /* Ocupa 70% da largura */
+        }
+        .extra-price {
+            flex-basis: 30%; /* Ocupa 30% da largura */
+            text-align: right; /* Alinha o preço à direita */
+        }
+    }
+    /* --- FIM DOS AJUSTES PARA CELULAR --- */
+
 </style>
 <?php echo $this->endSection(); ?>
 
@@ -94,26 +183,54 @@
                             <div class="cart-item-img">
                                 <img src="<?= $item['produto']->imagem ? site_url('home/imagemProduto/' . $item['produto']->imagem) : site_url('admin/images/sem-imagem.jpg') ?>" alt="<?= esc($item['produto']->nome) ?>">
                             </div>
+
                             <div class="cart-item-details">
                                 <div class="cart-item-title"><?= esc($item['produto']->nome) ?></div>
-                                <?php if ($item['especificacao']): ?>
-                                    <div class="cart-item-spec"><strong>Tamanho:</strong> <?= esc($item['especificacao']->descricao) ?></div>
-                                <?php endif; ?>
+                                
+                                <div class="cart-item-info">
+
+                                    <?php 
+                        
+                                    if (!empty($item['especificacao']) && is_object($item['especificacao']) && property_exists($item['especificacao'], 'descricao')) : 
+                                    ?>
+                                    
+                                        <span><strong>Tamanho:</strong> <?= esc($item['especificacao']->descricao) ?></span><br>
+
+                                    <?php endif; ?>
+
+                                    <span><strong>Quantidade:</strong> <?= esc($item['quantidade']) ?></span>
+                                </div>
+                                
                                 <?php if (!empty($item['extras'])): ?>
-                                <div class="cart-item-extra">
+                                <div class="cart-item-extras">
                                     <strong>Extras:</strong>
                                     <ul>
                                         <?php foreach ($item['extras'] as $extraItem): ?>
                                             <li>
-                                                <?= esc($extraItem['extra']->nome) ?> (x<?= esc($extraItem['quantidade']) ?>) —
-                                                R$ <?= number_format($extraItem['extra']->preco * $extraItem['quantidade'], 2, ',', '.') ?>
+                                                <div class="extra-details">
+                                                    <span class="extra-name">
+                                                        <?= esc($extraItem['extra']->nome) ?>
+                                                    </span>
+                                                    <span class="extra-qty">
+                                                        (x<?= esc($extraItem['quantidade']) ?>)
+                                                    </span>
+                                                </div>
+                                                <span class="extra-price">
+                                                    R$ <?= number_format($extraItem['extra']->preco * $extraItem['quantidade'], 2, ',', '.') ?>
+                                                </span>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
                                 </div>
-                            <?php endif; ?>
-                                <div class="cart-item-qty">Quantidade: <?= esc($item['quantidade']) ?></div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($item['customizacao'])): ?>
+                                    <div class="cart-item-customization">
+                                        <strong>Observações:</strong> <?= esc($item['customizacao']) ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
+
                             <div class="cart-item-price">
                                 <div>R$ <?= number_format($item['preco_total_item'], 2, ',', '.') ?></div>
                                 <a href="<?= site_url(route_to('carrinho.remover', $key)) ?>" class="btn btn-sm btn-outline-danger">Remover</a>
@@ -151,7 +268,4 @@
         <?php endif; ?>
     </div>
 </section>
-<?php echo $this->endSection(); ?>
-
-<?php echo $this->section('scripts'); ?>
 <?php echo $this->endSection(); ?>
