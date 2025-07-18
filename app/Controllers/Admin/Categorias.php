@@ -149,7 +149,7 @@ class Categorias extends BaseController
             'categoria' => $categoria,
         ];
 
-        return view('Admin/categorias/editar_imagem', $data);
+        return view('Admin/Categorias/editar_imagem', $data);
     }
 
     public function upload($id = null)

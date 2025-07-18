@@ -23,7 +23,6 @@ class BairroModel extends Model
     protected $validationRules = [
         'nome'          => 'required|min_length[2]|max_length[120]|is_unique[bairros.nome]',
         'valor_entrega' => 'required|decimal',
-        'cep'           => 'required|exact_length[8]',
     ];
 
     protected $validationMessages = [
@@ -36,11 +35,6 @@ class BairroModel extends Model
         'valor_entrega' => [
             'required' => 'O valor de entrega é obrigatório.',
             'decimal'  => 'Informe um valor válido com ponto (ex: 5.00).',
-        ],
-
-        'cep' => [
-            'required' => 'O CEP é obrigatório.',
-             'exact_length' => 'O CEP deve ter 8 caracteres.',
         ],
     ];
 
@@ -55,5 +49,26 @@ class BairroModel extends Model
         }
 
         return $data;
+    }
+
+    public function procurar($term)
+    {
+        if (null == $term) {
+            return [];
+        }
+
+        return $this->select('id, nome')
+            ->like('nome', $term)
+            ->withDeleted(true)
+            ->get()
+            ->getResult();
+    }
+
+    public function desfazerExclusao(int $id)
+    {
+        return $this->protect(false)
+            ->where('id', $id)
+            ->set('deletado_em', null)
+            ->update();
     }
 }

@@ -1,7 +1,7 @@
 <?php if(session()->has('errors')): ?>
     <div class="alert alert-danger">
         <?php foreach(session('errors') as $error): ?>
-            <p><?php echo $error; ?></p>
+            <p><?php echo esc($error); ?></p>
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
@@ -35,8 +35,16 @@
 
 <div class="row">
     <div class="form-group col-md-5">
-        <label for="bairro">Bairro</label>
-        <input type="text" class="form-control" name="bairro" value="<?php echo old('bairro', esc($endereco->bairro)); ?>">
+        <label for="bairro_id">Bairro</label>
+        <select class="form-control" name="bairro_id" id="bairro_id" required>
+            <option value="">-- Selecione o bairro --</option>
+            <?php foreach ($bairros as $bairro): ?>
+                <option value="<?php echo esc($bairro->id); ?>"
+                    <?php echo set_select('bairro_id', esc($bairro->id), (old('bairro_id', $endereco->bairro_id ?? '') == $bairro->id) ? true : false); ?>>
+                    <?php echo esc($bairro->nome); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
     <div class="form-group col-md-5">
         <label for="cidade">Cidade</label>
@@ -53,3 +61,20 @@
     <textarea class="form-control" name="referencia"><?php echo old('referencia', esc($endereco->referencia)); ?></textarea>
 </div>
 <hr>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- jQuery e Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#bairro_id').select2({
+        placeholder: "-- Selecione o bairro --",
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>

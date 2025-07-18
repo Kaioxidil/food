@@ -33,15 +33,15 @@
                     <?php endforeach; ?>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Subtotal</span>
-                        <span>R$ <?= number_format($subtotal, 2, ',', '.') ?></span>
+                        <span id="subtotal-valor">R$ <?= number_format($subtotal, 2, ',', '.') ?></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Taxa de Entrega</span>
-                        <span>R$ <?= number_format($taxa_entrega, 2, ',', '.') ?></span>
+                        <span id="taxa-entrega-valor">R$ <?= number_format($taxa_entrega, 2, ',', '.') ?></span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between active">
                         <strong>Total do Pedido</strong>
-                        <strong>R$ <?= number_format($total, 2, ',', '.') ?></strong>
+                        <strong id="total-final-valor">R$ <?= number_format($total, 2, ',', '.') ?></strong>
                     </li>
                 </ul>
 
@@ -52,15 +52,17 @@
                     <?php if (isset($enderecos) && !empty($enderecos)): ?>
                         <div class="form-group mb-3">
                             <label for="endereco_salvo_id">Usar um endereço salvo</label>
-                            <select class="form-control" id="endereco_salvo_id">
-                                <option value="">-- Selecione um endereço --</option>
-                                <?php foreach ($enderecos as $e): ?>
-                                    <option value="<?= $e->id ?>" 
-                                            data-logradouro="<?= esc($e->logradouro) ?>"
-                                            data-numero="<?= esc($e->numero) ?>"
-                                            data-bairro="<?= esc($e->bairro) ?>"
-                                            data-complemento="<?= esc($e->complemento) ?>">
-                                        <?= esc($e->titulo) ?> (<?= esc($e->logradouro) ?>, <?= esc($e->numero) ?>)
+                            <select class="form-control" name="endereco_salvo_id" id="endereco_salvo_id">
+                                <option value=""></option>
+                                <?php foreach ($enderecos as $endereco): ?>
+                                    <option
+                                        value="<?= esc($endereco->id) ?>"
+                                        data-logradouro="<?= esc($endereco->logradouro) ?>"
+                                        data-numero="<?= esc($endereco->numero) ?>"
+                                        data-complemento="<?= esc($endereco->complemento) ?>"
+                                        data-bairro="<?= esc($endereco->bairro_nome) ?>"
+                                    >
+                                        <?= esc($endereco->logradouro) ?>, <?= esc($endereco->numero) ?> - <?= esc($endereco->bairro_nome) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -69,7 +71,7 @@
 
                     <div class="form-group mb-3">
                         <label for="endereco_completo">Endereço completo (Rua, Número, Complemento)</label>
-                        <input type="text" class="form-control" name="endereco" id="endereco_completo" required>
+                        <input type="text" class="form-control" name="endereco" id="endereco_completo" value="<?= old('endereco') ?>" required>
                     </div>
                     
                     <div class="form-group mb-3">
@@ -77,7 +79,9 @@
                         <select class="form-control" name="bairro_id" id="bairro_id" required>
                             <option value="">-- Selecione o bairro --</option>
                             <?php foreach ($bairros as $bairro): ?>
-                                <option value="<?= esc($bairro->id) ?>"><?= esc($bairro->nome) ?></option>
+                                <option value="<?= esc($bairro->id) ?>" data-valor="<?= esc($bairro->valor_entrega) ?>">
+                                    <?= esc($bairro->nome) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -114,52 +118,81 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mostrar campo de troco se for dinheiro
-    const formaPagamentoSelect = document.getElementById('forma_pagamento_id');
-    const campoObservacoes = document.getElementById('campo-observacoes');
-    const observacoesInput = document.getElementById('observacoes');
+$(document).ready(function() {
+    // ########## SEU CÓDIGO EXISTENTE (perfeito!) ##########
+    $('#bairro_id').select2({
+        placeholder: "-- Selecione o bairro --",
+        allowClear: true,
+        width: '100%'
+    });
 
-    formaPagamentoSelect.addEventListener('change', function() {
-        const texto = this.options[this.selectedIndex].text.toLowerCase();
+    $('#endereco_salvo_id').select2({
+        placeholder: "-- Selecione um endereço salvo --",
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#forma_pagamento_id').on('change', function() {
+        const texto = $(this).find('option:selected').text().toLowerCase();
         if (texto.includes('dinheiro')) {
-            campoObservacoes.style.display = 'block';
+            $('#campo-observacoes').show();
         } else {
-            campoObservacoes.style.display = 'none';
-            observacoesInput.value = '';
+            $('#campo-observacoes').hide();
+            $('#observacoes').val('');
         }
     });
 
-    // Preencher campos com endereço salvo
-    const enderecoSalvoSelect = document.getElementById('endereco_salvo_id');
-    const enderecoCompletoInput = document.getElementById('endereco_completo');
-    const bairroSelect = document.getElementById('bairro_id');
+    $('#endereco_salvo_id').on('change', function() {
+        const option = $(this).find('option:selected');
+        if (!option.val()) {
+            $('#endereco_completo').val(''); // Limpa o campo se desmarcar
+            $('#bairro_id').val('').trigger('change'); // Limpa o bairro e dispara o evento de cálculo
+            return;
+        };
 
-    enderecoSalvoSelect.addEventListener('change', function() {
-        const option = this.options[this.selectedIndex];
-        if (!option.value) return;
-
-        const logradouro = option.dataset.logradouro;
-        const numero = option.dataset.numero;
-        const complemento = option.dataset.complemento;
-        const bairroNome = option.dataset.bairro;
-
-        let endereco = `${logradouro}, ${numero}`;
-        if (complemento) {
-            endereco += ` - ${complemento}`;
+        let endereco = option.data('logradouro') + ', ' + option.data('numero');
+        if (option.data('complemento')) {
+            endereco += ' - ' + option.data('complemento');
         }
-        enderecoCompletoInput.value = endereco;
+        $('#endereco_completo').val(endereco);
 
-        // Selecionar bairro
-        for (let i = 0; i < bairroSelect.options.length; i++) {
-            const texto = bairroSelect.options[i].text.toLowerCase().trim();
-            if (texto === bairroNome.toLowerCase().trim()) {
-                bairroSelect.value = bairroSelect.options[i].value;
-                break;
+        const bairroNome = option.data('bairro').toLowerCase().trim();
+        $('#bairro_id option').each(function() {
+            if ($(this).text().toLowerCase().trim() === bairroNome) {
+                $('#bairro_id').val($(this).val()).trigger('change');
+                return false;
             }
-        }
+        });
     });
+
+    // ########## NOVO SCRIPT PARA CÁLCULO DINÂMICO ##########
+    const subtotal = parseFloat('<?= $subtotal; ?>');
+
+    // Função para formatar o número como moeda brasileira (R$)
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Ouve o evento de 'change' no seletor de bairros
+    $('#bairro_id').on('change', function() {
+        const option = $(this).find('option:selected');
+        // Pega o valor da taxa do atributo 'data-valor'
+        const taxaEntrega = parseFloat(option.data('valor')) || 0;
+        
+        // Calcula o novo total
+        const novoTotal = subtotal + taxaEntrega;
+        
+        // Atualiza os textos na tela com os valores formatados
+        $('#taxa-entrega-valor').text(formatarMoeda(taxaEntrega));
+        $('#total-final-valor').text(formatarMoeda(novoTotal));
+    });
+
 });
 </script>
 <?= $this->endSection() ?>

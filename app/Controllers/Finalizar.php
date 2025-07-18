@@ -13,7 +13,7 @@ use App\Services\CarrinhoService;
 
 class Finalizar extends BaseController
 {
-    private const VALOR_ENTREGA_FIXO = 5.00; // <-- TAXA DE ENTREGA FIXA DEFINIDA AQUI
+    // A constante VALOR_ENTREGA_FIXO foi removida daqui.
 
     private $formaPagamentoModel;
     private $bairroModel;
@@ -39,14 +39,16 @@ class Finalizar extends BaseController
         }
 
         $carrinhoData = $this->carrinhoService->getCarrinho();
-        $totalComEntrega = $carrinhoData['total'] + self::VALOR_ENTREGA_FIXO; // Soma a taxa fixa
+        
+        // Agora, o total inicial não inclui a entrega, pois ela ainda não foi selecionada.
+        $totalInicial = $carrinhoData['total'];
 
         $data = [
             'titulo'           => 'Finalizar Pedido',
             'carrinho'         => $carrinhoData['itens'],
             'subtotal'         => $carrinhoData['total'],
-            'taxa_entrega'     => self::VALOR_ENTREGA_FIXO, // Passa a taxa para a view
-            'total'            => $totalComEntrega, // Passa o total final para a view
+            'taxa_entrega'     => 0.00, // Começa com 0. Será atualizado via JavaScript.
+            'total'            => $totalInicial, // O total inicial é apenas o subtotal.
             'formas_pagamento' => $this->formaPagamentoModel->where('ativo', true)->findAll(),
             'bairros'          => $this->bairroModel->where('ativo', true)->findAll(),
         ];
@@ -75,19 +77,30 @@ class Finalizar extends BaseController
         }
 
         $carrinhoData = $this->carrinhoService->getCarrinho();
-        $bairro = $this->bairroModel->find($this->request->getPost('bairro_id')); // Bairro ainda é necessário para saber onde entregar
         
+        // Busca o bairro para obter o valor da entrega
+        $bairro = $this->bairroModel->find($this->request->getPost('bairro_id'));
+        
+        // Verifica se o bairro foi encontrado para evitar erros
+        if (!$bairro) {
+            return redirect()->back()->with('erro', 'Bairro não encontrado. Por favor, selecione um bairro válido.')->withInput();
+        }
+
+        $valorEntrega = (float) $bairro->valor_entrega; // Pega a taxa de entrega do bairro
+
         $db = \Config\Database::connect();
         $db->transStart();
 
         $usuario = $this->autenticacao->pegaUsuarioLogado();
-        $totalPedido = $carrinhoData['total'] + self::VALOR_ENTREGA_FIXO; // Usa a taxa fixa
+        
+        // Calcula o total do pedido com a taxa de entrega do bairro
+        $totalPedido = $carrinhoData['total'] + $valorEntrega;
 
         $pedidoData = [
             'usuario_id'         => $usuario->id ?? null,
             'forma_pagamento_id' => $this->request->getPost('forma_pagamento_id'),
             'bairro'             => $bairro->nome,
-            'valor_entrega'      => self::VALOR_ENTREGA_FIXO, // Salva a taxa fixa
+            'valor_entrega'      => $valorEntrega, // Salva a taxa de entrega correta
             'endereco'           => $this->request->getPost('endereco'),
             'observacoes'        => $this->request->getPost('observacoes'),
             'valor_produtos'     => $carrinhoData['total'],

@@ -70,8 +70,6 @@ $routes->group('admin', function($routes){
 
     $routes->get('relatorios/relatoriousuario/gerarpdf', 'Admin\Relatorios\RelatorioUsuario::gerarPdf');
 
-    $routes->get('bairros', 'Admin\Bairros::index');
-    $routes->get('bairros/sincronizar', 'Admin\Bairros::sincronizar');
 
 
 });

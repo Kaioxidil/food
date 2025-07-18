@@ -3,7 +3,7 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\BairroModel;
+use App\Entities\Bairro;
 
 class Bairros extends BaseController
 {
@@ -11,7 +11,7 @@ class Bairros extends BaseController
 
     public function __construct()
     {
-        $this->bairroModel = new BairroModel();
+        $this->bairroModel = new \App\Models\BairroModel();
     }
 
     public function index()
@@ -25,78 +25,170 @@ class Bairros extends BaseController
         return view('Admin/Bairros/index', $data);
     }
 
-    public function sincronizar()
+    public function procurar()
     {
-        $cidade = 'Terra Roxa'; // Defina dinamicamente, se quiser
-        $estado = 'PR';
-
-        $uf = strtoupper($estado);
-
-        $urlMunicipios = "https://servicodados.ibge.gov.br/api/v1/localidades/estados/$uf/municipios";
-
-        $client = \Config\Services::curlrequest();
-        $response = $client->get($urlMunicipios);
-
-        if ($response->getStatusCode() !== 200) {
-            return $this->response->setStatusCode(500)->setJSON(['erro' => 'Erro ao buscar cidade no IBGE']);
+        if (!$this->request->isAJAX()) {
+            exit('Página não encontrada');
         }
 
-        $municipios = json_decode($response->getBody());
+        $bairros = $this->bairroModel->procurar($this->request->getGet('term'));
+        $retorno = [];
 
-        $idMunicipio = null;
-        foreach ($municipios as $municipio) {
-            if (strtolower($municipio->nome) === strtolower($cidade)) {
-                $idMunicipio = $municipio->id;
-                break;
+        foreach ($bairros as $bairro) {
+            $data['id'] = $bairro->id;
+            $data['value'] = $bairro->nome;
+            $retorno[] = $data;
+        }
+
+        return $this->response->setJSON($retorno);
+    }
+
+    public function criar()
+    {
+        $bairro = new Bairro();
+
+        $data = [
+            'titulo' => "Cadastrando novo bairro",
+            'bairro' => $bairro,
+        ];
+
+        return view('Admin/Bairros/criar', $data);
+    }
+
+    public function show($id = null)
+    {
+        $bairro = $this->buscaBairroOu404($id);
+
+        $data = [
+            'titulo' => "Detalhando bairro: $bairro->nome",
+            'bairro' => $bairro,
+        ];
+
+        return view('Admin/Bairros/show', $data);
+    }
+
+    public function cadastrar()
+    {
+        if ($this->request->getMethod() === 'post') {
+            $bairro = new Bairro($this->request->getPost());
+
+            if ($this->bairroModel->save($bairro)) {
+                return redirect()
+                    ->to(site_url("admin/bairros/show/" . $this->bairroModel->getInsertID()))
+                    ->with('sucesso', "Bairro cadastrado com sucesso: $bairro->nome.");
+            } else {
+                return redirect()
+                    ->back()
+                    ->with('errors_model', $this->bairroModel->errors())
+                    ->with('atencao', 'Verifique os erros abaixo.')
+                    ->withInput();
             }
         }
 
-        if (!$idMunicipio) {
-            return $this->response->setStatusCode(404)->setJSON(['erro' => 'Cidade não encontrada']);
+        return redirect()->back();
+    }
+
+    public function editar($id = null)
+    {
+        $bairro = $this->buscaBairroOu404($id);
+
+        if ($bairro->deletado_em !== null) {
+            return redirect()
+                ->back()
+                ->with('info', "O bairro $bairro->nome encontra-se excluído. Não é possível editar.");
         }
 
-        $cepBase = '85990000'; // CEP base para busca (ajuste conforme necessário)
-        $bairroSet = [];
+        $data = [
+            'titulo' => "Editando bairro: $bairro->nome",
+            'bairro' => $bairro,
+        ];
 
-        for ($i = 0; $i < 10; $i++) {
-            $cep = (string)((int)$cepBase + $i);
+        return view('Admin/Bairros/editar', $data);
+    }
 
-            $viaCepUrl = "https://viacep.com.br/ws/{$cep}/json/";
-            $resp = $client->get($viaCepUrl);
+    public function atualizar($id = null)
+    {
+        if ($this->request->getMethod() === 'post') {
+            $bairro = $this->buscaBairroOu404($id);
 
-            if ($resp->getStatusCode() !== 200) {
-                continue;
+            if ($bairro->deletado_em !== null) {
+                return redirect()
+                    ->back()
+                    ->with('info', "O bairro $bairro->nome encontra-se excluído. Não é possível atualizar.");
             }
 
-            $data = json_decode($resp->getBody());
+            $bairro->fill($this->request->getPost());
 
-            if (!isset($data->bairro) || empty($data->bairro)) {
-                continue;
+            if (!$bairro->hasChanged()) {
+                return redirect()->back()
+                    ->with('info', 'Não há dados para atualizar.');
             }
 
-            $bairroNome = trim($data->bairro);
-
-            // Evita duplicatas
-            if (!in_array($bairroNome, $bairroSet)) {
-                $bairroSet[] = $bairroNome;
-
-                // Verifica se o bairro já existe para evitar duplicidade no banco
-                $bairroExistente = $this->bairroModel->where('nome', $bairroNome)->first();
-
-                if (!$bairroExistente) {
-                    $this->bairroModel->insert([
-                        'nome' => $bairroNome,
-                        'valor_entrega' => 5.00, // valor padrão numérico
-                        'cep' => preg_replace('/[^0-9]/', '', $data->cep),
-                        'ativo' => true
-                    ]);
-                }
+            if ($this->bairroModel->save($bairro)) {
+                return redirect()
+                    ->to(site_url("admin/bairros/show/$bairro->id"))
+                    ->with('sucesso', "Bairro atualizado com sucesso: $bairro->nome.");
+            } else {
+                return redirect()
+                    ->back()
+                    ->with('errors_model', $this->bairroModel->errors())
+                    ->with('atencao', 'Verifique os erros abaixo.')
+                    ->withInput();
             }
         }
 
-        return $this->response->setJSON([
-            'status' => 'sucesso',
-            'bairros_importados' => $bairroSet,
-        ]);
+        return redirect()->back();
+    }
+
+    public function excluir($id = null)
+    {
+        $bairro = $this->buscaBairroOu404($id);
+
+        if ($bairro->deletado_em !== null) {
+            return redirect()
+                ->back()
+                ->with('info', "O bairro $bairro->nome já se encontra excluído.");
+        }
+
+        if ($this->request->getMethod() === 'post') {
+            $this->bairroModel->delete($id);
+            return redirect()->to(site_url('admin/bairros'))
+                ->with('sucesso', "Bairro excluído com sucesso: $bairro->nome.");
+        }
+
+        $data = [
+            'titulo' => "Excluindo o bairro: $bairro->nome",
+            'bairro' => $bairro,
+        ];
+
+        return view('Admin/Bairros/excluir', $data);
+    }
+
+    public function desfazerExclusao($id = null)
+    {
+        $bairro = $this->buscaBairroOu404($id);
+
+        if ($bairro->deletado_em === null) {
+            return redirect()->back()->with('info', 'Apenas bairros excluídos podem ser recuperados.');
+        }
+
+        if ($this->bairroModel->desfazerExclusao($id)) {
+            return redirect()->back()->with('sucesso', 'Exclusão desfeita com sucesso.');
+        } else {
+            return redirect()
+                ->back()
+                ->with('errors_model', $this->bairroModel->errors())
+                ->with('atencao', 'Verifique os erros abaixo.')
+                ->withInput();
+        }
+    }
+
+    private function buscaBairroOu404(int $id = null)
+    {
+        if (!$id || !$bairro = $this->bairroModel->withDeleted(true)->where('id', $id)->first()) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Não encontramos o bairro: $id");
+        }
+
+        return $bairro;
     }
 }

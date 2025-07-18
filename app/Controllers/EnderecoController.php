@@ -4,23 +4,21 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\UsuarioEnderecoModel;
+use App\Models\BairroModel; // Importa o model BairroModel
 
 class EnderecoController extends BaseController
 {
     private $usuarioEnderecoModel;
+    private $bairroModel;
     private $autenticacao;
     private $usuarioLogado;
 
     public function __construct()
     {
         $this->usuarioEnderecoModel = new UsuarioEnderecoModel();
+        $this->bairroModel = new BairroModel();  // Instancia BairroModel
         $this->autenticacao = service('autenticacao');
-        
-        // A verificação de login agora é feita pelo Filtro de Rota ('login').
-        // A linha abaixo foi removida pois causava o erro.
-        // $this->autenticacao->check(); 
 
-        // Apenas pegamos o usuário que já foi validado pelo filtro.
         $this->usuarioLogado = $this->autenticacao->pegaUsuarioLogado();
     }
 
@@ -29,7 +27,6 @@ class EnderecoController extends BaseController
      */
     public function index()
     {
-        // Esta verificação é uma segurança extra, mas o filtro já deve ter barrado usuários não logados.
         if ($this->usuarioLogado === null) {
             return redirect()->route('login');
         }
@@ -47,7 +44,8 @@ class EnderecoController extends BaseController
     {
         return view('Conta/Enderecos/criar', [
             'titulo' => 'Adicionar Novo Endereço',
-            'endereco' => new \App\Entities\UsuarioEndereco(), // Entidade vazia para o formulário
+            'endereco' => new \App\Entities\UsuarioEndereco(),
+            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(), // Passa bairros ativos
         ]);
     }
 
@@ -72,7 +70,7 @@ class EnderecoController extends BaseController
             ->with('atencao', 'Por favor, verifique os erros abaixo.')
             ->withInput();
     }
-    
+
     /**
      * Exibe o formulário para editar um endereço existente.
      */
@@ -83,6 +81,7 @@ class EnderecoController extends BaseController
         return view('Conta/Enderecos/editar', [
             'titulo' => 'Editar Endereço',
             'endereco' => $endereco,
+            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(), // Passa bairros ativos
         ]);
     }
 
@@ -94,9 +93,9 @@ class EnderecoController extends BaseController
         if ($this->request->getMethod() !== 'post') {
             return redirect()->back();
         }
-        
+
         $endereco = $this->buscaEnderecoOu404($id);
-        
+
         $postData = $this->request->getPost();
         $endereco->fill($postData);
 
@@ -144,7 +143,7 @@ class EnderecoController extends BaseController
         if (!$endereco) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Endereço não encontrado.");
         }
-        
+
         return $endereco;
     }
 }
