@@ -53,32 +53,48 @@ $routes->get('/finalizar', 'Finalizar::index');
 $routes->post('/finalizar/enviar', 'Finalizar::enviar');
 
 $routes->group('admin', function($routes){
-    $routes->add('formas', 'Admin\FormasPagamentos::index');
+
+
+    $routes->get('formas', 'Admin\FormasPagamentos::index');
     $routes->add('formas/criar', 'Admin\FormasPagamentos::criar');
     $routes->post('formas/cadastrar', 'Admin\FormasPagamentos::cadastrar');
-    
-    $routes->add('formas/show/(:num)', 'Admin\FormasPagamentos::show/$1');
+    $routes->get('formas/show/(:num)', 'Admin\FormasPagamentos::show/$1');
     $routes->add('formas/editar/(:num)', 'Admin\FormasPagamentos::editar/$1');
     $routes->post('formas/atualizar/(:num)', 'Admin\FormasPagamentos::atualizar/$1');
-
     $routes->add('formas/excluir/(:num)', 'Admin\FormasPagamentos::excluir/$1');
-    $routes->post('formas/excluir/(:num)', 'Admin\FormasPagamentos::excluir/$1');
-
     $routes->get('formas/desfazerexclusao/(:num)', 'Admin\FormasPagamentos::desfazerExclusao/$1');
-
     $routes->get('formas/procurar', 'Admin\FormasPagamentos::procurar'); 
 
-    $routes->get('relatorios/relatoriousuario/gerarpdf', 'Admin\Relatorios\RelatorioUsuario::gerarPdf');
 
+    $routes->get('home', 'Admin\Home::index');
+    $routes->get('home/atualizarDashboard', 'Admin\Home::atualizarDashboard');
 
+     // ==========================================================
+    // --- ROTAS DE PEDIDOS (CORRIGIDAS E COMPLETAS) ---
+    // ==========================================================
+    
+    // Rota para exibir a lista de pedidos (com filtros)
+    $routes->get('pedidos', 'Admin\Pedidos::index');
+    
+    // Rota para exibir os detalhes de um pedido específico
+    $routes->get('pedidos/show/(:num)', 'Admin\Pedidos::show/$1');
+
+    // Rota para a requisição AJAX que atualiza o status do pedido
+    $routes->post('pedidos/atualizarstatus', 'Admin\Pedidos::atualizarStatus');
+
+    // [NOVO] Rota para a requisição AJAX que associa o entregador
+    $routes->post('pedidos/associarEntregador', 'Admin\Pedidos::associarEntregador');
+    
+    // [NOVO] Rota para a requisição AJAX que busca os dados para impressão
+    $routes->get('pedidos/getdadosimpressao', 'Admin\Pedidos::getDadosImpressao');
+    // ==========================================================
+
+    // [NOVO] Rota para a requisição AJAX que atualiza a tabela de pedidos
+    $routes->get('pedidos/atualizartabela', 'Admin\Pedidos::atualizarTabela');
 
 });
 
 
-$routes->group('admin', static function ($routes) {
-
-    $routes->get('home/atualizar', 'Admin\Home::atualizarDashboard'); 
-});
 
 
 

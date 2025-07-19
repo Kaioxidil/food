@@ -4,10 +4,11 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\UsuarioEnderecoModel;
-use App\Models\BairroModel; // Importa o model BairroModel
+use App\Models\BairroModel; 
 
 class EnderecoController extends BaseController
 {
+    // ... (o início do ficheiro e todos os outros métodos permanecem iguais) ...
     private $usuarioEnderecoModel;
     private $bairroModel;
     private $autenticacao;
@@ -16,42 +17,39 @@ class EnderecoController extends BaseController
     public function __construct()
     {
         $this->usuarioEnderecoModel = new UsuarioEnderecoModel();
-        $this->bairroModel = new BairroModel();  // Instancia BairroModel
+        $this->bairroModel = new BairroModel();
         $this->autenticacao = service('autenticacao');
-
         $this->usuarioLogado = $this->autenticacao->pegaUsuarioLogado();
     }
 
-    /**
-     * Lista todos os endereços do usuário logado.
-     */
     public function index()
     {
         if ($this->usuarioLogado === null) {
             return redirect()->route('login');
         }
 
+        $enderecos = $this->usuarioEnderecoModel
+            ->select('usuarios_enderecos.*, bairros.nome AS bairro')
+            ->join('bairros', 'bairros.id = usuarios_enderecos.bairro')
+            ->where('usuarios_enderecos.usuario_id', $this->usuarioLogado->id)
+            ->findAll();
+
         return view('Conta/Enderecos/index', [
-            'titulo' => 'Meus Endereços',
-            'enderecos' => $this->usuarioEnderecoModel->where('usuario_id', $this->usuarioLogado->id)->findAll(),
+            'titulo'    => 'Meus Endereços',
+            'enderecos' => $enderecos,
         ]);
     }
-
-    /**
-     * Exibe o formulário para criar um novo endereço.
-     */
+ 
+    // ... (métodos criar, cadastrar, editar, atualizar permanecem iguais) ...
     public function criar()
     {
         return view('Conta/Enderecos/criar', [
             'titulo' => 'Adicionar Novo Endereço',
             'endereco' => new \App\Entities\UsuarioEndereco(),
-            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(), // Passa bairros ativos
+            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(),
         ]);
     }
-
-    /**
-     * Processa o formulário de criação de endereço.
-     */
+ 
     public function cadastrar()
     {
         if ($this->request->getMethod() !== 'post') {
@@ -70,10 +68,7 @@ class EnderecoController extends BaseController
             ->with('atencao', 'Por favor, verifique os erros abaixo.')
             ->withInput();
     }
-
-    /**
-     * Exibe o formulário para editar um endereço existente.
-     */
+ 
     public function editar(int $id)
     {
         $endereco = $this->buscaEnderecoOu404($id);
@@ -81,13 +76,10 @@ class EnderecoController extends BaseController
         return view('Conta/Enderecos/editar', [
             'titulo' => 'Editar Endereço',
             'endereco' => $endereco,
-            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(), // Passa bairros ativos
+            'bairros' => $this->bairroModel->where('ativo', true)->orderBy('nome')->findAll(),
         ]);
     }
 
-    /**
-     * Processa o formulário de atualização de endereço.
-     */
     public function atualizar(int $id)
     {
         if ($this->request->getMethod() !== 'post') {
@@ -95,7 +87,6 @@ class EnderecoController extends BaseController
         }
 
         $endereco = $this->buscaEnderecoOu404($id);
-
         $postData = $this->request->getPost();
         $endereco->fill($postData);
 
@@ -112,9 +103,10 @@ class EnderecoController extends BaseController
             ->with('atencao', 'Por favor, verifique os erros abaixo.')
             ->withInput();
     }
-
+ 
     /**
-     * Processa a exclusão (soft delete) de um endereço.
+     * ✅ CORREÇÃO: Atualização no comentário do método.
+     * Processa a exclusão PERMANENTE de um endereço.
      */
     public function excluir(int $id)
     {
@@ -124,21 +116,19 @@ class EnderecoController extends BaseController
 
         $endereco = $this->buscaEnderecoOu404($id);
 
+        // Agora, esta chamada irá executar um DELETE FROM no banco de dados.
         if ($this->usuarioEnderecoModel->delete($id)) {
             return redirect()->route('conta.enderecos')->with('sucesso', 'Endereço excluído com sucesso.');
         }
 
         return redirect()->back()->with('erro', 'Não foi possível excluir o endereço.');
     }
-
-    /**
-     * Busca um endereço específico do usuário logado ou retorna erro 404.
-     */
+ 
     private function buscaEnderecoOu404(int $id)
     {
         $endereco = $this->usuarioEnderecoModel->where('id', $id)
-                                               ->where('usuario_id', $this->usuarioLogado->id)
-                                               ->first();
+                                                ->where('usuario_id', $this->usuarioLogado->id)
+                                                ->first();
 
         if (!$endereco) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Endereço não encontrado.");

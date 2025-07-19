@@ -9,23 +9,23 @@
 <div class="row">
     <div class="form-group col-md-6">
         <label for="titulo">Título (Ex: Casa)</label>
-        <input type="text" class="form-control" name="titulo" value="<?php echo old('titulo', esc($endereco->titulo)); ?>">
+        <input type="text" class="form-control" required name="titulo" value="<?php echo old('titulo', esc($endereco->titulo)); ?>">
     </div>
     <div class="form-group col-md-6">
         <label for="cep">CEP</label>
-        <input type="text" class="form-control" name="cep" value="<?php echo old('cep', esc($endereco->cep)); ?>">
+        <input type="text" class="form-control" required name="cep" value="<?php echo old('cep', esc($endereco->cep)); ?>">
     </div>
 </div>
 
 <div class="form-group">
     <label for="logradouro">Rua / Logradouro</label>
-    <input type="text" class="form-control" name="logradouro" value="<?php echo old('logradouro', esc($endereco->logradouro)); ?>">
+    <input type="text" class="form-control" name="logradouro" required value="<?php echo old('logradouro', esc($endereco->logradouro)); ?>">
 </div>
 
 <div class="row">
     <div class="form-group col-md-4">
         <label for="numero">Número</label>
-        <input type="text" class="form-control" name="numero" value="<?php echo old('numero', esc($endereco->numero)); ?>">
+        <input type="text" class="form-control" name="numero" required value="<?php echo old('numero', esc($endereco->numero)); ?>">
     </div>
     <div class="form-group col-md-8">
         <label for="complemento">Complemento</label>
@@ -35,12 +35,12 @@
 
 <div class="row">
     <div class="form-group col-md-5">
-        <label for="bairro_id">Bairro</label>
-        <select class="form-control" name="bairro_id" id="bairro_id" required>
+        <label for="bairro">Bairro</label>
+        <select class="form-control" name="bairro" id="bairro" required>
             <option value="">-- Selecione o bairro --</option>
             <?php foreach ($bairros as $bairro): ?>
                 <option value="<?php echo esc($bairro->id); ?>"
-                    <?php echo set_select('bairro_id', esc($bairro->id), (old('bairro_id', $endereco->bairro_id ?? '') == $bairro->id) ? true : false); ?>>
+                    <?php echo set_select('bairro', esc($bairro->id), (old('bairro', $endereco->bairro ?? '') == $bairro->id)); ?>>
                     <?php echo esc($bairro->nome); ?>
                 </option>
             <?php endforeach; ?>
@@ -48,13 +48,16 @@
     </div>
     <div class="form-group col-md-5">
         <label for="cidade">Cidade</label>
-        <input type="text" class="form-control" name="cidade" value="<?php echo old('cidade', esc($endereco->cidade)); ?>">
+        <input required type="text" class="form-control" name="cidade" id="cidade" 
+               value="<?php echo old('cidade', esc($endereco->cidade)); ?>">
     </div>
     <div class="form-group col-md-2">
         <label for="estado">Estado</label>
-        <input type="text" class="form-control" name="estado" maxlength="2" value="<?php echo old('estado', esc($endereco->estado)); ?>">
+        <input required type="text" class="form-control" name="estado" id="estado" maxlength="2" 
+               value="<?php echo old('estado', esc($endereco->estado)); ?>">
     </div>
 </div>
+
 
 <div class="form-group">
     <label for="referencia">Ponto de Referência</label>
@@ -71,7 +74,7 @@
 
 <script>
 $(document).ready(function() {
-    $('#bairro_id').select2({
+    $('#bairro').select2({
         placeholder: "-- Selecione o bairro --",
         allowClear: true,
         width: '100%'

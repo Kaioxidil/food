@@ -51,8 +51,8 @@
 
                     <?php if (isset($enderecos) && !empty($enderecos)): ?>
                         <div class="form-group mb-3">
-                            <label for="endereco_salvo_id">Usar um endereço salvo</label>
-                            <select class="form-control" name="endereco_salvo_id" id="endereco_salvo_id">
+                            <label for="endereco_id">Usar um endereço salvo</label>
+                            <select class="form-control" name="endereco_id" id="endereco_id">
                                 <option value=""></option>
                                 <?php foreach ($enderecos as $endereco): ?>
                                     <option
@@ -60,9 +60,8 @@
                                         data-logradouro="<?= esc($endereco->logradouro) ?>"
                                         data-numero="<?= esc($endereco->numero) ?>"
                                         data-complemento="<?= esc($endereco->complemento) ?>"
-                                        data-bairro="<?= esc($endereco->bairro_nome) ?>"
-                                    >
-                                        <?= esc($endereco->logradouro) ?>, <?= esc($endereco->numero) ?> - <?= esc($endereco->bairro_nome) ?>
+                                        data-bairro="<?= esc($endereco->bairro) ?>" >
+                                        <?= esc($endereco->logradouro) ?>, <?= esc($endereco->numero) ?> - <?= esc($endereco->bairro) ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -71,7 +70,7 @@
 
                     <div class="form-group mb-3">
                         <label for="endereco_completo">Endereço completo (Rua, Número, Complemento)</label>
-                        <input type="text" class="form-control" name="endereco" id="endereco_completo" value="<?= old('endereco') ?>" required>
+                        <input type="text" class="form-control" id="endereco_completo" value="<?= old('endereco') ?>" required>
                     </div>
                     
                     <div class="form-group mb-3">
@@ -119,21 +118,21 @@
 
 <?= $this->section('scripts') ?>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    // ########## SEU CÓDIGO EXISTENTE (perfeito!) ##########
-    $('#bairro_id').select2({
-        placeholder: "-- Selecione o bairro --",
+    
+    // ✅ ALTERAÇÃO 2: O seletor do JavaScript agora aponta para #endereco_id
+    $('#endereco_id').select2({
+        placeholder: "-- Selecione um endereço salvo --",
         allowClear: true,
         width: '100%'
     });
-
-    $('#endereco_salvo_id').select2({
-        placeholder: "-- Selecione um endereço salvo --",
+    
+    $('#bairro_id').select2({
+        placeholder: "-- Selecione o bairro --",
         allowClear: true,
         width: '100%'
     });
@@ -148,11 +147,12 @@ $(document).ready(function() {
         }
     });
 
-    $('#endereco_salvo_id').on('change', function() {
+    // ✅ ALTERAÇÃO 3: O seletor do JavaScript agora aponta para #endereco_id
+    $('#endereco_id').on('change', function() {
         const option = $(this).find('option:selected');
         if (!option.val()) {
-            $('#endereco_completo').val(''); // Limpa o campo se desmarcar
-            $('#bairro_id').val('').trigger('change'); // Limpa o bairro e dispara o evento de cálculo
+            $('#endereco_completo').val('');
+            $('#bairro_id').val('').trigger('change');
             return;
         };
 
@@ -171,24 +171,17 @@ $(document).ready(function() {
         });
     });
 
-    // ########## NOVO SCRIPT PARA CÁLCULO DINÂMICO ##########
     const subtotal = parseFloat('<?= $subtotal; ?>');
 
-    // Função para formatar o número como moeda brasileira (R$)
     function formatarMoeda(valor) {
         return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // Ouve o evento de 'change' no seletor de bairros
     $('#bairro_id').on('change', function() {
         const option = $(this).find('option:selected');
-        // Pega o valor da taxa do atributo 'data-valor'
         const taxaEntrega = parseFloat(option.data('valor')) || 0;
-        
-        // Calcula o novo total
         const novoTotal = subtotal + taxaEntrega;
         
-        // Atualiza os textos na tela com os valores formatados
         $('#taxa-entrega-valor').text(formatarMoeda(taxaEntrega));
         $('#total-final-valor').text(formatarMoeda(novoTotal));
     });

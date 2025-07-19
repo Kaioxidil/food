@@ -13,8 +13,6 @@ use App\Services\CarrinhoService;
 
 class Finalizar extends BaseController
 {
-    // A constante VALOR_ENTREGA_FIXO foi removida daqui.
-
     private $formaPagamentoModel;
     private $bairroModel;
     private $usuarioEnderecoModel;
@@ -39,16 +37,14 @@ class Finalizar extends BaseController
         }
 
         $carrinhoData = $this->carrinhoService->getCarrinho();
-        
-        // Agora, o total inicial não inclui a entrega, pois ela ainda não foi selecionada.
         $totalInicial = $carrinhoData['total'];
 
         $data = [
             'titulo'           => 'Finalizar Pedido',
             'carrinho'         => $carrinhoData['itens'],
             'subtotal'         => $carrinhoData['total'],
-            'taxa_entrega'     => 0.00, // Começa com 0. Será atualizado via JavaScript.
-            'total'            => $totalInicial, // O total inicial é apenas o subtotal.
+            'taxa_entrega'     => 0.00,
+            'total'            => $totalInicial,
             'formas_pagamento' => $this->formaPagamentoModel->where('ativo', true)->findAll(),
             'bairros'          => $this->bairroModel->where('ativo', true)->findAll(),
         ];
@@ -66,10 +62,12 @@ class Finalizar extends BaseController
             return redirect()->back();
         }
 
+        // ✅ ALTERAÇÃO 1: Validamos o `endereco_id` e tornamos o campo de texto do endereço opcional.
         $regras = [
             'forma_pagamento_id' => ['label' => 'Forma de Pagamento', 'rules' => 'required|integer'],
             'bairro_id'          => ['label' => 'Bairro para Entrega', 'rules' => 'required|integer'],
-            'endereco'           => ['label' => 'Endereço de Entrega', 'rules' => 'required|max_length[255]'],
+            'endereco_id'        => ['label' => 'Endereço de Entrega', 'rules' => 'required|integer'],
+            'observacoes'        => ['label' => 'Observações', 'rules' => 'max_length[500]'],
         ];
 
         if (!$this->validate($regras)) {
@@ -78,33 +76,34 @@ class Finalizar extends BaseController
 
         $carrinhoData = $this->carrinhoService->getCarrinho();
         
-        // Busca o bairro para obter o valor da entrega
         $bairro = $this->bairroModel->find($this->request->getPost('bairro_id'));
-        
-        // Verifica se o bairro foi encontrado para evitar erros
         if (!$bairro) {
-            return redirect()->back()->with('erro', 'Bairro não encontrado. Por favor, selecione um bairro válido.')->withInput();
+            return redirect()->back()->with('erro', 'Bairro não encontrado.')->withInput();
         }
-
-        $valorEntrega = (float) $bairro->valor_entrega; // Pega a taxa de entrega do bairro
+        
+        // ✅ ALTERAÇÃO 2: Buscamos o objeto de endereço completo a partir do ID recebido.
+        $endereco = $this->usuarioEnderecoModel->find($this->request->getPost('endereco_id'));
+        if (!$endereco) {
+            return redirect()->back()->with('erro', 'Endereço não encontrado.')->withInput();
+        }
 
         $db = \Config\Database::connect();
         $db->transStart();
 
         $usuario = $this->autenticacao->pegaUsuarioLogado();
         
-        // Calcula o total do pedido com a taxa de entrega do bairro
+        $valorEntrega = (float) $bairro->valor_entrega;
         $totalPedido = $carrinhoData['total'] + $valorEntrega;
 
         $pedidoData = [
             'usuario_id'         => $usuario->id ?? null,
+            'endereco_id'        => $endereco->id,
             'forma_pagamento_id' => $this->request->getPost('forma_pagamento_id'),
-            'bairro'             => $bairro->nome,
-            'valor_entrega'      => $valorEntrega, // Salva a taxa de entrega correta
-            'endereco'           => $this->request->getPost('endereco'),
+            'bairro'             => $bairro->nome, // A informação do bairro continua salva
+            'endereco'           => "{$endereco->logradouro}, {$endereco->numero}" . ($endereco->complemento ? ", {$endereco->complemento}" : ""),
             'observacoes'        => $this->request->getPost('observacoes'),
             'valor_produtos'     => $carrinhoData['total'],
-            'valor_total'        => $totalPedido,
+            'valor_total'        => $totalPedido, // O valor total já inclui a entrega
             'status'             => 'pendente',
             'criado_em'          => date('Y-m-d H:i:s'),
         ];
@@ -217,8 +216,11 @@ class Finalizar extends BaseController
     // --- DETALHES FINANCEIROS ---
     $mensagem .= "💰 *Detalhes do Pagamento:*\n\n";
 
-    $mensagem .= "   *Subtotal dos Produtos:* R$ " . number_format($carrinhoData['total'], 2, ',', '.') . "\n";
-    $mensagem .= "   *Taxa de Entrega:* R$ " . number_format($pedidoData['valor_entrega'], 2, ',', '.') . "\n";
+    // CALCULAMOS A TAXA DE ENTREGA A PARTIR DO TOTAL E DO VALOR DOS PRODUTOS
+    $taxaEntrega = $pedidoData['valor_total'] - $pedidoData['valor_produtos'];
+
+    $mensagem .= "   *Subtotal dos Produtos:* R$ " . number_format($pedidoData['valor_produtos'], 2, ',', '.') . "\n";
+    $mensagem .= "   *Taxa de Entrega:* R$ " . number_format($taxaEntrega, 2, ',', '.') . "\n"; // <-- USAMOS A NOVA VARIÁVEL
     $mensagem .= "   *Valor Total:* *R$ " . number_format($pedidoData['valor_total'], 2, ',', '.') . "*\n"; // Total em negrito
 
     // Busca a forma de pagamento

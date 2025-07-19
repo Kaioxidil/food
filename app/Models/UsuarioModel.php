@@ -123,4 +123,9 @@ class UsuarioModel extends Model
 
         }
     }
+
+    public function recuperaTotalClientesAtivos(): int
+    {
+        return $this->where('ativo', true)->countAllResults();
+    }
 }

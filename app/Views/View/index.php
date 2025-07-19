@@ -276,50 +276,13 @@
                     <h3 class="text-light-black title fw-700 no-margin"><?= esc($restaurante->nome); ?></h3>
                     <p class="text-light-black sub-title no-margin"><?= esc($restaurante->endereco); ?> <span><a href="<?= site_url('conta/enderecos'); ?>" class="text-success">Mudar localização</a></span></p>
                     </p>
-                    <div class="head-rating">
-                        <div class="rating"> 
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <span class="fs-16 text-<?= ($restaurante->avaliacao ?? 0) >= $i ? 'yellow' : 'dark-white'; ?>">
-                                    <i class="fas fa-star"></i>
-                                </span>
-                            <?php endfor; ?>
-                            <span class="text-light-black fs-12 rate-data"><?= esc($restaurante->total_avaliacoes ?? '0'); ?> avaliações</span>
-                        </div>
-                        <div class="product-review">
-                            <div class="restaurent-details-mob">
-                                <a href="#"> <span class="text-light-black"><i class="fas fa-info-circle"></i></span>
-                                        <span class="text-dark-white">info</span>
-                                </a>
-                            </div>
-                            <div class="restaurent-details-mob">
-                                <a href="#"> <span class="text-light-black"><i class="fas fa-info-circle"></i></span>
-                                        <span class="text-dark-white">info</span>
-                                </a>
-                            </div>
-                            <div class="restaurent-details-mob">
-                                <a href="#"> <span class="text-light-black"><i class="fas fa-info-circle"></i></span>
-                                        <span class="text-dark-white">info</span>
-                                </a>
-                            </div>
-                            <div class="restaurent-details-mob">
-                                <a href="#"> <span class="text-light-black"><i class="fas fa-info-circle"></i></span>
-                                        <span class="text-dark-white">info</span>
-                                </a>
-                            </div>
-                            <h6 class="text-light-black no-margin"><?= esc($restaurante->percent_comida_boa ?? '0'); ?><span class="fs-14">% A comida estava boa</span></h6>
-                            <h6 class="text-light-black no-margin"><?= esc($restaurante->percent_entrega_pontual ?? '0'); ?><span class="fs-14">% A entrega foi pontual</span></h6>
-                            <h6 class="text-light-black no-margin"><?= esc($restaurante->percent_pedido_preciso ?? '0'); ?><span class="fs-14">% Pedido preciso</span></h6>
-                        </div>
-                    </div>
-                </div>
+                    
                     <div class="container">
                     <div class="row">
                         <div class="col-12">
                             <div class="restaurent-menu">
                                 <ul class="nav nav-pills">
-                                    <li class="nav-item"> 
-                                        <a class="nav-link text-light-white fw-700" data-toggle="collapse" href="#aboutcollapse">Sobre</a>
-                                    </li>
+        
                                     <?php foreach ($categorias as $cat): ?>
                                     <li class="nav-item"> 
                                         <a class="nav-link text-light-white fw-700" href="#category-<?= $cat->id; ?>"><?= esc($cat->nome); ?></a>
@@ -327,6 +290,9 @@
                                 <?php endforeach; ?>
                                     <li class="nav-item"> 
                                         <a class="nav-link text-light-white fw-700" data-toggle="collapse" href="#reviewcollapse">Avaliações</a>
+                                    </li>
+                                    <li class="nav-item"> 
+                                        <a class="nav-link text-light-white fw-700" data-toggle="collapse" href="#aboutcollapse">Sobre</a>
                                     </li>
                                     <li class="nav-item"> 
                                         <a class="nav-link text-light-white fw-700" data-toggle="collapse" href="#mapgallerycollapse">Mapa & Galeria</a>
@@ -632,9 +598,7 @@
                                                                     <?php endforeach; ?>
                                                                 <?php endif; ?>
                                                             </div>
-                                                            <span class="circle-tag">
-                                                                <img src="<?= site_url('web/') ?>assets/img/svg/010-heart.svg" alt="Favoritar">
-                                                            </span>
+                                                      
                                                             <div class="restaurent-product-price">
                                                             <h6 class="text-success fw-600 no-margin">
                                                                 <?php if (isset($produto->preco) && is_numeric($produto->preco)): ?>
@@ -684,47 +648,8 @@
         
     </div> 
 </div> 
-<div class="restaurent-address u-line">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="address-details">
-                    <div class="address">
-                        <div class="delivery-address"> 
-                            <a href="order-details.html" class="text-light-black">Entrega, O mais rápido possível (45–55m)</a> <div class="delivery-type"> <span class="text-success fs-12 fw-500">Sem mínimo</span><span class="text-light-white">, Frete Grátis</span> </div>
-                        </div>
-                        <div class="change-address"> <a href="<?= site_url('checkout/endereco'); ?>" class="fw-500">Mudar</a>
-                        </div>
-                    </div>
-                    <p class="text-light-white no-margin"><?= esc($restaurante->observacoes_entrega ?? 'Informações adicionais sobre a entrega.'); ?></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="modal fade" id="produtoModal" tabindex="-1" role="dialog" aria-labelledby="produtoModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="produtoModalLabel"></h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">×</span>
-        </button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="modalProdutoImagem" src="" alt="Imagem do Produto">
-        <p id="modalProdutoDescricao" class="modal-description"></p>
-        <p id="modalProdutoPreco" class="modal-price"></p>
-        <div id="modalProdutoTags" class="modal-tags"></div>
-        </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-success">Adicionar ao Carrinho</button>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <?php echo $this->endSection(); ?>
 
