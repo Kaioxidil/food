@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 21/07/2025 às 18:05
+-- Tempo de geração: 22/07/2025 às 05:16
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -250,7 +250,9 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (17, '2025-07-19-015722', 'App\\Database\\Migrations\\CriaTabelaEmpresas', 'default', 'App', 1752890264, 4),
 (18, '2025-07-19-015845', 'App\\Database\\Migrations\\RenomeiaEmpresa', 'default', 'App', 1752890329, 5),
 (19, '2025-07-19-015845', 'App\\Database\\Migrations\\RenomeiaEmpresasParaEmpresa', 'default', 'App', 1752890349, 6),
-(20, '2025-07-19-020108', 'App\\Database\\Migrations\\AdicionaCampoMapsIframeEmpresa', 'default', 'App', 1752890557, 7);
+(20, '2025-07-19-020108', 'App\\Database\\Migrations\\AdicionaCampoMapsIframeEmpresa', 'default', 'App', 1752890557, 7),
+(21, '2025-07-21-224856', 'App\\Database\\Migrations\\AdicionaValorEntregaEmPedidos', 'default', 'App', 1753138161, 8),
+(22, '2025-07-22-021047', 'App\\Database\\Migrations\\AddFotoPerfilToUsuarios', 'default', 'App', 1753150277, 9);
 
 -- --------------------------------------------------------
 
@@ -267,6 +269,7 @@ CREATE TABLE `pedidos` (
   `valor_total` decimal(10,2) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'pendente',
   `observacoes` text DEFAULT NULL,
+  `valor_entrega` decimal(10,2) NOT NULL DEFAULT 0.00,
   `criado_em` datetime DEFAULT NULL,
   `atualizado_em` datetime DEFAULT NULL,
   `deletado_em` datetime DEFAULT NULL
@@ -276,15 +279,10 @@ CREATE TABLE `pedidos` (
 -- Despejando dados para a tabela `pedidos`
 --
 
-INSERT INTO `pedidos` (`id`, `usuario_id`, `entregador_id`, `endereco_id`, `forma_pagamento_id`, `valor_total`, `status`, `observacoes`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(2, 1, NULL, NULL, 1, 30.00, 'em_preparacao', '', '2025-07-17 12:45:44', '2025-07-18 23:35:58', NULL),
-(3, 1, 1, 1, 1, 35.00, 'entregue', '100', '2025-07-17 22:00:09', '2025-07-19 01:16:14', NULL),
-(4, 1, 1, 3, 1, 35.00, 'entregue', '100', '2025-07-18 22:24:30', '2025-07-18 23:48:06', NULL),
-(5, 1, 1, 5, 1, 30.00, 'entregue', '100', '2025-07-18 22:50:19', '2025-07-19 01:15:14', NULL),
-(7, 1, 1, 5, 1, 30.00, 'entregue', '100', '2025-07-19 01:36:48', '2025-07-19 01:40:46', NULL),
-(8, 1, 1, 6, 1, 60.00, 'saiu_para_entrega', '100', '2025-07-19 02:10:57', '2025-07-19 02:12:11', NULL),
-(9, 1, 1, 6, 1, 40.00, 'cancelado', '200', '2025-07-19 19:20:53', '2025-07-19 23:20:51', NULL),
-(10, 1, NULL, 6, 1, 35.00, 'pendente', '', '2025-07-21 13:02:36', '2025-07-21 13:02:36', NULL);
+INSERT INTO `pedidos` (`id`, `usuario_id`, `entregador_id`, `endereco_id`, `forma_pagamento_id`, `valor_total`, `status`, `observacoes`, `valor_entrega`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(15, 1, 1, 1, 1, 30.00, 'entregue', '50', 5.00, '2025-07-21 19:54:02', '2025-07-21 22:51:09', NULL),
+(16, 1, 1, 1, 1, 35.00, 'saiu_para_entrega', '50', 5.00, '2025-07-21 20:00:06', '2025-07-21 22:13:35', NULL),
+(17, 1, 1, 1, 1, 30.00, 'entregue', '', 5.00, '2025-07-21 20:40:01', '2025-07-21 22:52:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -309,14 +307,8 @@ CREATE TABLE `pedidos_itens` (
 --
 
 INSERT INTO `pedidos_itens` (`id`, `pedido_id`, `produto_id`, `especificacao_id`, `quantidade`, `preco_unitario`, `observacao`, `preco_extras`, `subtotal`) VALUES
-(2, 2, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
-(3, 3, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
-(4, 4, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
-(5, 5, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
-(7, 7, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
-(8, 8, 1, 1, 2, 25.00, NULL, 0.00, 0.00),
-(9, 9, 1, 2, 1, 30.00, NULL, 0.00, 0.00),
-(10, 10, 1, 2, 1, 30.00, NULL, 0.00, 0.00);
+(15, 16, 1, 2, 1, 30.00, NULL, 0.00, 30.00),
+(16, 17, 1, 1, 1, 25.00, NULL, 0.00, 25.00);
 
 -- --------------------------------------------------------
 
@@ -406,6 +398,7 @@ CREATE TABLE `usuarios` (
   `email` varchar(255) NOT NULL,
   `cpf` varchar(20) DEFAULT NULL,
   `telefone` varchar(20) NOT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `ativo` tinyint(1) NOT NULL DEFAULT 0,
   `password_hash` varchar(255) NOT NULL,
@@ -421,8 +414,8 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `cpf`, `telefone`, `is_admin`, `ativo`, `password_hash`, `ativacao_hash`, `reset_hash`, `reset_expira_em`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 'Suporte', 'seudeliverytrx@gmail.com', '115.439.429-89', '(44) 99724-9833', 1, 1, '$2y$10$DKe9ECmIuEjxILIP6wRxX.4Ph1bsWGhoMykYxkaU4Tm1ReeyW/do2', NULL, NULL, NULL, '2025-07-16 22:08:07', '2025-07-16 22:09:01', NULL);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `cpf`, `telefone`, `foto_perfil`, `is_admin`, `ativo`, `password_hash`, `ativacao_hash`, `reset_hash`, `reset_expira_em`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(1, 'Suporte', 'seudeliverytrx@gmail.com', '115.439.429-89', '(44) 99724-9833', NULL, 1, 1, '$2y$10$DKe9ECmIuEjxILIP6wRxX.4Ph1bsWGhoMykYxkaU4Tm1ReeyW/do2', NULL, NULL, NULL, '2025-07-16 22:08:07', '2025-07-22 00:11:59', NULL);
 
 -- --------------------------------------------------------
 
@@ -452,7 +445,7 @@ CREATE TABLE `usuarios_enderecos` (
 --
 
 INSERT INTO `usuarios_enderecos` (`id`, `usuario_id`, `titulo`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `estado`, `complemento`, `referencia`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(6, 1, 'Casa', '85990000', 'Simão Rodrigues da SIlva', '134', '1', 'Terra Roxa', 'PR', '', '', '2025-07-19 01:49:25', '2025-07-19 01:49:25', NULL);
+(1, 1, 'Casa', '85990000', 'Simão Rodrigues da SIlva', '134', '1', 'Terra Roxa', 'PR', '', '', '2025-07-19 01:49:25', '2025-07-19 01:49:25', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -632,19 +625,19 @@ ALTER TABLE `medidas`
 -- AUTO_INCREMENT de tabela `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens`
 --
 ALTER TABLE `pedidos_itens`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens_extras`
