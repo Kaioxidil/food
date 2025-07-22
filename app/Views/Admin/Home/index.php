@@ -12,7 +12,7 @@
     #toast-container { z-index: 1060 !important; }
     .modal { z-index: 1050 !important; }
 
-    /* Estilos para a comanda de impressão */
+    /* Estilos para a comanda de impressão - Mantidos caso ainda sejam usados em outro lugar */
     .cupom-impressao {
         font-family: 'Courier New', Courier, monospace;
         color: #000;
@@ -65,7 +65,7 @@
         .modal-header, .modal-footer { display: none !important; }
     }
 
-     /* Alertas toastr */
+    /* Alertas toastr */
     .toast-info { background-color: #007bff !important; color: white; }
     .toast-success { background-color: #28a745 !important; color: white; }
     .toast-warning { background-color: #ffc107 !important; color: black; }
@@ -75,7 +75,7 @@
 
 <?php echo $this->section('conteudo'); ?> 
 
-<div class="main">
+<div class="row">
     <div class="content-wrapper">
         
         <div class="row">
@@ -114,40 +114,7 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12 grid-margin">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>📋 Últimos Pedidos Realizados</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Código</th>
-                                        <th>Cliente</th>
-                                        <th>Data</th>
-                                        <th>Status</th>
-                                        <th>Entregador</th>
-                                        <th>Valor Total</th>
-                                        <th>Pagamento</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-pedidos-body">
-                                    <?= $this->include('Admin/Pedidos/_tabela_pedidos'); ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-4 text-center">
-                            <a href="<?php echo site_url('admin/pedidos'); ?>" class="btn btn-primary">Ver todos os pedidos</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        
         <div class="row">
             <div class="col-md-8 grid-margin stretch-card">
                 <div class="card"><div class="card-body"><h4 class="card-title">📈 Faturamento nos Últimos 30 Dias</h4><canvas id="vendasChart"></canvas></div></div>
@@ -156,12 +123,12 @@
                 <div class="card"><div class="card-body"><h4 class="card-title">📊 Status dos Pedidos (Mês)</h4><canvas id="statusChart"></canvas></div></div>
             </div>
         </div>
-        
-    </div>
+
+        </div>
 </div>
 
 <div class="modal fade" id="modalCupom" tabindex="-1" role="dialog" aria-labelledby="modalCupomLabel" aria-hidden="true">
-    </div>
+</div>
 
 <?php echo $this->endSection(); ?>
 
@@ -173,206 +140,73 @@
 
 <script>
 $(function () {
-    // Flag para controlar a atualização automática
-    let podeAtualizar = true;
-
-    // --- FUNÇÕES AUXILIARES ---
-    function exibirAlerta(tipo, mensagem) {
-        toastr.options.timeOut = 3500;
-        toastr.options.closeButton = true;
-        toastr.options.progressBar = true;
-        toastr[tipo](mensagem);
-    }
-    
-    function handleAjaxResponse(response) {
-        if (response.sucesso) {
-            exibirAlerta('success', response.sucesso);
-            return true;
-        }
-        if (response.erro) {
-            exibirAlerta('error', response.erro);
-            return false;
-        }
-        exibirAlerta('error', 'Ocorreu um erro desconhecido.');
-        return false;
-    }
-
-    // --- INTERAÇÕES DA TABELA DE PEDIDOS ---
-
-    // Mudar Status do Pedido
-    $(document).on('change', '.select-status', function() {
-        const selectStatus = $(this);
-        const novoStatus = selectStatus.val();
-        const pedidoId = selectStatus.data('pedido-id');
-
-        $.ajax({
-            type: 'POST',
-            url: '<?= site_url('admin/pedidos/atualizarstatus'); ?>',
-            data: {
-                '<?= csrf_token(); ?>': '<?= csrf_hash(); ?>',
-                id: pedidoId,
-                status: novoStatus
-            },
-            dataType: 'json',
-            beforeSend: () => { podeAtualizar = false; },
-            success: (response) => {
-                if (handleAjaxResponse(response)) {
-                    if (novoStatus === 'em_preparacao' || novoStatus === 'saiu_para_entrega') {
-                        selectStatus.closest('tr').find('.imprimir-cupom').trigger('click');
-                    }
-                }
-            },
-            error: () => { exibirAlerta('error', 'Não foi possível se conectar ao servidor.'); },
-            complete: () => { podeAtualizar = true; }
-        });
-    });
-
-    // Associar Entregador
-    $(document).on('change', '.select-entregador', function() {
-        const entregadorId = $(this).val();
-        const pedidoId = $(this).data('pedido-id');
-        $.ajax({
-            type: 'POST',
-            url: '<?= site_url('admin/pedidos/associarEntregador'); ?>',
-            data: {
-                '<?= csrf_token(); ?>': '<?= csrf_hash(); ?>',
-                'pedido_id': pedidoId,
-                'entregador_id': entregadorId
-            },
-            dataType: 'json',
-            beforeSend: () => { podeAtualizar = false; },
-            success: (response) => { handleAjaxResponse(response); },
-            error: () => { exibirAlerta('error', 'Não foi possível se conectar ao servidor.'); },
-            complete: () => { podeAtualizar = true; }
-        });
-    });
-
-    // --- [CORRIGIDO] Imprimir Cupom ---
-    // Este bloco agora contém a lógica completa para criar o HTML do cupom.
-    $(document).on('click', '.imprimir-cupom', function() {
-        const botao = $(this);
-        const urlDados = botao.data('url-dados');
-
-        $.ajax({
-            type: 'GET',
-            url: urlDados,
-            dataType: 'json',
-            beforeSend: function() {
-                podeAtualizar = false;
-                exibirAlerta('info', 'Buscando dados do pedido...');
-                const modalHtml = `
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Cupom do Pedido</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            </div>
-                            <div class="modal-body" id="conteudoCupom"><p class="text-center">Aguarde...</p></div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                                <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir</button>
-                            </div>
-                        </div>
-                    </div>`;
-                $('#modalCupom').html(modalHtml).modal('show');
-            },
-            success: function(response) {
-                const id = botao.data('id');
-                const cliente = botao.data('cliente');
-                const valorTotal = parseFloat(botao.data('valor')).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                const dataPedido = new Date(botao.data('data')).toLocaleString('pt-BR');
-                const linhaTR = botao.closest('tr');
-                const status = linhaTR.find('.select-status').val();
-                const entregadorNome = linhaTR.find('.select-entregador option:selected').text().trim();
-                const entregadorId = linhaTR.find('.select-entregador').val();
-                const formaPagamento = linhaTR.find('.forma-pagamento').text().trim();
-
-                if ((status === 'saiu_para_entrega' || status === 'entregue') && !entregadorId) {
-                    exibirAlerta('warning', 'Selecione um entregador para imprimir a comanda.');
-                    $('#modalCupom').modal('hide');
-                    return;
-                }
-
-                let htmlItens = '';
-                if (response.itens && response.itens.length > 0) {
-                    response.itens.forEach(function(item) {
-                        htmlItens += `<li class="item-principal">${item.quantidade}x ${item.produto_nome} ${item.medida_nome ? `(${item.medida_nome})` : ''}</li>`;
-                        if (item.extras && item.extras.length > 0) {
-                            htmlItens += '<ul class="extras-lista">';
-                            item.extras.forEach(function(extra) { htmlItens += `<li>&nbsp;&nbsp;+ ${extra.nome}</li>`; });
-                            htmlItens += '</ul>';
-                        }
-                    });
-                } else {
-                    htmlItens = '<li>Nenhum item encontrado.</li>';
-                }
-
-                const ehEntrega = (status === 'saiu_para_entrega' || status === 'entregue');
-                const tituloCupom = ehEntrega ? 'COMANDA DE ENTREGA' : 'PEDIDO PARA COZINHA';
-                
-                let htmlEndereco = '';
-                if (ehEntrega && response.endereco) {
-                    htmlEndereco = `
-                        <div class="titulo-secao">Dados de Entrega</div>
-                        <div class="info-entrega">
-                            <p><strong>CLIENTE:</strong> ${cliente}</p>
-                            <p><strong>ENDEREÇO:</strong> ${response.endereco.logradouro || ''}, ${response.endereco.numero || ''}</p>
-                            <p><strong>BAIRRO:</strong> ${response.endereco.bairro || ''}</p>
-                            <p><strong>ENTREGADOR:</strong> ${entregadorNome}</p>
-                        </div>`;
-                }
-                
-                const htmlFinal = `
-                    <div class="cupom-impressao">
-                        <div class="header">
-                            <h5>Seu Delivery</h5>
-                            <p>CNPJ: XX.XXX.XXX/0001-XX</p>
-                        </div>
-                        <div class="titulo-secao">${tituloCupom}</div>
-                        <div class="info-pedido">
-                            <p><strong>CÓDIGO:</strong> ${id}</p>
-                            <p><strong>DATA:</strong> ${dataPedido}</p>
-                        </div>
-                        ${htmlEndereco}
-                        <div class="titulo-secao">Itens do Pedido</div>
-                        <ul class="itens-lista">${htmlItens}</ul>
-                        <div class="titulo-secao">Total</div>
-                        <div class="info-pedido">
-                            <p><strong>PAGAMENTO:</strong> ${formaPagamento}</p>
-                            <p class="total-final"><strong>VALOR:</strong> ${valorTotal}</p>
-                        </div>
-                        <div class="footer"><p>Obrigado pela preferência!</p></div>
-                    </div>`;
-                
-                $('#conteudoCupom').html(htmlFinal);
-            },
-            error: function(xhr) {
-                const erroMsg = xhr.responseJSON ? xhr.responseJSON.erro : 'Não foi possível buscar os dados do pedido.';
-                exibirAlerta('error', erroMsg);
-                $('#modalCupom').modal('hide');
-            },
-            complete: function() {
-                $('#modalCupom').on('hidden.bs.modal', function() {
-                    podeAtualizar = true;
-                    $(this).off('hidden.bs.modal').empty();
-                });
-            }
-        });
-    });
+    // A flag pode ser removida se não houver mais modais que interrompam a atualização.
+    // Ou mantida para futuras expansões. Por segurança, vamos mantê-la e simplificar seu uso.
+    let podeAtualizar = true; 
 
     // --- INICIALIZAÇÃO E ATUALIZAÇÃO DO DASHBOARD ---
 
     // Gráfico de Vendas
     const vendasCtx = document.getElementById('vendasChart').getContext('2d');
-    const vendasChart = new Chart(vendasCtx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Faturamento Diário', data: [], backgroundColor: 'rgba(40, 167, 69, 0.7)', borderColor: 'rgba(40, 167, 69, 1)', borderWidth: 1 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR'); } } } }, plugins: { tooltip: { callbacks: { label: function(context) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y); } } } } } });
+    const vendasChart = new Chart(vendasCtx, { 
+        type: 'bar', 
+        data: { 
+            labels: [], 
+            datasets: [{ 
+                label: 'Faturamento Diário', 
+                data: [], 
+                backgroundColor: 'rgba(40, 167, 69, 0.7)', 
+                borderColor: 'rgba(40, 167, 69, 1)', 
+                borderWidth: 1 
+            }] 
+        }, 
+        options: { 
+            responsive: true, 
+            scales: { 
+                y: { 
+                    beginAtZero: true, 
+                    ticks: { 
+                        callback: function(value) { return 'R$ ' + value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } 
+                    } 
+                } 
+            }, 
+            plugins: { 
+                tooltip: { 
+                    callbacks: { 
+                        label: function(context) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed.y); } 
+                    } 
+                } 
+            } 
+        } 
+    });
 
     // Gráfico de Status
     const statusCtx = document.getElementById('statusChart').getContext('2d');
-    const statusChart = new Chart(statusCtx, { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#17a2b8', '#007bff'], hoverOffset: 4 }] }, options: { responsive: true, legend: { position: 'top' } } });
+    const statusChart = new Chart(statusCtx, { 
+        type: 'doughnut', 
+        data: { 
+            labels: [], 
+            datasets: [{ 
+                data: [], 
+                backgroundColor: ['#28a745', '#ffc107', '#dc3545', '#6c757d', '#17a2b8', '#007bff'], 
+                hoverOffset: 4 
+            }] 
+        }, 
+        options: { 
+            responsive: true, 
+            plugins: {
+                legend: { 
+                    position: 'top' 
+                } 
+            }
+        } 
+    });
 
     // Função principal de atualização do Dashboard
     function atualizarDashboard() {
-        if (!podeAtualizar) { return; }
+        if (!podeAtualizar) { 
+            return; 
+        }
         
         $.ajax({
             url: "<?php echo site_url('admin/home/atualizarDashboard'); ?>",
@@ -384,11 +218,11 @@ $(function () {
                 $('#total-pedidos-mes').text(data.totalPedidosMes);
                 $('#total-clientes-ativos').text(data.totalClientesAtivos);
 
-                // Atualiza a tabela de pedidos
-                $('#tabela-pedidos-body').html(data.tabela_html);
+                // A linha abaixo de atualização da tabela foi removida
+                // $('#tabela-pedidos-body').html(data.tabela_html);
 
                 // Atualiza o gráfico de status
-                statusChart.data.labels = data.statusPedidos.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1).replace('_', ' '));
+                statusChart.data.labels = data.statusPedidos.map(item => item.status.charAt(0).toUpperCase() + item.status.slice(1).replace(/_/g, ' '));
                 statusChart.data.datasets[0].data = data.statusPedidos.map(item => item.total);
                 statusChart.update();
 
@@ -399,12 +233,47 @@ $(function () {
             },
             error: function(xhr, status, error) {
                 console.error("Erro ao atualizar o dashboard:", error);
+                toastr.error('Erro ao carregar dados do dashboard. Tente novamente mais tarde.', 'Erro!');
             }
         });
     }
 
-    // Inicia a atualização periódica a cada 8 segundos
-    setInterval(atualizarDashboard, 8000); 
+    // Chama a função pela primeira vez para carregar os dados iniciais
+    atualizarDashboard();
+
+    // Atualiza o dashboard a cada 5 segundos
+    setInterval(atualizarDashboard, 5000); 
+
+    // Removemos o evento de clique para os botões de ação da tabela
+    // $(document).on('click', '.btn-modal-pedido', function(e){...});
+
+    // Se a modalCupom não for mais usada, esta parte pode ser removida também.
+    // Se ela for usada por outra funcionalidade, mantenha.
+    $('#modalCupom').on('hidden.bs.modal', function () {
+        podeAtualizar = true; // Retoma a atualização quando a modal é fechada
+        // atualizarDashboard(); // Opcional: força uma atualização ao fechar a modal
+    });
+
+
+    // Configurações globais do Toastr
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "5000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+
 });
 </script>
 

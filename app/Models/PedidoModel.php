@@ -12,7 +12,7 @@ class PedidoModel extends Model
     protected $useSoftDeletes   = false;
     protected $allowedFields    = [
         'usuario_id',
-        'entregador_id', // Importante ter este campo aqui
+        'entregador_id', 
         'codigo',
         'forma_pagamento_id',
         'status',
@@ -53,18 +53,22 @@ class PedidoModel extends Model
     /**
      * Recupera os pedidos para a view principal com filtros e paginação.
      */
-     public function recuperaPedidosPaginados(array $filtros, int $perPage = 10): array
+      public function recuperaPedidosPaginados(array $filtros, int $perPage = 10): array
     {
         $builder = $this->select([
-            'pedidos.*',
+            'pedidos.id',
+            'pedidos.status',
+            'pedidos.valor_total',
+            'pedidos.entregador_id',
+            'pedidos.criado_em',
             'usuarios.nome AS cliente_nome',
-            'formas_pagamento.nome AS forma_pagamento_nome', // ADICIONADO: Seleciona o nome da forma de pagamento
+            'formas_pagamento.nome AS forma_pagamento_nome',
         ])
-        ->join('usuarios', 'usuarios.id = pedidos.usuario_id')
-        ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id'); // ADICIONADO: Faz a junção com a tabela de formas de pagamento
+        ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left') // Usar 'left' join é mais seguro
+        ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left');
 
         if (!empty($filtros['busca'])) {
-            $builder->like('pedidos.id', $filtros['busca']);
+            $builder->like('pedidos.id', $filtros['busca']); // Pesquisar por código é mais comum
         }
 
         if (!empty($filtros['status'])) {
@@ -135,5 +139,119 @@ class PedidoModel extends Model
                     ->groupBy('status')
                     ->orderBy('total', 'DESC')
                     ->findAll();
+    }
+
+    public function recuperaPedidosDoUsuario(int $usuario_id): array
+    {
+        return $this->select('pedidos.*')
+                    ->where('pedidos.usuario_id', $usuario_id)
+                    ->orderBy('pedidos.criado_em', 'DESC') // Ordena pelos mais recentes
+                    ->findAll();
+    }
+
+    public function recuperaDetalhesDoPedido(int $pedido_id, int $usuario_id)
+    {
+        return $this->select('pedidos.*, formas_pagamento.nome AS forma_pagamento')
+                    ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left')
+                    ->where('pedidos.id', $pedido_id)
+                    ->where('pedidos.usuario_id', $usuario_id)
+                    ->first();
+    }
+
+     public function recuperaDetalhesDoPedidoParaModal(int $pedido_id, int $usuario_id)
+    {
+        return $this->select([
+                        'pedidos.*',
+                        'formas_pagamento.nome AS forma_pagamento',
+                        'entregadores.nome AS entregador_nome',
+                        
+                        // Campos do endereço do usuário
+                        'usuarios_enderecos.logradouro',
+                        'usuarios_enderecos.numero',
+                        'usuarios_enderecos.cidade',
+                        'usuarios_enderecos.estado',
+                        'usuarios_enderecos.cep',
+
+                        // ✅ CORREÇÃO APLICADA AQUI:
+                        // Pegamos o `nome` da tabela `bairros` e o chamamos de `bairro`
+                        'bairros.nome AS bairro',
+                        'bairros.valor_entrega AS taxa_entrega_bairro'
+                    ])
+                    ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left')
+                    ->join('usuarios_enderecos', 'usuarios_enderecos.id = pedidos.endereco_id', 'left')
+                    ->join('entregadores', 'entregadores.id = pedidos.entregador_id', 'left')
+                    
+                    // ✅ ESTA É A LINHA MAIS IMPORTANTE DA CORREÇÃO:
+                    // Juntamos a tabela `bairros` usando o ID que está na coluna `usuarios_enderecos.bairro`.
+                    ->join('bairros', 'bairros.id = usuarios_enderecos.bairro', 'left')
+
+                    ->where('pedidos.id', $pedido_id)
+                    ->where('pedidos.usuario_id', $usuario_id)
+                    ->first();
+    }
+
+    public function recuperaPedidoParaImpressao(int $pedido_id)
+    {
+        $pedido = $this->select([
+                                'pedidos.*', // This already includes 'observacoes'
+                                'usuarios.nome AS cliente_nome',
+                                'formas_pagamento.nome AS forma_pagamento_nome',
+                                'entregadores.nome AS entregador_nome',
+                                
+                                // Campos do endereço do usuário
+                                'usuarios_enderecos.logradouro',
+                                'usuarios_enderecos.numero',
+                                'usuarios_enderecos.complemento',
+                                'usuarios_enderecos.referencia',
+                                'usuarios_enderecos.cidade',
+                                'usuarios_enderecos.estado',
+                                'usuarios_enderecos.cep',
+
+                                // Nome do bairro e taxa de entrega
+                                'bairros.nome AS bairro_nome',
+                                'bairros.valor_entrega AS taxa_entrega_bairro'
+                            ])
+                            ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left')
+                            ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left')
+                            ->join('entregadores', 'entregadores.id = pedidos.entregador_id', 'left')
+                            ->join('usuarios_enderecos', 'usuarios_enderecos.id = pedidos.endereco_id', 'left')
+                            ->join('bairros', 'bairros.id = usuarios_enderecos.bairro', 'left')
+                            ->where('pedidos.id', $pedido_id)
+                            ->first();
+
+        if ($pedido) {
+            // Anexar itens do pedido
+            $pedidoItemModel = new PedidoItemModel();
+            $pedidoItemExtraModel = new PedidoItemExtraModel();
+
+            $itens = $pedidoItemModel->recuperaItensDoPedidoParaImpressao($pedido->id);
+            foreach ($itens as $key => $item) {
+                $extras = $pedidoItemExtraModel->recuperaExtrasDoItem($item['id']);
+                if ($extras) {
+                    $itens[$key]['extras'] = $extras;
+                }
+            }
+            $pedido->itens_impressao = $itens;
+
+            // Formatar o endereço para a impressão
+            $endereco_impressao = new \stdClass();
+            $endereco_impressao->logradouro = $pedido->logradouro;
+            $endereco_impressao->numero = $pedido->numero;
+            $endereco_impressao->complemento = $pedido->complemento;
+            $endereco_impressao->referencia = $pedido->referencia;
+            $endereco_impressao->bairro = $pedido->bairro_nome;
+            $endereco_impressao->cidade = $pedido->cidade;
+            $endereco_impressao->estado = $pedido->estado;
+            $endereco_impressao->cep = $pedido->cep;
+
+            $pedido->endereco_impressao = $endereco_impressao;
+            
+            // Add company information that will be used in the receipt
+            $pedido->empresa_nome = 'Nome da Sua Empresa';
+            $pedido->empresa_endereco = 'Endereço da Empresa';
+            $pedido->empresa_telefone = '(00) 00000-0000';
+        }
+
+        return $pedido;
     }
 }

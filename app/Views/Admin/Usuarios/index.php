@@ -26,11 +26,7 @@
                         <i class="mdi mdi-plus me-2"></i> Cadastrar
                     </a>
 
-                    &nbsp;
-
-                   <a href="<?= site_url('admin/relatorios/relatoriousuario/gerarpdf') ?>" target="_blank" class="btn btn-outline-primary d-flex align-items-center px-3 py-2">
-                        <i class="fa fa-file-pdf-o me-2" aria-hidden="true"></i>  &nbsp; Visualizar Relatório
-                    </a>
+                    
 
 
                 </div>

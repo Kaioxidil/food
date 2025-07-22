@@ -5,8 +5,8 @@ namespace App\Controllers\Admin;
 use App\Controllers\BaseController;
 use App\Models\PedidoModel;
 use App\Models\EntregadorModel;
-use App\Models\UsuarioEnderecoModel;
-use App\Models\PedidoItemModel;      
+use App\Models\UsuarioEnderecoModel; 
+use App\Models\PedidoItemModel; 
 use App\Models\PedidoItemExtraModel; 
 use App\Models\BairroModel; 
 
@@ -14,10 +14,10 @@ class Pedidos extends BaseController
 {
     private $pedidoModel;
     private $entregadorModel;
-    private $usuarioEnderecoModel;
-    private $pedidoItemModel;      
+    private $usuarioEnderecoModel; 
+    private $pedidoItemModel; 
     private $pedidoItemExtraModel; 
-    private $bairroModel;
+    private $bairroModel; 
     
     private $statusDisponiveis = [
         'pendente', 'em_preparacao', 'saiu_para_entrega', 'entregue', 'cancelado'
@@ -27,10 +27,10 @@ class Pedidos extends BaseController
     {
         $this->pedidoModel = new PedidoModel();
         $this->entregadorModel = new EntregadorModel();
-        $this->usuarioEnderecoModel = new UsuarioEnderecoModel();
-        $this->pedidoItemModel = new PedidoItemModel();         
-        $this->pedidoItemExtraModel = new PedidoItemExtraModel();
-        $this->bairroModel = new BairroModel(); 
+        $this->usuarioEnderecoModel = new UsuarioEnderecoModel(); // Manter ou remover conforme necessidade
+        $this->pedidoItemModel = new PedidoItemModel(); // Manter ou remover conforme necessidade
+        $this->pedidoItemExtraModel = new PedidoItemExtraModel(); // Manter ou remover conforme necessidade
+        $this->bairroModel = new BairroModel(); // Manter ou remover conforme necessidade
     }
 
     public function index()
@@ -40,182 +40,82 @@ class Pedidos extends BaseController
             'status' => $this->request->getGet('status') ?? '',
         ];
 
-        $entregadores = $this->entregadorModel->where('ativo', true)->findAll();
+        // Busca os pedidos paginados
+        $pedidos = $this->pedidoModel->recuperaPedidosPaginados($filtros, 10);
+        
+        // Carregar dados de impressão para cada pedido
+        if (!empty($pedidos)) {
+            foreach ($pedidos as $key => $pedido) {
+                $detalhes_impressao = $this->pedidoModel->recuperaPedidoParaImpressao($pedido->id);
+                
+                if ($detalhes_impressao) {
+                    $pedidos[$key]->itens_impressao = $detalhes_impressao->itens_impressao;
+                    $pedidos[$key]->endereco_impressao = $detalhes_impressao->endereco_impressao;
+                    // Ensure observation data is included
+                    $pedidos[$key]->observacoes = $detalhes_impressao->observacoes ?? '';
+                    $pedidos[$key]->forma_pagamento_nome = $detalhes_impressao->forma_pagamento_nome ?? '';
+                    
+                    // Company info
+                    $pedidos[$key]->empresa_nome = $detalhes_impressao->empresa_nome ?? 'Nome da Empresa';
+                    $pedidos[$key]->empresa_endereco = $detalhes_impressao->empresa_endereco ?? 'Endereço da Empresa';
+                    $pedidos[$key]->empresa_telefone = $detalhes_impressao->empresa_telefone ?? '(00) 00000-0000';
+                }
+            }
+        }
 
         $data = [
             'titulo'            => 'Pedidos Realizados',
-            'pedidos'           => $this->pedidoModel->recuperaPedidosPaginados($filtros, 10),
+            'pedidos'           => $pedidos,
             'pager'             => $this->pedidoModel->pager,
             'filtros'           => $filtros,
-            'statusDisponiveis' => ['pendente', 'em_preparacao', 'saiu_para_entrega', 'entregue', 'cancelado'],
-            'entregadores'      => $entregadores,
-        ];
-
-        return view('Admin/Pedidos/index', $data);
-    }
-
-    /**
-     * CORREÇÃO COMPLETA:
-     * Busca todos os dados necessários para a impressão: Endereço, Itens e Extras.
-     */
-     public function getDadosImpressao()
-    {
-        if (!$this->request->isAJAX()) {
-            return redirect()->back();
-        }
-
-        $pedidoId = $this->request->getGet('pedido_id');
-        $pedido = $this->pedidoModel->find($pedidoId);
-
-        if (!$pedido) {
-            return $this->response->setJSON(['erro' => 'Pedido não localizado.'])->setStatusCode(404);
-        }
-
-        $endereco = null;
-        $debug_message = '';
-
-        if ($pedido->endereco_id) {
-            $endereco = $this->usuarioEnderecoModel->find($pedido->endereco_id);
-
-            if ($endereco) {
-                // --- INÍCIO DA CORREÇÃO DO BAIRRO ---
-                
-                // Verificamos se existe um bairro associado ao endereço
-                if (isset($endereco->bairro) && !empty($endereco->bairro)) {
-                    
-                    // Usamos o BairroModel para buscar o bairro pelo ID (que está em $endereco->bairro)
-                    $bairroDoEndereco = $this->bairroModel->find($endereco->bairro);
-
-                    // Se encontrarmos o bairro, substituímos o ID pelo nome
-                    if ($bairroDoEndereco) {
-                        $endereco->bairro = $bairroDoEndereco->nome;
-                    } else {
-                        // Caso não encontre (ex: bairro foi excluído), exibimos uma mensagem de erro
-                        $endereco->bairro = "Bairro ID {$endereco->bairro} não encontrado";
-                    }
-                }
-                
-                // --- FIM DA CORREÇÃO DO BAIRRO ---
-
-            } else {
-                $debug_message = "Erro: O pedido está associado ao ID de endereço '{$pedido->endereco_id}', mas este ID não foi encontrado no banco de dados de endereços.";
-            }
-
-        } else {
-            $debug_message = 'Atenção: Este pedido não possui um endereço de entrega associado a ele.';
-        }
-
-        // Busca os itens (lógica existente)
-        $itens = $this->pedidoItemModel->recuperaItensDoPedidoParaImpressao($pedidoId);
-        foreach ($itens as $key => $item) {
-            $extras = $this->pedidoItemExtraModel->recuperaExtrasDoItem($item['id']);
-            if ($extras) {
-                $itens[$key]['extras'] = $extras;
-            }
-        }
-        
-        // Retorna um JSON com todos os dados, agora com o nome do bairro
-        return $this->response->setJSON([
-            'itens'    => $itens,
-            'endereco' => $endereco,
-            'debug'    => $debug_message
-        ]);
-    }
-
-    public function atualizarStatus()
-    {
-        if (!$this->request->isAJAX()) {
-            return redirect()->back();
-        }
-
-        $id = $this->request->getPost('id');
-        $novoStatus = $this->request->getPost('status');
-
-        if (!in_array($novoStatus, $this->statusDisponiveis)) {
-            return $this->response->setJSON(['erro' => 'Status inválido.'])->setStatusCode(400);
-        }
-
-        $pedido = $this->pedidoModel->find($id);
-
-        if (!$pedido) {
-            return $this->response->setJSON(['erro' => 'Pedido não encontrado.'])->setStatusCode(404);
-        }
-
-        $pedido->status = $novoStatus;
-
-        if ($this->pedidoModel->save($pedido)) {
-            
-            // CORREÇÃO: Usamos o método da Entity para gerar o badge
-            return $this->response->setJSON([
-                'sucesso' => 'Status atualizado com sucesso!',
-                'badge'   => $pedido->getStatusBadge() // Agora chama a Entity!
-            ]);
-        }
-        
-        return $this->response->setJSON([
-            'erro' => 'Não foi possível atualizar o status. Tente novamente.',
-            'badge' => $pedido->getStatusBadge() // Consistência até no erro
-        ])->setStatusCode(500);
-    }
-
-    public function associarEntregador()
-    {
-        if (!$this->request->isAJAX()) {
-            return redirect()->back();
-        }
-
-        $pedidoId = $this->request->getPost('pedido_id');
-        $entregadorId = $this->request->getPost('entregador_id');
-
-        $pedido = $this->pedidoModel->find($pedidoId);
-
-        if (!$pedido) {
-            return $this->response->setJSON(['erro' => 'Pedido não encontrado.'])->setStatusCode(404);
-        }
-
-        $pedido->entregador_id = $entregadorId;
-
-        if ($this->pedidoModel->save($pedido)) {
-            return $this->response->setJSON(['sucesso' => 'Entregador associado com sucesso!']);
-        }
-
-        return $this->response->setJSON(['erro' => 'Não foi possível associar o entregador.'])->setStatusCode(500);
-    }
-    
-    private function getBadgeHtml(string $status): string
-    {
-        $badgeCores = [
-            'pendente'        => 'badge-warning',
-            'em_preparacao'   => 'badge-primary',
-            'saiu_para_entrega' => 'badge-info',
-            'entregue'        => 'badge-success',
-            'cancelado'       => 'badge-danger',
-        ];
-        
-        $classe = $badgeCores[$status] ?? 'badge-secondary';
-        $texto = ucfirst(str_replace('_', ' ', $status));
-
-        return '<span class="badge ' . $classe . '">' . $texto . '</span>';
-    }
-
-     public function atualizarTabela()
-    {
-        if (!$this->request->isAJAX()) {
-            return redirect()->back();
-        }
-
-        $filtros = [
-            'busca'  => $this->request->getGet('busca') ?? '',
-            'status' => $this->request->getGet('status') ?? '',
-        ];
-
-        $data = [
-            'pedidos'           => $this->pedidoModel->recuperaPedidosPaginados($filtros, 10),
             'statusDisponiveis' => $this->statusDisponiveis,
             'entregadores'      => $this->entregadorModel->where('ativo', true)->findAll(),
         ];
 
-        // Renderiza apenas a view parcial com o corpo da tabela
-        return view('Admin/Pedidos/_tabela_pedidos', $data);
+        return view('Admin/Pedidos/index', $data);
     }
+    
+    public function processarAcao()
+    {
+        if (strtolower($this->request->getMethod()) !== 'post') {
+            return redirect()->back()->with('atencao', 'Ação não permitida.');
+        }
+
+        // Recebemos os dados de um único pedido aqui
+        $pedidoId = $this->request->getPost('pedido_id');
+        $status = $this->request->getPost('status');
+        $entregadorId = $this->request->getPost('entregador_id');
+
+        if (empty($pedidoId) || empty($status)) {
+            return redirect()->back()->with('atencao', 'Dados inválidos para atualização.');
+        }
+
+        if (in_array($status, ['saiu_para_entrega', 'entregue']) && empty($entregadorId)) {
+            return redirect()->back()->with('atencao', 'Para o status "Saiu para entrega" ou "Entregue", é obrigatório selecionar um entregador.');
+        }
+        
+        // Busca o pedido original para comparar o status
+        $pedidoOriginal = $this->pedidoModel->find($pedidoId);
+        if (!$pedidoOriginal) {
+            return redirect()->back()->with('atencao', 'Pedido não encontrado para atualização.');
+        }
+
+        $dadosPedido = [
+            'id' => $pedidoId,
+            'status' => $status,
+            'entregador_id' => !empty($entregadorId) ? $entregadorId : null,
+        ];
+
+        if ($this->pedidoModel->save($dadosPedido)) {
+            // A lógica de impressão agora dispara se o status MUDOU para um dos designados
+            if ($status !== $pedidoOriginal->status && ($status === 'em_preparacao' || ($status === 'saiu_para_entrega' && !empty($entregadorId)))) {
+                session()->setFlashdata('imprimir_cupom', $pedidoId);
+            }
+            return redirect()->to('admin/pedidos' . '?' . http_build_query($this->request->getGet()))->with('sucesso', 'Pedido atualizado com sucesso!');
+        } else {
+            return redirect()->back()->with('atencao', 'Não foi possível atualizar o pedido.');
+        }
+    }
+
+    
 }

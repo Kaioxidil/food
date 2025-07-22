@@ -3,7 +3,7 @@
 <?= $this->section('titulo') ?> <?= esc($titulo) ?> <?= $this->endSection() ?>
 
 <?= $this->section('conteudo') ?>
-<div class="container mt-5 mb-5">
+<div class="container mt-5 mb-5" style="min-height: 400px;">
     <div class="row">
         <div class="col-lg-8 offset-lg-2">
             
@@ -37,7 +37,7 @@
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Taxa de Entrega</span>
-                        <span id="taxa-entrega-valor">R$ <?= number_format($taxa_entrega, 2, ',', '.') ?></span>
+                        <span id="taxa-entrega-valor">Aguardando endereço...</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between active">
                         <strong>Total do Pedido</strong>
@@ -49,42 +49,22 @@
                     
                     <h4 class="mb-3">Endereço de Entrega</h4>
 
-                    <?php if (isset($enderecos) && !empty($enderecos)): ?>
-                        <div class="form-group mb-3">
-                            <label for="endereco_id">Usar um endereço salvo</label>
-                            <select class="form-control" name="endereco_id" id="endereco_id">
-                                <option value=""></option>
-                                <?php foreach ($enderecos as $endereco): ?>
-                                    <option
-                                        value="<?= esc($endereco->id) ?>"
-                                        data-logradouro="<?= esc($endereco->logradouro) ?>"
-                                        data-numero="<?= esc($endereco->numero) ?>"
-                                        data-complemento="<?= esc($endereco->complemento) ?>"
-                                        data-bairro="<?= esc($endereco->bairro) ?>" >
-                                        <?= esc($endereco->logradouro) ?>, <?= esc($endereco->numero) ?> - <?= esc($endereco->bairro) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    <?php endif; ?>
-
                     <div class="form-group mb-3">
-                        <label for="endereco_completo">Endereço completo (Rua, Número, Complemento)</label>
-                        <input type="text" class="form-control" id="endereco_completo" value="<?= old('endereco') ?>" required>
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label for="bairro_id">Bairro</label>
-                        <select class="form-control" name="bairro_id" id="bairro_id" required>
-                            <option value="">-- Selecione o bairro --</option>
-                            <?php foreach ($bairros as $bairro): ?>
-                                <option value="<?= esc($bairro->id) ?>" data-valor="<?= esc($bairro->valor_entrega) ?>">
-                                    <?= esc($bairro->nome) ?>
+                        <label for="endereco_id">Selecione um endereço salvo</label>
+                        <select class="form-control" name="endereco_id" id="endereco_id" required>
+                            <option></option>
+                            <?php foreach ($enderecos as $endereco): ?>
+                                <option
+                                    value="<?= esc($endereco->id) ?>"
+                                    data-bairro-id="<?= esc($endereco->bairro) ?>" >
+                                    <?= esc($endereco->logradouro) ?>, <?= esc($endereco->numero) ?> - <?= esc($endereco->bairro_nome) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-
+                    
+                    <input type="hidden" name="bairro_id" id="bairro_id_hidden">
+                    
                     <hr>
                     <h4 class="mb-3">Pagamento</h4>
                     
@@ -124,52 +104,30 @@
 <script>
 $(document).ready(function() {
     
-    // ✅ ALTERAÇÃO 2: O seletor do JavaScript agora aponta para #endereco_id
+    // Inicializa os selects
     $('#endereco_id').select2({
-        placeholder: "-- Selecione um endereço salvo --",
+        placeholder: "-- Selecione um endereço --",
         allowClear: true,
         width: '100%'
     });
     
-    $('#bairro_id').select2({
-        placeholder: "-- Selecione o bairro --",
-        allowClear: true,
+    $('#forma_pagamento_id').select2({
+        placeholder: "-- Selecione uma forma de pagamento --",
         width: '100%'
     });
 
+    // Mostra/esconde campo de troco
     $('#forma_pagamento_id').on('change', function() {
         const texto = $(this).find('option:selected').text().toLowerCase();
-        if (texto.includes('dinheiro')) {
-            $('#campo-observacoes').show();
-        } else {
-            $('#campo-observacoes').hide();
-            $('#observacoes').val('');
-        }
+        $('#campo-observacoes').toggle(texto.includes('dinheiro'));
     });
-
-    // ✅ ALTERAÇÃO 3: O seletor do JavaScript agora aponta para #endereco_id
-    $('#endereco_id').on('change', function() {
-        const option = $(this).find('option:selected');
-        if (!option.val()) {
-            $('#endereco_completo').val('');
-            $('#bairro_id').val('').trigger('change');
-            return;
-        };
-
-        let endereco = option.data('logradouro') + ', ' + option.data('numero');
-        if (option.data('complemento')) {
-            endereco += ' - ' + option.data('complemento');
-        }
-        $('#endereco_completo').val(endereco);
-
-        const bairroNome = option.data('bairro').toLowerCase().trim();
-        $('#bairro_id option').each(function() {
-            if ($(this).text().toLowerCase().trim() === bairroNome) {
-                $('#bairro_id').val($(this).val()).trigger('change');
-                return false;
-            }
-        });
-    });
+    
+    // Tabela de bairros com seus valores (para uso no JS)
+    const bairrosData = {
+        <?php foreach($bairros as $bairro): ?>
+            "<?= esc($bairro->id) ?>": <?= esc($bairro->valor_entrega) ?>,
+        <?php endforeach; ?>
+    };
 
     const subtotal = parseFloat('<?= $subtotal; ?>');
 
@@ -177,15 +135,23 @@ $(document).ready(function() {
         return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    $('#bairro_id').on('change', function() {
+    // ✅ CORRIGIDO: Lógica para calcular a entrega quando um endereço é selecionado
+    $('#endereco_id').on('change', function() {
         const option = $(this).find('option:selected');
-        const taxaEntrega = parseFloat(option.data('valor')) || 0;
-        const novoTotal = subtotal + taxaEntrega;
+        const bairroId = option.data('bairro-id');
         
-        $('#taxa-entrega-valor').text(formatarMoeda(taxaEntrega));
+        let taxaEntrega = 0;
+
+        if (bairroId && bairrosData[bairroId] !== undefined) {
+            taxaEntrega = parseFloat(bairrosData[bairroId]);
+            $('#taxa-entrega-valor').text(formatarMoeda(taxaEntrega));
+        } else {
+            $('#taxa-entrega-valor').text('Aguardando endereço...');
+        }
+        
+        const novoTotal = subtotal + taxaEntrega;
         $('#total-final-valor').text(formatarMoeda(novoTotal));
     });
-
 });
 </script>
 <?= $this->endSection() ?>

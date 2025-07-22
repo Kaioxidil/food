@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 17/07/2025 às 18:23
+-- Tempo de geração: 21/07/2025 às 18:05
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -44,7 +44,7 @@ CREATE TABLE `bairros` (
 --
 
 INSERT INTO `bairros` (`id`, `nome`, `cidade`, `slug`, `valor_entrega`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 'Jardim Veneza', 'Terra Roxa - PR', 'jardim-veneza', 5.00, 1, '2025-07-17 12:44:56', '2025-07-17 12:44:56', NULL),
+(1, 'Jardim Veneza', 'Terra Roxa - PR', 'jardim-veneza', 5.00, 1, '2025-07-17 12:44:56', '2025-07-19 19:21:54', NULL),
 (2, 'Centro', 'Terra Roxa - PR', 'centro', 5.00, 1, NULL, NULL, NULL),
 (3, 'Jardim Paraíso', 'Terra Roxa - PR', 'jardim-paraiso', 5.00, 1, NULL, NULL, NULL),
 (4, 'Vila Nova', 'Terra Roxa - PR', 'vila-nova', 5.00, 1, NULL, NULL, NULL),
@@ -54,7 +54,8 @@ INSERT INTO `bairros` (`id`, `nome`, `cidade`, `slug`, `valor_entrega`, `ativo`,
 (8, 'Jardim Primavera', 'Terra Roxa - PR', 'jardim-primavera', 5.00, 1, NULL, NULL, NULL),
 (9, 'Vila Mariana', 'Terra Roxa - PR', 'vila-mariana', 5.00, 1, NULL, NULL, NULL),
 (10, 'Jardim das Flores', 'Terra Roxa - PR', 'jardim-das-flores', 5.00, 1, NULL, NULL, NULL),
-(11, 'Vila Industrial', 'Terra Roxa - PR', 'vila-industrial', 5.00, 1, NULL, NULL, NULL);
+(11, 'Vila Industrial', 'Terra Roxa - PR', 'vila-industrial', 5.00, 1, NULL, NULL, NULL),
+(12, 'Jardim Europa', 'Terra Roxa - PR', 'jardim-europa', 5.00, 1, '2025-07-17 21:53:37', '2025-07-17 21:53:37', NULL);
 
 -- --------------------------------------------------------
 
@@ -83,6 +84,34 @@ INSERT INTO `categorias` (`id`, `nome`, `slug`, `ativo`, `imagem`, `criado_em`, 
 -- --------------------------------------------------------
 
 --
+-- Estrutura para tabela `empresa`
+--
+
+CREATE TABLE `empresa` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `nome` varchar(120) NOT NULL,
+  `cnpj` varchar(18) NOT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `telefone` varchar(20) DEFAULT NULL,
+  `celular` varchar(20) DEFAULT NULL,
+  `logradouro` varchar(100) NOT NULL,
+  `numero` varchar(20) NOT NULL,
+  `complemento` varchar(100) DEFAULT NULL,
+  `bairro` varchar(60) NOT NULL,
+  `cidade` varchar(60) NOT NULL,
+  `estado` varchar(2) NOT NULL,
+  `cep` varchar(10) NOT NULL,
+  `foto_perfil` varchar(255) DEFAULT NULL,
+  `banner` varchar(255) DEFAULT NULL,
+  `maps_iframe` text DEFAULT NULL COMMENT 'Código do iframe de localização no Google Maps',
+  `ativo` tinyint(1) NOT NULL DEFAULT 1,
+  `criado_em` datetime DEFAULT NULL,
+  `atualizado_em` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estrutura para tabela `entregadores`
 --
 
@@ -102,6 +131,13 @@ CREATE TABLE `entregadores` (
   `atualizado_em` datetime DEFAULT NULL,
   `deletado_em` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Despejando dados para a tabela `entregadores`
+--
+
+INSERT INTO `entregadores` (`id`, `nome`, `cpf`, `cnh`, `email`, `telefone`, `endereco`, `imagem`, `veiculo`, `placa`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(1, 'Lipao', '338.222.230-26', '17000663361', 'kaiogremaschidasilva@gmail.com', '(44) 99724-9833', 'Rua Simão Rodrigues Da Silva', NULL, 'Fan 125', 'KLD-3514', 1, '2025-07-18 20:52:44', '2025-07-18 20:52:44', NULL);
 
 -- --------------------------------------------------------
 
@@ -171,7 +207,8 @@ CREATE TABLE `medidas` (
 --
 
 INSERT INTO `medidas` (`id`, `nome`, `descricao`, `ativo`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 'Porção P', '', 1, '2025-07-17 00:23:02', '2025-07-17 00:23:02', NULL);
+(1, 'Porção P', '', 1, '2025-07-17 00:23:02', '2025-07-17 00:23:02', NULL),
+(2, 'Porção M', '', 1, '2025-07-19 19:17:41', '2025-07-19 19:17:41', NULL);
 
 -- --------------------------------------------------------
 
@@ -207,7 +244,13 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 (11, '2025-07-11-015103', 'App\\Database\\Migrations\\AddRestauranteSlugToProdutos', 'default', 'App', 1752713954, 1),
 (12, '2025-07-16-154303', 'App\\Database\\Migrations\\CriaTabelaPedidos', 'default', 'App', 1752713954, 1),
 (13, '2025-07-16-232746', 'App\\Database\\Migrations\\CreateUsuariosEnderecos', 'default', 'App', 1752713954, 1),
-(14, '2025-07-17-000115', 'App\\Database\\Migrations\\AddObservacaoToPedidosItens', 'default', 'App', 1752713954, 1);
+(14, '2025-07-17-000115', 'App\\Database\\Migrations\\AddObservacaoToPedidosItens', 'default', 'App', 1752713954, 1),
+(15, '2025-07-18-234125', 'App\\Database\\Migrations\\AddEntregadorIdToPedidos', 'default', 'App', 1752882117, 2),
+(16, '2025-07-18-234858', 'App\\Database\\Migrations\\AddEnderecoIdToPedidos', 'default', 'App', 1752882552, 3),
+(17, '2025-07-19-015722', 'App\\Database\\Migrations\\CriaTabelaEmpresas', 'default', 'App', 1752890264, 4),
+(18, '2025-07-19-015845', 'App\\Database\\Migrations\\RenomeiaEmpresa', 'default', 'App', 1752890329, 5),
+(19, '2025-07-19-015845', 'App\\Database\\Migrations\\RenomeiaEmpresasParaEmpresa', 'default', 'App', 1752890349, 6),
+(20, '2025-07-19-020108', 'App\\Database\\Migrations\\AdicionaCampoMapsIframeEmpresa', 'default', 'App', 1752890557, 7);
 
 -- --------------------------------------------------------
 
@@ -218,6 +261,8 @@ INSERT INTO `migrations` (`id`, `version`, `class`, `group`, `namespace`, `time`
 CREATE TABLE `pedidos` (
   `id` int(5) UNSIGNED NOT NULL,
   `usuario_id` int(5) UNSIGNED DEFAULT NULL,
+  `entregador_id` int(11) DEFAULT NULL,
+  `endereco_id` int(11) DEFAULT NULL,
   `forma_pagamento_id` int(5) UNSIGNED NOT NULL,
   `valor_total` decimal(10,2) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'pendente',
@@ -231,8 +276,15 @@ CREATE TABLE `pedidos` (
 -- Despejando dados para a tabela `pedidos`
 --
 
-INSERT INTO `pedidos` (`id`, `usuario_id`, `forma_pagamento_id`, `valor_total`, `status`, `observacoes`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(2, 1, 1, 30.00, 'pendente', '', '2025-07-17 12:45:44', NULL, NULL);
+INSERT INTO `pedidos` (`id`, `usuario_id`, `entregador_id`, `endereco_id`, `forma_pagamento_id`, `valor_total`, `status`, `observacoes`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
+(2, 1, NULL, NULL, 1, 30.00, 'em_preparacao', '', '2025-07-17 12:45:44', '2025-07-18 23:35:58', NULL),
+(3, 1, 1, 1, 1, 35.00, 'entregue', '100', '2025-07-17 22:00:09', '2025-07-19 01:16:14', NULL),
+(4, 1, 1, 3, 1, 35.00, 'entregue', '100', '2025-07-18 22:24:30', '2025-07-18 23:48:06', NULL),
+(5, 1, 1, 5, 1, 30.00, 'entregue', '100', '2025-07-18 22:50:19', '2025-07-19 01:15:14', NULL),
+(7, 1, 1, 5, 1, 30.00, 'entregue', '100', '2025-07-19 01:36:48', '2025-07-19 01:40:46', NULL),
+(8, 1, 1, 6, 1, 60.00, 'saiu_para_entrega', '100', '2025-07-19 02:10:57', '2025-07-19 02:12:11', NULL),
+(9, 1, 1, 6, 1, 40.00, 'cancelado', '200', '2025-07-19 19:20:53', '2025-07-19 23:20:51', NULL),
+(10, 1, NULL, 6, 1, 35.00, 'pendente', '', '2025-07-21 13:02:36', '2025-07-21 13:02:36', NULL);
 
 -- --------------------------------------------------------
 
@@ -257,7 +309,14 @@ CREATE TABLE `pedidos_itens` (
 --
 
 INSERT INTO `pedidos_itens` (`id`, `pedido_id`, `produto_id`, `especificacao_id`, `quantidade`, `preco_unitario`, `observacao`, `preco_extras`, `subtotal`) VALUES
-(2, 2, 1, 1, 1, 25.00, NULL, 0.00, 0.00);
+(2, 2, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
+(3, 3, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
+(4, 4, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
+(5, 5, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
+(7, 7, 1, 1, 1, 25.00, NULL, 0.00, 0.00),
+(8, 8, 1, 1, 2, 25.00, NULL, 0.00, 0.00),
+(9, 9, 1, 2, 1, 30.00, NULL, 0.00, 0.00),
+(10, 10, 1, 2, 1, 30.00, NULL, 0.00, 0.00);
 
 -- --------------------------------------------------------
 
@@ -320,7 +379,8 @@ CREATE TABLE `produtos_especificacoes` (
 --
 
 INSERT INTO `produtos_especificacoes` (`id`, `produto_id`, `medida_id`, `preco`, `customizavel`) VALUES
-(1, 1, 1, 25.00, 0);
+(1, 1, 1, 25.00, 0),
+(2, 1, 2, 30.00, 1);
 
 -- --------------------------------------------------------
 
@@ -392,7 +452,7 @@ CREATE TABLE `usuarios_enderecos` (
 --
 
 INSERT INTO `usuarios_enderecos` (`id`, `usuario_id`, `titulo`, `cep`, `logradouro`, `numero`, `bairro`, `cidade`, `estado`, `complemento`, `referencia`, `criado_em`, `atualizado_em`, `deletado_em`) VALUES
-(1, 1, 'Casa', '85990000', 'Simão Rodrigues da SIlva', '134', 'JARDIM VENEZA', 'Terra Roxa', 'PR', '', '', '2025-07-17 00:27:19', '2025-07-17 00:27:19', NULL);
+(6, 1, 'Casa', '85990000', 'Simão Rodrigues da SIlva', '134', '1', 'Terra Roxa', 'PR', '', '', '2025-07-19 01:49:25', '2025-07-19 01:49:25', NULL);
 
 --
 -- Índices para tabelas despejadas
@@ -411,6 +471,13 @@ ALTER TABLE `bairros`
 ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `nome` (`nome`);
+
+--
+-- Índices de tabela `empresa`
+--
+ALTER TABLE `empresa`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `cnpj` (`cnpj`);
 
 --
 -- Índices de tabela `entregadores`
@@ -523,7 +590,7 @@ ALTER TABLE `usuarios_enderecos`
 -- AUTO_INCREMENT de tabela `bairros`
 --
 ALTER TABLE `bairros`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de tabela `categorias`
@@ -532,10 +599,16 @@ ALTER TABLE `categorias`
   MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT de tabela `empresa`
+--
+ALTER TABLE `empresa`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de tabela `entregadores`
 --
 ALTER TABLE `entregadores`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de tabela `extras`
@@ -553,25 +626,25 @@ ALTER TABLE `formas_pagamento`
 -- AUTO_INCREMENT de tabela `medidas`
 --
 ALTER TABLE `medidas`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens`
 --
 ALTER TABLE `pedidos_itens`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `pedidos_itens_extras`
@@ -589,7 +662,7 @@ ALTER TABLE `produtos`
 -- AUTO_INCREMENT de tabela `produtos_especificacoes`
 --
 ALTER TABLE `produtos_especificacoes`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `produtos_extras`
@@ -607,7 +680,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de tabela `usuarios_enderecos`
 --
 ALTER TABLE `usuarios_enderecos`
-  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Restrições para tabelas despejadas

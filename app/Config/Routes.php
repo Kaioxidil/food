@@ -54,7 +54,7 @@ $routes->post('/finalizar/enviar', 'Finalizar::enviar');
 
 $routes->group('admin', function($routes){
 
-
+    // Rotas de Formas de Pagamento (sem alterações)
     $routes->get('formas', 'Admin\FormasPagamentos::index');
     $routes->add('formas/criar', 'Admin\FormasPagamentos::criar');
     $routes->post('formas/cadastrar', 'Admin\FormasPagamentos::cadastrar');
@@ -65,32 +65,17 @@ $routes->group('admin', function($routes){
     $routes->get('formas/desfazerexclusao/(:num)', 'Admin\FormasPagamentos::desfazerExclusao/$1');
     $routes->get('formas/procurar', 'Admin\FormasPagamentos::procurar'); 
 
-
+    // Rotas de Home (sem alterações)
     $routes->get('home', 'Admin\Home::index');
     $routes->get('home/atualizarDashboard', 'Admin\Home::atualizarDashboard');
 
-     // ==========================================================
-    // --- ROTAS DE PEDIDOS (CORRIGIDAS E COMPLETAS) ---
-    // ==========================================================
+    
+    // --- ROTAS DE PEDIDOS (CORRIGIDAS E ORGANIZADAS) ---
     
     // Rota para exibir a lista de pedidos (com filtros)
     $routes->get('pedidos', 'Admin\Pedidos::index');
     
-    // Rota para exibir os detalhes de um pedido específico
-    $routes->get('pedidos/show/(:num)', 'Admin\Pedidos::show/$1');
-
-    // Rota para a requisição AJAX que atualiza o status do pedido
-    $routes->post('pedidos/atualizarstatus', 'Admin\Pedidos::atualizarStatus');
-
-    // [NOVO] Rota para a requisição AJAX que associa o entregador
-    $routes->post('pedidos/associarEntregador', 'Admin\Pedidos::associarEntregador');
     
-    // [NOVO] Rota para a requisição AJAX que busca os dados para impressão
-    $routes->get('pedidos/getdadosimpressao', 'Admin\Pedidos::getDadosImpressao');
-    // ==========================================================
-
-    // [NOVO] Rota para a requisição AJAX que atualiza a tabela de pedidos
-    $routes->get('pedidos/atualizartabela', 'Admin\Pedidos::atualizarTabela');
 
 });
 
@@ -100,12 +85,14 @@ $routes->group('admin', function($routes){
 
 
 
-
-// Rotas da Conta do Usuário (requer login)
 $routes->group('conta', ['filter' => 'login'], static function ($routes) {
     
-    // ... outras rotas da conta podem vir aqui ...
+    
+    $routes->get('pedidos', 'OrdensController::index', ['as' => 'conta.pedidos']);
+    $routes->get('pedidos/detalhes/(:num)', 'OrdensController::detalhes/$1', ['as' => 'conta.pedidos.detalhes']);
 
+    
+    // Suas rotas de endereço existentes
     $routes->get('enderecos', 'EnderecoController::index', ['as' => 'conta.enderecos']);
     $routes->get('enderecos/criar', 'EnderecoController::criar', ['as' => 'enderecos.criar']);
     $routes->post('enderecos/cadastrar', 'EnderecoController::cadastrar', ['as' => 'enderecos.cadastrar']);

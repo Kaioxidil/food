@@ -46,4 +46,37 @@ class PedidoItemModel extends Model
             ->where('pedidos_itens.pedido_id', $pedido_id)
             ->findAll();
     }
+
+
+    public function recuperaItensDoPedido(int $pedido_id): array
+    {
+        return $this->select([
+                'pedidos_itens.id', // ID do item para buscar os extras
+                'pedidos_itens.quantidade',
+                'produtos.nome AS produto_nome',
+                'medidas.nome AS medida_nome',
+            ])
+            ->join('produtos', 'produtos.id = pedidos_itens.produto_id')
+            ->join('produtos_especificacoes', 'produtos_especificacoes.id = pedidos_itens.especificacao_id')
+            ->join('medidas', 'medidas.id = produtos_especificacoes.medida_id')
+            ->where('pedidos_itens.pedido_id', $pedido_id)
+            ->findAll();
+    }
+    
+    public function recuperaItensDoPedidoParaModal(int $pedido_id): array
+        {
+            return $this->select([
+                'pedidos_itens.quantidade',
+                'pedidos_itens.preco_unitario', // Buscando o preço que foi salvo no pedido
+                'produtos.nome AS produto_nome',
+                'medidas.nome AS medida_nome',
+            ])
+            ->join('produtos', 'produtos.id = pedidos_itens.produto_id')
+            ->join('produtos_especificacoes', 'produtos_especificacoes.id = pedidos_itens.especificacao_id')
+            ->join('medidas', 'medidas.id = produtos_especificacoes.medida_id')
+            ->where('pedidos_itens.pedido_id', $pedido_id)
+            ->findAll();
+        }
+
+     
 }

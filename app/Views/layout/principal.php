@@ -23,6 +23,10 @@
     <meta name="twitter:image" content="<?php echo site_url('web/') ?>assets/logo-mini.svg" />
     <meta name="twitter:url" content="<?php echo current_url(); ?>" />
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
 
     <!-- Fav and touch icons -->
     <link rel="shortcut icon" href="<?php echo site_url('web/') ?>assets/favicon.png" type="image/x-icon">
@@ -80,6 +84,63 @@
             padding: 15px; /* Adiciona espaçamento para os botões não ficarem colados */
         }
     }
+
+    .user-dropdown {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        width: 200px;
+        text-align: center;
+    }
+
+    .user-dropdown ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 10px;
+    }
+
+    .user-dropdown ul li {
+        margin-bottom: 10px;
+    }
+
+    .user-dropdown a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #e4002b;
+        text-decoration: none;
+    }
+
+    .user-dropdown .icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .user-dropdown .details {
+        font-weight: 500;
+    }
+
+    .user-footer {
+        border-top: 1px solid #ddd;
+        padding-top: 10px;
+        font-size: 14px;
+        color: #555;
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .user-footer a {
+        color: #e4002b;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .hover-red:hover {
+            color: var(--bs-danger) !important;
+    }
+
 </style>
 
 
@@ -115,11 +176,17 @@
                     </div>
                     <div class="right-side fw-700 mainNavCol">
                         <div class="gem-points">
-                            <a href="#"> <i class="fas fa-concierge-bell"></i>
-                                <span>Minhas Ordens</span>
+                            <a href="<?php echo site_url('conta/pedidos'); ?>"> <i class="fas fa-concierge-bell"></i>
+                                
                             </a>
                         </div>
 
+                         <div class="cart-btn">
+                            <a href="<?php echo site_url('/carrinho')?>" class="text-light-green fw-700"> <i class="fas fa-shopping-bag"></i>
+                 
+                            </a>
+                           
+                        </div>
 
                         <div class="user-details p-relative">
                             <?php
@@ -134,8 +201,8 @@
                                     <ul>
                                         <li style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
 
-                                            <a href="<?= site_url('login') ?>" class="btn btn-first green-btn text-custom-white fw-500 mb-2 btn-full-width">Entrar</a>
-                                            <a href="<?= site_url('registro') ?>" class="btn btn-first green-btn text-custom-white fw-500 btn-full-width">Cadastrar</a>
+                                            <a href="<?= site_url('login') ?>" class="btn btn-first green-btn text-white fw-500 mb-2 btn-full-width hover-red">Entrar</a>
+                                            <a href="<?= site_url('registro') ?>" class="btn btn-first green-btn text-white fw-500 btn-full-width hover-red">Cadastrar</a>
 
                                         </li>
                                     </ul>
@@ -151,29 +218,19 @@
                                 <div class="user-dropdown">
                                     <ul>
                                         <li>
-                                            <a href="order-details.html">
+                                            <a href="<?php echo site_url('conta/pedidos') ?>">
                                                 <div class="icon"><i class="flaticon-rewind"></i></div>
-                                                <span class="details">Pedidos Anteriores</span>
+                                                <span class="details">Pedidos</span>
                                             </a>
                                         </li>
+                                       
                                         <li>
-                                            <a href="order-details.html">
-                                                <div class="icon"><i class="flaticon-takeaway"></i></div>
-                                                <span class="details">Próximos Pedidos</span>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#">
+                                            <a href="<?php echo site_url('conta') ?>">
                                                 <div class="icon"><i class="flaticon-user"></i></div>
                                                 <span class="details">Conta</span>
                                             </a>
                                         </li>
-                                        <li>
-                                            <a href="<?= site_url('login/logout') ?>">
-                                                <div class="icon"><i class="flaticon-board-games-with-roles"></i></div>
-                                                <span class="details">Sair</span>
-                                            </a>
-                                        </li>
+                                      
                                     </ul>
                                     <div class="user-footer">
                                         <span class="text-light-black">Não é o <?= esc($primeiro_nome) ?>?</span>
@@ -185,38 +242,7 @@
 
 
 
-                        <div class="cart-btn notification-btn">
-                            <a href="#" class="text-light-green fw-700"> <i class="fas fa-bell"></i>
-                                <span class="user-alert-notification"></span>
-                            </a>
-                            <div class="notification-dropdown">
-                                <div class="product-detail">
-                                    <a href="#">
-                                        <div class="img-box">
-                                            <img src="<?php echo site_url('web/') ?>assets/img/shop-1.png" class="rounded" alt="image">
-                                        </div>
-                                        <div class="product-about">
-                                            <p class="text-light-black">Lil Johnny’s</p>
-                                            <p class="text-light-white">Spicy Maxican Grill</p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="rating-box">
-                                    <p class="text-light-black">Como foi seu último pedido?</p> <span class="text-dark-white"><i class="fas fa-star"></i></span>
-                                    <span class="text-dark-white"><i class="fas fa-star"></i></span>
-                                    <span class="text-dark-white"><i class="fas fa-star"></i></span>
-                                    <span class="text-dark-white"><i class="fas fa-star"></i></span>
-                                    <span class="text-dark-white"><i class="fas fa-star"></i></span>
-                                    <cite class="text-light-white">Pedido há 2 dias</cite>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="cart-btn">
-                            <a href="<?php echo site_url('/carrinho')?>" class="text-light-green fw-700"> <i class="fas fa-shopping-bag"></i>
-                                <span class="user-alert-cart">3</span>
-                            </a>
-                           
-                        </div>
+                       
                     </div>
                 </div>
 

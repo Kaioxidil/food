@@ -33,4 +33,11 @@ class UsuarioEnderecoModel extends Model
     protected $updatedField  = 'atualizado_em';
     
 
+    public function recuperaEnderecosDoUsuario(int $usuario_id): array
+    {
+        return $this->select('usuarios_enderecos.*, bairros.nome AS bairro_nome')
+                    ->join('bairros', 'bairros.id = usuarios_enderecos.bairro')
+                    ->where('usuarios_enderecos.usuario_id', $usuario_id)
+                    ->findAll();
+    }
 }

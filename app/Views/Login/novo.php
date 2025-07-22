@@ -135,6 +135,21 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDnd9JwZvXty-1gHZihMoFhJtCXmHfeRQg"></script>
     <script src="<?php echo site_url('web/assets/js/sticksy.js') ?>"></script>
     <script src="<?php echo site_url('web/assets/js/munchbox.js') ?>"></script>
+    <script>
+$(document).ready(function() {
+    $('.toggle-password').click(function() {
+        const input = $(this).prev('input');
+        if (input.attr('type') === 'password') {
+            input.attr('type', 'text');
+            $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            input.attr('type', 'password');
+            $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    });
+});
+</script>
+
 </body>
 
 </html>
