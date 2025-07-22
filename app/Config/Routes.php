@@ -74,13 +74,9 @@ $routes->group('admin', function($routes){
     
     // Rota para exibir a lista de pedidos (com filtros)
     $routes->get('pedidos', 'Admin\Pedidos::index');
-    
-    
+       
 
 });
-
-
-
 
 
 
@@ -88,6 +84,15 @@ $routes->group('admin', function($routes){
 $routes->group('conta', ['filter' => 'login'], static function ($routes) {
     
     
+    $routes->get('/', 'ContaUsuario::index', ['as' => 'conta']);
+    $routes->get('editar', 'ContaUsuario::editar', ['as' => 'conta.editar']);
+    $routes->post('atualizar', 'ContaUsuario::atualizar', ['as' => 'conta.atualizar']);
+
+    // Rota para upload da foto de perfil
+    $routes->post('upload-foto', 'ContaUsuario::uploadFoto', ['as' => 'conta.upload.foto']);
+    // Rota para remover a foto de perfil
+    $routes->get('remover-foto', 'ContaUsuario::removerFoto', ['as' => 'conta.remover.foto']);
+
     $routes->get('pedidos', 'OrdensController::index', ['as' => 'conta.pedidos']);
     $routes->get('pedidos/detalhes/(:num)', 'OrdensController::detalhes/$1', ['as' => 'conta.pedidos.detalhes']);
 

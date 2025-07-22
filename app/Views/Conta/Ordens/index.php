@@ -5,6 +5,7 @@
 <?= $this->section('conteudo') ?>
 
 <style>
+    /* Estilos do menu lateral */
     .menu-lateral .list-group-item {
         border: none;
         border-left: 4px solid transparent;
@@ -29,6 +30,7 @@
         width: 20px;
     }
 
+    /* Lista de Pedidos */
     .lista-pedidos {
         display: flex;
         flex-direction: column;
@@ -60,6 +62,7 @@
         margin-right: 1rem;
         font-size: 1.5rem;
         color: #555;
+        flex-shrink: 0; /* Impede que o ícone encolha */
     }
 
     .pedido-card .card-content {
@@ -104,8 +107,10 @@
         color: #EA1D2C;
         font-size: 1.8rem;
         padding: 0 0.5rem;
+        flex-shrink: 0; /* Impede que o botão encolha */
     }
 
+    /* Modal de Detalhes */
     .modal-header {
         background-color: #f8f9fa;
         border-bottom: 1px solid #dee2e6;
@@ -124,6 +129,75 @@
         border: none;
         padding-left: 0;
         padding-right: 0;
+    }
+
+    /* --- Ajustes para Mobile --- */
+    @media (max-width: 768px) {
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        /* Menu lateral em telas menores */
+        .col-lg-3 {
+            margin-bottom: 30px; /* Espaçamento abaixo do menu lateral */
+        }
+        .menu-lateral {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Sombra mais sutil */
+        }
+        .menu-lateral .list-group-item {
+            padding: 12px 15px; /* Menor padding */
+            font-size: 0.95rem; /* Fonte ligeiramente menor */
+        }
+
+        /* Formulário de Busca e Filtro */
+        .row.g-3.mb-4 {
+            flex-direction: column; /* Colunas empilham em telas pequenas */
+            gap: 10px; /* Espaçamento entre os campos */
+        }
+        .row.g-3.mb-4 .col-md-6,
+        .row.g-3.mb-4 .col-md-4,
+        .row.g-3.mb-4 .col-md-2 {
+            width: 100%; /* Ocupam toda a largura */
+        }
+
+        /* Cards de Pedidos */
+        .pedido-card {
+            flex-direction: column; /* Ícone, conteúdo e botão empilham */
+            align-items: flex-start; /* Alinha o conteúdo à esquerda */
+            padding: 1rem; /* Padding ligeiramente menor */
+        }
+        .pedido-card .card-icon {
+            margin-right: 0; /* Remove margem lateral */
+            margin-bottom: 0.75rem; /* Adiciona margem abaixo */
+        }
+        .pedido-card .card-content {
+            width: 100%; /* Ocupa toda a largura disponível */
+            margin-bottom: 1rem; /* Espaço antes do botão de detalhes */
+        }
+        .pedido-card .card-action {
+            width: 100%; /* Faz o botão ocupar a largura total */
+            text-align: right; /* Alinha o botão à direita */
+        }
+        .pedido-card .card-action .btn-detalhes {
+            font-size: 1.5rem; /* Reduz ligeiramente o tamanho do ícone do botão */
+            padding: 0; /* Remove padding extra */
+        }
+
+        /* Modal de Detalhes */
+        .modal-dialog {
+            margin: 0.5rem; /* Margem menor para o modal */
+        }
+        .modal-body {
+            padding: 1rem; /* Menor padding no corpo do modal */
+        }
+        .modal-body .detalhe-secao {
+            padding-bottom: 0.75rem; /* Menor padding */
+            margin-bottom: 0.75rem; /* Menor margem */
+        }
+        .lista-itens-pedido .list-group-item {
+            font-size: 0.95rem; /* Reduz o tamanho da fonte dos itens */
+        }
     }
 </style>
 
@@ -152,7 +226,7 @@ function formatarStatus($status)
         <div class="col-lg-3">
             <div class="menu-lateral bg-white rounded shadow-sm">
                 <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action">
+                    <a href="<?= site_url('conta') ?>" class="list-group-item list-group-item-action">
                         <i class="bi bi-person-circle"></i> Meu Perfil
                     </a>
                     <a href="<?= site_url('conta/pedidos') ?>" class="list-group-item list-group-item-action active">
@@ -171,27 +245,27 @@ function formatarStatus($status)
         <div class="col-lg-9">
            <h2 class="mb-4"><?= esc($titulo) ?></h2>
 
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-6">
-        <input type="text" name="busca" value="<?= esc($busca ?? '') ?>" class="form-control" placeholder="Buscar por código do pedido...">
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <input type="text" name="busca" value="<?= esc($busca ?? '') ?>" class="form-control" placeholder="Buscar por código do pedido...">
 
-    </div>
-    <div class="col-md-4">
-        <select name="status" class="form-select">
-            <option value="">Todos os status</option>
-            <option value="pendente" <?= ($status ?? '') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
-            <option value="em_preparacao" <?= ($status ?? '') === 'em_preparacao' ? 'selected' : '' ?>>Em preparo</option>
-            <option value="saiu_para_entrega" <?= ($status ?? '') === 'saiu_para_entrega' ? 'selected' : '' ?>>A caminho</option>
-            <option value="entregue" <?= ($status ?? '') === 'entregue' ? 'selected' : '' ?>>Entregue</option>
-            <option value="cancelado" <?= ($status ?? '') === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
-        </select>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-danger w-100" type="submit">
-            <i class="bi bi-search"></i> Filtrar
-        </button>
-    </div>
-</form>
+                </div>
+                <div class="col-md-4">
+                    <select name="status" class="form-select">
+                        <option value="">Todos os status</option>
+                        <option value="pendente" <?= ($status ?? '') === 'pendente' ? 'selected' : '' ?>>Pendente</option>
+                        <option value="em_preparacao" <?= ($status ?? '') === 'em_preparacao' ? 'selected' : '' ?>>Em preparo</option>
+                        <option value="saiu_para_entrega" <?= ($status ?? '') === 'saiu_para_entrega' ? 'selected' : '' ?>>A caminho</option>
+                        <option value="entregue" <?= ($status ?? '') === 'entregue' ? 'selected' : '' ?>>Entregue</option>
+                        <option value="cancelado" <?= ($status ?? '') === 'cancelado' ? 'selected' : '' ?>>Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-danger w-100" type="submit">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                </div>
+            </form>
 
             <?php if (empty($pedidos)): ?>
                 <div class="alert alert-info" role="alert">
@@ -230,7 +304,6 @@ function formatarStatus($status)
     </div>
 </div>
 
-<!-- Modal de Detalhes -->
 <div class="modal fade" id="pedidoModal" tabindex="-1" aria-labelledby="pedidoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -294,7 +367,7 @@ $(document).ready(function() {
                         </div>`;
                 }
 
-                // ✅ --- LÓGICA DE ENDEREÇO ATUALIZADA ---
+                // LÓGICA DE ENDEREÇO ATUALIZADA
                 let enderecoHtml = '';
                 // Verificamos se o campo 'logradouro' foi retornado. Se sim, montamos o endereço.
                 if (response.pedido.logradouro) {

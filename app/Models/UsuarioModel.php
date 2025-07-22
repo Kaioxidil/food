@@ -11,7 +11,7 @@ class UsuarioModel extends Model
 {
     protected $table         = 'usuarios';
     protected $returnType    = 'App\Entities\Usuario';
-    protected $allowedFields = ['nome', 'email', 'cpf', 'telefone', 'reset_hash', 'password', 'reset_expira_em', 'ativo'];
+    protected $allowedFields = ['nome', 'email', 'cpf', 'telefone', 'reset_hash', 'password', 'reset_expira_em', 'ativo', 'foto_perfil'];
 
     // Datas
     protected $useTimestamps  = true;

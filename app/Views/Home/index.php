@@ -169,22 +169,7 @@
                                             ?>
                                             <img src="<?= $imagemPath ?>" class="img-fluid full-width" alt="<?= esc($produto->nome) ?>">
                                         </a>
-                                        <div class="overlay">
-                                            <div class="product-tags padding-10">
-                                                <?php if (!empty($produto->desconto)): ?>
-                                                    <div class="custom-tag">
-                                                        <span class="text-custom-white rectangle-tag bg-gradient-red">
-                                                            <?= esc($produto->desconto) ?>%
-                                                        </span>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if (!empty($produto->trending)): ?>
-                                                    <span class="type-tag bg-gradient-green text-custom-white">Trending</span>
-                                                <?php elseif (!empty($produto->novo)): ?>
-                                                    <span class="type-tag bg-gradient-orange text-custom-white">NEW</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
+                                        
                                     </div>
                                     <div class="product-caption">
                                         <div class="title-box">
@@ -199,10 +184,7 @@
                                         </p>
                                         <div class="product-details">
                                             <div class="price-time" style="display: flex; flex-direction: column; align-items: flex-start;">
-                                                <span class="text-light-black time">~30–40 min</span>
-                                                <?php if (isset($produto->preco)): ?>
-                                                    <span class="text-light-white price">R$ <?= number_format($produto->preco, 2, ',', '.') ?></span>
-                                                <?php endif; ?>
+                                                
                                                 <a href="<?= site_url("produto/$produto->slug") ?>" class="btn btn-sm mt-2" style="background-color: #dc3545; color: white; border-color: #dc3545;">Mais detalhes</a>
                                             </div>
                                         </div>

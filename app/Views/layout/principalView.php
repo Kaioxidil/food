@@ -197,7 +197,7 @@
                             ?>
                             <?php if (!$usuario): ?>
                                 <a href="#" class="text-light-white fw-500">
-                                    <img src="<?php echo site_url('web/') ?>assets/img/user-1.png" class="rounded-circle" alt="userimg">
+                                    <img src="<?php echo site_url('web/') ?>assets/seudelivery.png" class="rounded-circle" alt="userimg"  style="width: 30px; height: 30px;">
                                     <span>Olá, visitante</span>
                                 </a>
                                 <div class="user-dropdown">
@@ -215,8 +215,18 @@
                                 <?php
                                     $primeiro_nome = explode(' ', $usuario->nome)[0];
                                 ?>
-                                <a href="#" class="text-light-white fw-500">
-                                    <img src="<?php echo site_url('web/') ?>assets/img/user-1.png" class="rounded-circle" alt="userimg">
+                                   <a href="#" class="text-light-white fw-500">
+                                    <?php
+                                    // Verifica se o usuário tem uma foto de perfil
+                                    if (!empty($usuario->foto_perfil)) {
+                                        // Se tiver, exibe a foto de perfil do usuário
+                                        $caminho_foto = site_url('uploads/usuarios/' . $usuario->foto_perfil);
+                                    } else {
+                                        // Se não tiver, exibe a imagem padrão
+                                        $caminho_foto = site_url('web/assets/seudelivery.png');
+                                    }
+                                    ?>
+                                    <img src="<?= esc($caminho_foto) ?>" class="rounded-circle" alt="Foto de perfil do usuário" style="width: 30px; height: 30px;">
                                     <span>Olá, <?= esc($primeiro_nome) ?></span>
                                 </a>
                                 <div class="user-dropdown">
