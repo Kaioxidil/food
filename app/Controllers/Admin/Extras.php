@@ -61,6 +61,7 @@ class Extras extends BaseController{
     public function criar() {
 
         $extra = new extra();
+        $extra->ativo = 1; 
 
         $data = [
             'titulo'  => "Cadastrando novo extra",
@@ -71,13 +72,24 @@ class Extras extends BaseController{
     }
 
 
+    // Admin/Controllers/Extras.php
+
     public function cadastrar()
-     {
+    {
         if ($this->request->getMethod() === 'post') {
- 
+            
+            // --- ALTERAÇÃO AQUI ---
+            // 1. Pega todos os dados do formulário para uma variável
+            $postData = $this->request->getPost(); 
 
+            // 2. Remove os pontos de milhar e troca a vírgula por ponto no preço
+            $preco = str_replace(',', '.', str_replace('.', '', $postData['preco']));
 
-            $extra = new extra($this->request->getPost());  
+            // 3. Atualiza o valor do preço no array de dados
+            $postData['preco'] = $preco;
+
+            // 4. Cria a entidade com os dados já tratados
+            $extra = new Extra($postData);  
 
             if ($this->extraModel->save($extra)) {
                 return redirect()
@@ -114,8 +126,10 @@ class Extras extends BaseController{
         return view('Admin/Extras/editar', $data);
     }
 
-     public function atualizar($id = null)
-     {
+     // Admin/Controllers/Extras.php
+
+    public function atualizar($id = null)
+    {
         if ($this->request->getMethod() === 'post') {
             $extra = $this->buscaExtraOu404($id);
 
@@ -125,8 +139,18 @@ class Extras extends BaseController{
                     ->with('info', "O extra $extra->nome encontra-se excluído. Não é possível atualizar.");
             }
 
+            // --- ALTERAÇÃO AQUI ---
+            // 1. Pega todos os dados do formulário
+            $postData = $this->request->getPost();
 
-            $extra->fill($this->request->getPost());
+            // 2. Trata o campo 'preco'
+            $preco = str_replace(',', '.', str_replace('.', '', $postData['preco']));
+            
+            // 3. Atualiza o valor do preço
+            $postData['preco'] = $preco;
+
+            // 4. Preenche a entidade com os dados tratados
+            $extra->fill($postData);
 
             if (!$extra->hasChanged()) {
                 return redirect()->back()

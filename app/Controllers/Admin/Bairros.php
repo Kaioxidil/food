@@ -46,6 +46,7 @@ class Bairros extends BaseController
     public function criar()
     {
         $bairro = new Bairro();
+        $bairro->ativo = 1;
 
         $data = [
             'titulo' => "Cadastrando novo bairro",

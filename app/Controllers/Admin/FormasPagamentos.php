@@ -106,6 +106,7 @@ class FormasPagamentos extends BaseController
     public function criar()
     {
         $forma = new FormaPagamento();
+        $forma->ativo = 1; 
 
         $data = [
             'titulo' => 'Cadastrando nova forma de pagamento',

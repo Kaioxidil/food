@@ -46,6 +46,7 @@ class Medidas extends BaseController
     public function criar() {
 
             $medida = new medida();
+            $medida->ativo = 1; 
 
             $data = [
                 'titulo'  => "Cadastrando novo medida",

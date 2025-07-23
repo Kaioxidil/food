@@ -63,6 +63,7 @@ class Produtos extends BaseController
     public function criar() {
 
         $produto = new Produto(); // CORREÇÃO: Instancia a Entidade Produto
+        $produto->ativo = 1;
 
         $data = [
             'titulo'     => "Cadastrando novo produto",

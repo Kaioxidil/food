@@ -59,6 +59,7 @@ class Entregadores extends BaseController
     public function criar()
     {
         $entregador = new Entregador();
+        $entregador->ativo = 1;
 
         $data = [
             'titulo' => "Criando novo entregador",

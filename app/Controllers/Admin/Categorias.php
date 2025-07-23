@@ -47,6 +47,7 @@ class Categorias extends BaseController
     public function criar()
     {
         $categoria = new Categoria();
+        $categoria->ativo = 1; 
 
         $data = [
             'titulo' => "Cadastrando nova categoria",

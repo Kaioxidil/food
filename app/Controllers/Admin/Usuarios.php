@@ -60,6 +60,7 @@ class Usuarios extends BaseController
     public function criar()
     {
         $usuario = new Usuario();
+        $usuario->ativo = 1;
         $data    = [
             'titulo'  => "Criando novo usuário",
             'usuario' => $usuario,
