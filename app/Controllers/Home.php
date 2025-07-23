@@ -5,22 +5,25 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\CategoriaModel;
 use App\Models\ProdutoModel;
-use App\Models\UsuarioEnderecoModel; // Adicionado
+use App\Models\UsuarioEnderecoModel; 
+use App\Models\EmpresaModel;
 
 class Home extends BaseController
 {
     private $cart;
     private $categoriaModel;
     private $produtoModel;
-    private $usuarioEnderecoModel; // Adicionado
-    private $autenticacao;         // Adicionado
+    private $usuarioEnderecoModel; 
+    private $autenticacao;        
+    private $empresaModel; 
 
     public function __construct()
     {
         $this->categoriaModel = new CategoriaModel();
         $this->produtoModel = new ProdutoModel();
-        $this->usuarioEnderecoModel = new UsuarioEnderecoModel(); // Adicionado
-        $this->autenticacao = service('autenticacao');         // Adicionado
+        $this->usuarioEnderecoModel = new UsuarioEnderecoModel(); 
+        $this->autenticacao = service('autenticacao');  
+        $this->empresaModel = new EmpresaModel();       
         
         $this->cart = \Config\Services::cart();
     }
@@ -39,8 +42,8 @@ class Home extends BaseController
     {
         $categorias = $this->categoriaModel->orderBy('nome', 'ASC')->findAll();
         $produtosPorCategoria = [];
-        $produtosParaSlider = []; 
-        
+        $produtosParaSlider = [];
+
         foreach ($categorias as $categoria) {
             $produtos = $this->produtoModel
                 ->select([
@@ -63,71 +66,63 @@ class Home extends BaseController
                 $produtosParaSlider = array_merge($produtosParaSlider, $produtos);
             }
         }
-
-        // --- INÍCIO DA LÓGICA PARA BUSCAR O ENDEREÇO DO USUÁRIO ---
         
-        $enderecoExibido = 'Rua Exemplo, 123 - Centro'; // Endereço padrão
-
+        $enderecoExibido = 'Endereço não informado';
         if ($this->autenticacao->estaLogado()) {
             $usuario = $this->autenticacao->pegaUsuarioLogado();
-            
-            // Busca o primeiro endereço do usuário
             $enderecoUsuario = $this->usuarioEnderecoModel->where('usuario_id', $usuario->id)->first();
-            
             if ($enderecoUsuario) {
-                // Formata o endereço para exibição
                 $enderecoExibido = "{$enderecoUsuario->logradouro}, {$enderecoUsuario->numero} - {$enderecoUsuario->bairro}";
             }
         }
-        
-        // --- FIM DA LÓGICA ---
 
+        // --- INÍCIO DA ALTERAÇÃO ---
 
-        // Dados de restaurante (mantidos como dummy data)
-        $restaurante = (object) [
-            'nome'                    => 'Hamburgada',
-            'endereco'                => $enderecoExibido, // <-- AQUI USAMOS A VARIÁVEL COM O ENDEREÇO
-            'avaliacao'               => 4,
-            'total_avaliacoes'        => 100,
-            'tipo_culinaria'          => 'Diversa',
-            'descricao'               => 'Uma descrição incrível do restaurante.',
-            'telefone'                => '(00) 0000-0000',
-            'email'                   => 'contato@restaurante.com',
-            'facebook'                => 'https://facebook.com/hamburgada',
-            'instagram'               => 'https://instagram.com/hamburgada',
-            'pinterest'               => '',
-            'youtube'                 => '',
-            'observacoes_entrega'     => 'Entrega disponível para toda a cidade. Consulte as taxas de entrega para sua região.',
-            'percent_comida_boa'      => 90,
-            'percent_entrega_pontual' => 95,
-            'percent_pedido_preciso'  => 88,
-            'preco_medio'             => 3,
-            'horarios'                => [
-                'monday' => '7:00am - 10:59pm', 'tuesday' => '7:00am - 10:00pm', 'wednesday' => '7:00am - 10:00pm',
-                'thursday' => '7:00am - 10:00pm', 'friday' => '7:00am - 10:00pm', 'saturday' => '7:00am - 10:00pm', 'sunday' => '7:00am - 10:00pm',
-            ],
-            'galeria' => [
-                site_url('web/assets/img/gallery/img-1.jpg'), site_url('web/assets/img/gallery/img-2.jpg'),
-                site_url('web/assets/img/gallery/img-3.jpg'), site_url('web/assets/img/gallery/img-4.jpg'),
-                site_url('web/assets/img/gallery/img-5.jpg'), site_url('web/assets/img/gallery/img-6.jpg'),
-            ],
-            'avaliacoes' => [
-                (object)['usuario' => 'Sarra', 'local' => 'New York, (NY)', 'tipo_usuario' => 'Top Reviewer', 'data' => 'Sep 20, 2019', 'estrelas' => 5, 'comentario' => 'Delivery was fast and friendly. Food was not great especially the salad. Will not be ordering from again. Too many options to settle for this place.', 'itens_pedidos' => ['Coffee', 'Pizza', 'Noodles', 'Burger']],
-                (object)['usuario' => 'João', 'local' => 'São Paulo, (SP)', 'tipo_usuario' => 'Regular', 'data' => 'Oct 15, 2024', 'estrelas' => 4, 'comentario' => 'Boa comida, entrega um pouco demorada mas valeu a pena.', 'itens_pedidos' => ['Sanduíche', 'Batata Frita']],
-                (object)['usuario' => 'Maria', 'local' => 'Rio de Janeiro, (RJ)', 'tipo_usuario' => 'Foodie', 'data' => 'Nov 01, 2024', 'estrelas' => 5, 'comentario' => 'Pizza sensacional! Virei cliente.', 'itens_pedidos' => ['Pizza de Calabresa']],
-            ],
-        ];
+        // 1. Busca os dados da primeira empresa encontrada no banco de dados.
+        $empresa = $this->empresaModel->first();
+
+        // 2. ADIÇÃO: Verificação de segurança.
+        // Se nenhuma empresa for encontrada, exibimos uma página de erro 404.
+        // Isso evita erros na view se a variável $empresa for nula.
+        if (!$empresa) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Nenhuma empresa encontrada no sistema.');
+        }
+
+        // 3. Decodifica os horários de funcionamento.
+        $horariosDecodificados = json_decode($empresa->horarios_funcionamento ?? '[]', true);
+
+        // --- FIM DA ALTERAÇÃO ---
 
         $data = [
-            'titulo'               => esc($restaurante->nome),
-            'restaurante'          => $restaurante,
+            'titulo'               => esc($empresa->nome),
+            'empresa'              => $empresa, 
+            'horarios'             => $horariosDecodificados,
             'categorias'           => $categorias,
             'produtosPorCategoria' => $produtosPorCategoria,
-            'produtos'             => $produtosParaSlider,
+            'produtos'             => $produtosParaSlider, // Esta variável alimenta o slider de produtos
             'carrinho'             => $this->cart,
+            'enderecoExibido'      => $enderecoExibido
         ];
 
         return view('View/index', $data);
+    }
+
+    public function imagem($imagem = null)
+    {
+        if (empty($imagem)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        // Supondo que as imagens da empresa ficam em 'uploads/empresa'
+        $path = WRITEPATH . 'uploads/empresa/' . $imagem;
+
+        if (file_exists($path)) {
+            $this->response->setContentType(mime_content_type($path));
+            readfile($path);
+        } else {
+            // Se a imagem não for encontrada, pode retornar um 404
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Imagem não encontrada.');
+        }
     }
     
     // ... O restante dos métodos (imagemCategoria, imagemProduto) continua o mesmo ...

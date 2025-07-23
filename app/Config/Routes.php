@@ -74,7 +74,43 @@ $routes->group('admin', function($routes){
     
     // Rota para exibir a lista de pedidos (com filtros)
     $routes->get('pedidos', 'Admin\Pedidos::index');
-       
+
+    
+       // Rota para exibir a lista de extras
+    $routes->get('extras', 'Admin\Extras::index');
+    // Rota para exibir o formulário de criação de extra
+    $routes->get('extras/criar', 'Admin\Extras::criar');
+    // Rota para processar o cadastro de um novo extra
+    $routes->post('extras/cadastrar', 'Admin\Extras::cadastrar');
+    // Rota para procurar extras (usado no autocomplete)
+    $routes->get('extras/procurar', 'Admin\Extras::procurar');
+    // Rota para exibir detalhes de um extra específico
+    $routes->get('extras/show/(:num)', 'Admin\Extras::show/$1');
+    // Rota para exibir o formulário de edição de extra
+    $routes->get('extras/editar/(:num)', 'Admin\Extras::editar/$1');
+    // Rota para processar a atualização de um extra
+    $routes->post('extras/atualizar/(:num)', 'Admin\Extras::atualizar/$1');
+    // Rota para exibir a tela de confirmação de exclusão ou processar a exclusão
+    $routes->add('extras/excluir/(:num)', 'Admin\Extras::excluir/$1');
+    // Rota para desfazer a exclusão de um extra
+    $routes->get('extras/desfazerexclusao/(:num)', 'Admin\Extras::desfazerExclusao/$1');
+
+    $routes->get('empresa', 'Admin\EmpresaController::index');
+    
+    // Mostra os detalhes da empresa
+    $routes->get('empresa/detalhes/(:num)', 'Admin\EmpresaController::detalhes/$1');
+    
+    // Formulário de criação (sem ID) ou edição (com ID)
+    $routes->get('empresa/form', 'Admin\EmpresaController::form');
+    $routes->get('empresa/form/(:num)', 'Admin\EmpresaController::form/$1');
+    
+    // Salva os dados do formulário
+    $routes->post('empresa/save', 'Admin\EmpresaController::save');
+
+    // Gerenciamento de fotos
+    $routes->get('empresa/fotos/(:num)', 'Admin\EmpresaController::fotos/$1');
+    $routes->post('empresa/uploadFotos', 'Admin\EmpresaController::uploadFotos');
+    $routes->get('empresa/deleteFoto/(:num)/(:segment)', 'Admin\EmpresaController::deleteFoto/$1/$2');
 
 });
 

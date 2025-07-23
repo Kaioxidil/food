@@ -275,129 +275,27 @@
         <?php $this->renderSection('conteudo'); ?>
 
     
-    <footer class="section-padding bg-light-theme pt-0 u-line">
-        <div class="u-line instagram-slider swiper-container">
-            <ul class="hm-list hm-instagram swiper-wrapper">
-                <?php if (isset($produtos) && is_array($produtos)): ?>
-                    <?php foreach ($produtos as $produto): ?>
-                        <li class="swiper-slide">
-                            <a href="<?= site_url("produto/$produto->slug") ?>">
-                                <?php if ($produto->imagem): ?>
-                                    <img src="<?= site_url("home/imagemProduto/$produto->imagem") ?>" alt="<?= esc($produto->nome) ?>">
-                                <?php else: ?>
-                                    <img src="<?= site_url('admin/images/sem-imagem.jpg') ?>" alt="Sem imagem">
-                                <?php endif; ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+<footer class="section-padding bg-light-theme pt-0 u-line">
 
-            </ul>
-        </div>
-
-
-
-        <div class="container-fluid">
-    <div class="row">
-        <div class="col-xl col-lg-4 col-md-4 col-sm-6">
-            <div class="footer-contact">
-                <h6 class="text-light-black">Precisa de Ajuda?</h6>
-                <ul>
-                    <li class="fw-600"><span class="text-light-white">Ligue para Nós</span> <a href="tel:" class="text-light-black">+(347) 123 456 789</a>
+    <div class="u-line instagram-slider swiper-container mb-5">
+        <ul class="hm-list hm-instagram swiper-wrapper">
+            <?php if (!empty($produtos) && is_iterable($produtos)): ?>
+                <?php foreach ($produtos as $produto): ?>
+                    <li class="swiper-slide">
+                        <a href="<?= site_url("produto/$produto->slug") ?>">
+                            <?php if ($produto->imagem): ?>
+                                <img src="<?= site_url("home/imagemProduto/$produto->imagem") ?>" alt="<?= esc($produto->nome) ?>">
+                            <?php else: ?>
+                                <img src="<?= site_url('admin/images/sem-imagem.jpg') ?>" alt="Sem imagem">
+                            <?php endif; ?>
+                        </a>
                     </li>
-                    <li class="fw-600"><span class="text-light-white">Envie um Email</span> <a href="mailto:" class="text-light-black">demo@domain.com</a>
-                    </li>
-                    <li class="fw-600"><span class="text-light-white">Siga-nos no Twitter</span> <a href="#" class="text-light-black">@munchbox</a>
-                    </li>
-                    <li class="fw-600"><span class="text-light-white">Siga-nos no Instagram</span> <a href="#" class="text-light-black">@munchbox</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="col-xl col-lg-4 col-md-4 col-sm-6">
-            <div class="footer-links">
-                <h6 class="text-light-black">Conheça-nos</h6>
-                <ul>
-                    <li><a href="#" class="text-light-white fw-600">Sobre Nós</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Blog</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Redes Sociais</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Munchbox</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Benefícios</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="col-xl col-lg-4 col-md-4 col-sm-6">
-            <div class="footer-links">
-                <h6 class="text-light-black">Podemos Ajudar Você</h6>
-                <ul>
-                    <li><a href="#" class="text-light-white fw-600">Detalhes da Conta</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Histórico de Pedidos</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Encontrar Restaurante</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Login</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Rastrear Pedido</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <div class="col-xl col-lg-4 col-md-4 col-sm-6">
-            <div class="footer-links">
-                <h6 class="text-light-black">Fazendo Negócios</h6>
-                <ul>
-                    <li><a href="#" class="text-light-white fw-600">Sugira uma Ideia</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Seja um Restaurante Parceiro</a>
-                    </li>
-                    <li><a href="#" class="text-light-white fw-600">Criar uma Conta</a>
-                    </li>
-                    
-                </ul>
-            </div>
-        </div>
-        <div class="col-xl col-lg-4 col-md-4 col-sm-6">
-            <div class="footer-contact">
-                <h6 class="text-light-black">Newsletter</h6>
-                <form class="subscribe_form">
-                    <div class="input-group">
-                        <input type="text" class="form-control form-control-submit" name="email" placeholder="Digite seu email">
-                        <span class="input-group-btn">
-                            <button class="btn btn-second btn-submit" type="button"><i class="fas fa-paper-plane"></i></button>
-                        </span>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="ft-social-media">
-                <h6 class="text-center text-light-black">Siga-nos</h6>
-                <ul>
-                    <li> <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    </li>
-                    <li> <a href="#"><i class="fab fa-twitter"></i></a>
-                    </li>
-                    <li> <a href="#"><i class="fab fa-instagram"></i></a>
-                    </li>
-                    <li> <a href="#"><i class="fab fa-pinterest-p"></i></a>
-                    </li>
-                    <li> <a href="#"><i class="fab fa-youtube"></i></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </ul>
     </div>
-</div>
-
-
-    </footer>
-
+ 
+</footer>
    <div class="copyright">
     <div class="container-fluid">
         <div class="row">

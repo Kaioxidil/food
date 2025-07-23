@@ -52,7 +52,7 @@ class Medidas extends BaseController
                 'medida' => $medida,
             ];
 
-            return view('Admin/medidas/criar', $data);
+            return view('Admin/Medidas/criar', $data);
         }
 
         public function show($id = null)
@@ -64,7 +64,7 @@ class Medidas extends BaseController
             'medida' => $medida,
         ];
 
-        return view('Admin/medidas/show', $data);
+        return view('Admin/Medidas/show', $data);
     }
 
     public function cadastrar()
@@ -107,7 +107,7 @@ class Medidas extends BaseController
             'medida' => $medida,
         ];
 
-        return view('Admin/medidas/editar', $data);
+        return view('Admin/Medidas/editar', $data);
     }
 
 

@@ -55,7 +55,7 @@ class Extras extends BaseController{
             'extra' => $extra,
         ];
 
-        return view('Admin/extras/show', $data);
+        return view('Admin/Extras/show', $data);
     }
 
     public function criar() {
@@ -67,7 +67,7 @@ class Extras extends BaseController{
             'extra' => $extra,
         ];
 
-        return view('Admin/extras/criar', $data);
+        return view('Admin/Extras/criar', $data);
     }
 
 

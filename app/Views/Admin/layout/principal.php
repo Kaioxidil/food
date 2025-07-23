@@ -41,7 +41,7 @@
                <div id="relogio-data" class="me-3 text-dark" style="font-weight: 500;"></div>
                
                 <ul class="navbar-nav navbar-nav-right">
-                    <li class="nav-item dropdown me-1">
+                    <!-- <li class="nav-item dropdown me-1">
                         <a class="nav-link count-indicator dropdown-toggle d-flex justify-content-center align-items-center"
                             id="messageDropdown" href="#" data-toggle="dropdown">
                             <i class="mdi mdi-message-text mx-0"></i>
@@ -86,8 +86,8 @@
                                 </div>
                             </a>
                         </div>
-                    </li>
-                    <li class="nav-item dropdown me-4">
+                    </li> -->
+                    <!-- <li class="nav-item dropdown me-4">
                         <a class="nav-link count-indicator dropdown-toggle d-flex align-items-center justify-content-center notification-dropdown"
                             id="notificationDropdown" href="#" data-toggle="dropdown">
                             <i class="mdi mdi-bell mx-0"></i>
@@ -136,7 +136,7 @@
                                 </div>
                             </a>
                         </div>
-                    </li>
+                    </li> -->
                     <li class="nav-item nav-profile dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
                             <img src="<?=site_url('admin/')?>images/faces/seudelivery.png" alt="profile" />
@@ -155,7 +155,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right navbar-dropdown"
                             aria-labelledby="profileDropdown">
-                            <a class="dropdown-item">
+                            <a class="dropdown-item" href="<?php echo site_url("admin/empresa/detalhes/1") ?>">
                                 <i class="mdi mdi-settings text-primary"></i>
                                 Configurações
                             </a>
