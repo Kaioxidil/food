@@ -25,6 +25,8 @@ class Produtos extends BaseController
         $this->produtoEspecificacaoModel = new \App\Models\ProdutoEspecificacaoModel();
     }
 
+    
+
     public function index()
     {
         
@@ -413,67 +415,60 @@ class Produtos extends BaseController
     }
 
 
-    public function cadastrarEspecificacoes($id = null)
-    {
-        if ($this->request->getMethod() === 'post') {
+public function cadastrarespecificacoes($id = null)
+{
+    if ($this->request->getMethod() === 'post') {
+        $produto = $this->buscaProdutoOu404($id);
 
-            $produto = $this->buscaProdutoOu404($id);
+        // Valor do input 'preco' já vem como "22.90" (via JS), só converter para float
+        $precoBruto = $this->request->getPost('preco');
+        $precoFinal = (float) $precoBruto;
 
-            $especificacaoId = $this->request->getPost('especificacao_id');
+        $especificacaoId = $this->request->getPost('especificacao_id');
 
-            $dados = [
-                'produto_id'    => $produto->id,
-                'medida_id'     => $this->request->getPost('medida_id'),
-                'preco'         => str_replace(',', '', $this->request->getPost('preco')),
-                'customizavel'  => $this->request->getPost('customizavel'),
-            ];
+        $dados = [
+            'produto_id'   => $produto->id,
+            'medida_id'    => $this->request->getPost('medida_id'),
+            'preco'        => $precoFinal,
+            'customizavel' => $this->request->getPost('customizavel'),
+        ];
 
-            // Se for edição
-            if (!empty($especificacaoId)) {
-                // Atualiza os dados
-                if ($this->produtoEspecificacaoModel->update($especificacaoId, $dados)) {
-                    return redirect()->back()
-                        ->with('sucesso', 'Especificação atualizada com sucesso.')
-                        ->with('info', "A especificação do produto <strong>{$produto->nome}</strong> foi modificada.");
-                } else {
-                    return redirect()
-                        ->back()
-                        ->with('errors_model', $this->produtoEspecificacaoModel->errors())
-                        ->with('atencao', 'Verifique os erros abaixo.')
-                        ->withInput();
-                }
-            }
-
-            // Verifica se especificação já existe (para novos cadastros apenas)
-            $especificacaoExistente = $this->produtoEspecificacaoModel
-                ->where('produto_id', $produto->id)
-                ->where('medida_id', $dados['medida_id'])
-                ->first();
-
-            if ($especificacaoExistente) {
-                return redirect()->back()
-                    ->with('info', "A especificação já está cadastrada para o produto: <strong>$produto->nome</strong>.")
-                    ->withInput();
-            }
-
-            // Cadastro novo
-            if ($this->produtoEspecificacaoModel->save($dados)) {
-                return redirect()->back()
-                    ->with('sucesso', 'Especificação cadastrada com sucesso.')
-                    ->with('info', "A especificação foi adicionada ao produto: <strong>$produto->nome</strong>.");
+        // Se for edição
+        if (!empty($especificacaoId)) {
+            if ($this->produtoEspecificacaoModel->update($especificacaoId, $dados)) {
+                return redirect()->back()->with('sucesso', 'Especificação atualizada com sucesso.');
             } else {
-                return redirect()
-                    ->back()
+                return redirect()->back()
                     ->with('errors_model', $this->produtoEspecificacaoModel->errors())
                     ->with('atencao', 'Verifique os erros abaixo.')
                     ->withInput();
             }
+        }
 
+        // Se for novo
+        $especificacaoExistente = $this->produtoEspecificacaoModel
+            ->where('produto_id', $produto->id)
+            ->where('medida_id', $dados['medida_id'])
+            ->first();
+
+        if ($especificacaoExistente) {
+            return redirect()->back()
+                ->with('info', "Essa medida já está cadastrada para o produto <strong>$produto->nome</strong>.")
+                ->withInput();
+        }
+
+        if ($this->produtoEspecificacaoModel->save($dados)) {
+            return redirect()->back()->with('sucesso', 'Especificação cadastrada com sucesso.');
         } else {
-            return redirect()->back();
+            return redirect()->back()
+                ->with('errors_model', $this->produtoEspecificacaoModel->errors())
+                ->with('atencao', 'Verifique os erros abaixo.')
+                ->withInput();
         }
     }
 
+    return redirect()->back();
+}
 
         public function excluirMedida($especificacao_id = null, $produto_id = null)
         {

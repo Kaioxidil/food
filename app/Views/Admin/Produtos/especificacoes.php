@@ -73,7 +73,7 @@
                                 Preço
                                 <a href="javascript:void" data-toggle="popover" title="Preço" data-content="Esse produto pode ter um preço diferente dependendo da sua personalização"><i class="mdi mdi-help-circle-outline tooltip-icon"></i></a>
                             </label>
-                            <input type="text" class="money form-control" name="preco" id="preco" placeholder="R$ 0,00" value="<?= old('preco'); ?>">
+                            <input type="text" class="form-control" name="preco" id="preco" placeholder="Ex: 10,50 " value="<?= old('preco'); ?>">
                         </div>
 
                         <div class="form-group col-md-3">
@@ -169,38 +169,61 @@
 <?php echo $this->endSection(); ?>
 
 <?php echo $this->section('scripts'); ?>
-    <script src="<?php echo site_url('admin/vendors/mask/jquery.mask.min.js'); ?>"></script>
-    <script src="<?php echo site_url('admin/vendors/mask/app.js'); ?>"></script>
     <script src="<?php echo site_url('admin/vendors/select2/select2.min.js'); ?>"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $('.js-example-basic-single').select2({
-                placeholder: 'Selecione a medida',
-                allowClear: false,
-                language: {
-                    noResults: function () {
-                        return "Nenhuma medida encontrada&nbsp;&nbsp;<a href='<?php echo site_url('admin/medidas/criar'); ?>' class='btn btn-primary btn-sm'>Cadastrar medida</a>";
-                    }
-                },
-                escapeMarkup: function (markup) {
-                    return markup;
+    $(document).ready(function () {
+        // Select2
+        $('.js-example-basic-single').select2({
+            placeholder: 'Selecione a medida',
+            allowClear: false,
+            language: {
+                noResults: function () {
+                    return "Nenhuma medida encontrada&nbsp;&nbsp;<a href='<?php echo site_url('admin/medidas/criar'); ?>' class='btn btn-primary btn-sm'>Cadastrar medida</a>";
                 }
-            });
-
-            $('#preco').mask('000.000.000,00', { reverse: true });
-
-            $('[data-toggle="popover"]').popover({
-                trigger: 'hover'
-            });
-
-            $('.btn-editar-especificacao').on('click', function () {
-                $('#especificacao_id').val($(this).data('id'));
-                $('#medida_id').val($(this).data('medida_id')).trigger('change');
-                $('#preco').val($(this).data('preco'));
-                $('select[name="customizavel"]').val($(this).data('customizavel'));
-                $('#btn-salvar').html('<i class="mdi mdi-content-save-edit"></i> Atualizar medida');
-            });
+            },
+            escapeMarkup: function (markup) {
+                return markup;
+            }
         });
+
+        // Popover
+        $('[data-toggle="popover"]').popover({
+            trigger: 'hover'
+        });
+
+        // Máscara no campo de preço
+        $('#preco').mask('#.##0,00', {reverse: true});
+
+        // Submit: transforma valor para float antes de enviar
+        $("form").submit(function () {
+            let preco = $('#preco').val();
+
+            if (preco) {
+                preco = preco.replace(/\./g, '').replace(',', '.'); // 1.234,56 → 1234.56
+                $('#preco').val(preco);
+            }
+
+            return true;
+        });
+
+        // Botão editar: preencher os campos
+        $('.btn-editar-especificacao').on('click', function () {
+            $('#especificacao_id').val($(this).data('id'));
+            $('#medida_id').val($(this).data('medida_id')).trigger('change');
+
+            // Preço com ponto decimal → máscara aplica ao exibir
+            var preco = $(this).data('preco');
+            $('#preco').val(preco);
+
+            $('select[name="customizavel"]').val($(this).data('customizavel'));
+            $('#btn-salvar').html('<i class="mdi mdi-content-save-edit"></i> Atualizar medida');
+
+            $('html, body').animate({
+                scrollTop: $("form").offset().top
+            }, 500);
+        });
+    });
     </script>
 <?php echo $this->endSection(); ?>
