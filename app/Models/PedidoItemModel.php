@@ -38,6 +38,7 @@ class PedidoItemModel extends Model
         return $this->select([
                 'pedidos_itens.id', // ID do item para buscar os extras
                 'pedidos_itens.quantidade',
+                   'pedidos_itens.observacao', 
                 'produtos.nome AS produto_nome',
                 'medidas.nome AS medida_nome',
             ])

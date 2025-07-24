@@ -18,6 +18,7 @@ class Pedidos extends BaseController
     private $pedidoItemModel; 
     private $pedidoItemExtraModel; 
     private $bairroModel; 
+    private $empresaModel;
     
     private $statusDisponiveis = [
         'pendente', 'em_preparacao', 'saiu_para_entrega', 'entregue', 'cancelado'
@@ -27,10 +28,11 @@ class Pedidos extends BaseController
     {
         $this->pedidoModel = new PedidoModel();
         $this->entregadorModel = new EntregadorModel();
-        $this->usuarioEnderecoModel = new UsuarioEnderecoModel(); // Manter ou remover conforme necessidade
-        $this->pedidoItemModel = new PedidoItemModel(); // Manter ou remover conforme necessidade
-        $this->pedidoItemExtraModel = new PedidoItemExtraModel(); // Manter ou remover conforme necessidade
-        $this->bairroModel = new BairroModel(); // Manter ou remover conforme necessidade
+        $this->usuarioEnderecoModel = new UsuarioEnderecoModel();
+        $this->pedidoItemModel = new PedidoItemModel();
+        $this->pedidoItemExtraModel = new PedidoItemExtraModel();
+        $this->bairroModel = new BairroModel();
+        $this->empresaModel = new \App\Models\EmpresaModel();
     }
 
     public function index()
@@ -43,6 +45,9 @@ class Pedidos extends BaseController
         // Busca os pedidos paginados
         $pedidos = $this->pedidoModel->recuperaPedidosPaginados($filtros, 10);
         
+        // --- ALTERAÇÃO AQUI: Buscar os dados da empresa APENAS UMA VEZ ---
+        $dadosEmpresa = $this->empresaModel->getDadosEmpresa();
+        
         // Carregar dados de impressão para cada pedido
         if (!empty($pedidos)) {
             foreach ($pedidos as $key => $pedido) {
@@ -51,14 +56,21 @@ class Pedidos extends BaseController
                 if ($detalhes_impressao) {
                     $pedidos[$key]->itens_impressao = $detalhes_impressao->itens_impressao;
                     $pedidos[$key]->endereco_impressao = $detalhes_impressao->endereco_impressao;
-                    // Ensure observation data is included
                     $pedidos[$key]->observacoes = $detalhes_impressao->observacoes ?? '';
                     $pedidos[$key]->forma_pagamento_nome = $detalhes_impressao->forma_pagamento_nome ?? '';
                     
-                    // Company info
-                    $pedidos[$key]->empresa_nome = $detalhes_impressao->empresa_nome ?? 'Nome da Empresa';
-                    $pedidos[$key]->empresa_endereco = $detalhes_impressao->empresa_endereco ?? 'Endereço da Empresa';
-                    $pedidos[$key]->empresa_telefone = $detalhes_impressao->empresa_telefone ?? '(00) 00000-0000';
+                    // --- ALTERAÇÃO AQUI: Usar os dados da empresa buscados acima ---
+                    if ($dadosEmpresa) {
+                        $pedidos[$key]->empresa_nome = $dadosEmpresa->nome;
+                        $pedidos[$key]->empresa_endereco = $dadosEmpresa->logradouro . ', ' . $dadosEmpresa->numero . ' - ' . $dadosEmpresa->bairro;
+                        $pedidos[$key]->empresa_telefone = $dadosEmpresa->telefone;
+                    } else {
+                        // Mantém os valores genéricos caso não encontre a empresa
+                        $pedidos[$key]->empresa_nome = 'Nome da Sua Loja';
+                        $pedidos[$key]->empresa_endereco = 'Endereço da Empresa';
+                        $pedidos[$key]->empresa_telefone = '(00) 00000-0000';
+                    }
+                    // --- FIM DA ALTERAÇÃO ---
                 }
             }
         }
@@ -81,7 +93,6 @@ class Pedidos extends BaseController
             return redirect()->back()->with('atencao', 'Ação não permitida.');
         }
 
-        // Recebemos os dados de um único pedido aqui
         $pedidoId = $this->request->getPost('pedido_id');
         $status = $this->request->getPost('status');
         $entregadorId = $this->request->getPost('entregador_id');
@@ -94,7 +105,6 @@ class Pedidos extends BaseController
             return redirect()->back()->with('atencao', 'Para o status "Saiu para entrega" ou "Entregue", é obrigatório selecionar um entregador.');
         }
         
-        // Busca o pedido original para comparar o status
         $pedidoOriginal = $this->pedidoModel->find($pedidoId);
         if (!$pedidoOriginal) {
             return redirect()->back()->with('atencao', 'Pedido não encontrado para atualização.');
@@ -107,7 +117,6 @@ class Pedidos extends BaseController
         ];
 
         if ($this->pedidoModel->save($dadosPedido)) {
-            // A lógica de impressão agora dispara se o status MUDOU para um dos designados
             if ($status !== $pedidoOriginal->status && ($status === 'em_preparacao' || ($status === 'saiu_para_entrega' && !empty($entregadorId)))) {
                 session()->setFlashdata('imprimir_cupom', $pedidoId);
             }
@@ -116,6 +125,4 @@ class Pedidos extends BaseController
             return redirect()->back()->with('atencao', 'Não foi possível atualizar o pedido.');
         }
     }
-
-    
 }

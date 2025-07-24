@@ -22,10 +22,11 @@ class PedidoItemExtraModel extends Model
 
     protected $useTimestamps = false;
 
-    public function recuperaExtrasDoItem(int $pedido_item_id): array
+     public function recuperaExtrasDoItem(int $pedido_item_id): array
     {
         return $this->select([
             'pedidos_itens_extras.quantidade',
+            'pedidos_itens_extras.preco', // Adicionando o campo de preço
             'extras.nome'
         ])
         ->join('extras', 'extras.id = pedidos_itens_extras.extra_id')

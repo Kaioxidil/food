@@ -32,18 +32,18 @@
         padding: 4px 0; 
         margin: 8px 0; 
         text-align: center; 
-        font-size: 14px; 
+        font-size: 16px; 
     }
     .cupom-impressao .info-pedido p,
-    .cupom-impressao .info-entrega p { margin: 2px 0; font-size: 16px; }
+    .cupom-impressao .info-entrega p { margin: 2px 0; font-size: 18px; }
     .cupom-impressao .info-pedido strong,
     .cupom-impressao .info-entrega strong { min-width: 302px; display: inline-block; }
-    .cupom-impressao .itens-lista { list-style: none; padding: 0; font-size: 12px; }
+    .cupom-impressao .itens-lista { list-style: none; padding: 0; font-size: 16px; }
     .cupom-impressao .itens-lista li { display: flex; justify-content: space-between; margin-bottom: 3px; }
     .cupom-impressao .itens-lista .item-principal { font-weight: bold; }
-    .cupom-impressao .itens-lista .extras-lista { list-style: none; padding-left: 15px; font-size: 11px; margin: 0; }
+    .cupom-impressao .itens-lista .extras-lista { list-style: none; padding-left: 15px; font-size: 16px; margin: 0; }
     .cupom-impressao .total-final { font-size: 16px; font-weight: bold; text-align: right; margin-top: 8px; }
-    .cupom-impressao .footer { text-align: center; margin-top: 10px; font-size: 11px; }
+    .cupom-impressao .footer { text-align: center; margin-top: 10px; font-size: 16px; }
 
    /* Estilos para a impressão ajustados para 80mm x 210mm */
     @media print {
@@ -57,7 +57,7 @@
             height: 210mm;
             margin: 0;
             padding: 0;
-            font-size: 14px; /* fonte maior para melhor leitura */
+            font-size: 16px; /* fonte maior para melhor leitura */
         }
 
         body * {
@@ -112,7 +112,7 @@
             width: 80mm;
             margin: 0 auto;
             padding: 0;
-            font-size: 14px;
+            font-size: 16px;
             height: 100%;
         }
     }
@@ -248,14 +248,10 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-
-
 $(function () {
-
     <?php if (session()->has('imprimir_cupom')): ?>
         $(document).ready(function() {
             const pedidoIdParaImprimir = '<?= session()->getFlashdata('imprimir_cupom'); ?>';
-            // Simula o clique no botão de impressão para o pedido correto
             $(`button.imprimir-cupom[data-id="${pedidoIdParaImprimir}"]`).trigger('click');
         });
     <?php endif; ?>
@@ -274,17 +270,31 @@ $(function () {
     $(document).on('click', '.imprimir-cupom', function() {
         const botao = $(this);
         try {
-            // Pedido já vem com itens_impressao, endereco_impressao, forma_pagamento_nome e observacoes
             const pedido = JSON.parse(botao.attr('data-pedido-json'));
             let htmlItens = '';
 
             if (pedido.itens_impressao && pedido.itens_impressao.length > 0) {
                 pedido.itens_impressao.forEach(function(item) {
-                    htmlItens += `<li class="item-principal"><span>${item.quantidade}x ${item.produto_nome} ${item.medida_nome ? `(${item.medida_nome})` : ''}</span></li>`;
+                    const medida = item.medida_nome ? ` (${item.medida_nome})` : '';
+                    const observacao = item.observacao ? `<br/>&nbsp;&nbsp;&nbsp;** ${item.observacao}` : '';
+                    
+                    htmlItens += `<li class="item-principal">
+                                      <span>${item.quantidade}x ${item.produto_nome}${medida}</span>
+                                  </li>`;
+                                  
+                    // Adiciona a observação do item, se existir
+                    if (item.observacao) {
+                        htmlItens += `<li>&nbsp;&nbsp;* ${item.observacao}</li>`;
+                    }
+                                  
                     if (item.extras && item.extras.length > 0) {
                         htmlItens += '<ul class="extras-lista">';
                         item.extras.forEach(function(extra) {
-                            htmlItens += `<li>&nbsp;&nbsp;+ ${extra.nome}</li>`;
+                            // Formata o preço do extra
+                            const precoExtra = parseFloat(extra.preco).toFixed(2).replace('.', ',');
+                            const quantidadeExtra = extra.quantidade;
+                            
+                            htmlItens += `<li>&nbsp;&nbsp;+ ${quantidadeExtra}x ${extra.nome} (R$ ${precoExtra})</li>`;
                         });
                         htmlItens += '</ul>';
                     }
@@ -295,14 +305,12 @@ $(function () {
 
             const dataPedido = new Date(pedido.criado_em.date).toLocaleString('pt-BR');
 
-            // Forma de pagamento e observações - sempre juntas
             let htmlPagamentoObservacao = `
                 <div class="info-pagamento-observacao">
                     <p><strong>Forma de Pagamento:</strong> ${pedido.forma_pagamento_nome}</p>
                     ${pedido.observacoes ? `<p class="observacao-pedido"><strong>Obs/Troco:</strong> ${pedido.observacoes}</p>` : ''}
                 </div>`;
 
-            // Só exibe Dados de Entrega se status for 'saiu_para_entrega' ou 'entregue'
             let htmlEnderecoEntrega = '';
             if ((pedido.status === 'saiu_para_entrega' || pedido.status === 'entregue') && pedido.endereco_impressao) {
                 htmlEnderecoEntrega = `
@@ -349,6 +357,10 @@ $(function () {
         }
     });
 
+    // Funções auxiliares (manter se já existirem)
+    function exibirAlerta(tipo, mensagem) {
+        toastr[tipo](mensagem);
+    }
 });
 </script>
 <?= $this->endSection(); ?>

@@ -69,4 +69,10 @@ class EmpresaModel extends Model
     {
         return $this->countAllResults() > 0;
     }
+
+    public function getDadosEmpresa()
+    {
+
+        return $this->first();
+    }
 }
