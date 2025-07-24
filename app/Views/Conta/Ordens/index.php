@@ -348,11 +348,28 @@ $(document).ready(function() {
                 let itensHtml = '';
                 response.itens.forEach(function(item) {
                     const totalItem = parseFloat(item['preco_unitario'] * item['quantidade']).toFixed(2).replace('.', ',');
+                    
+                    // Lógica para extras
+                    let extrasHtml = '';
+                    if (item.extras && item.extras.length > 0) {
+                        item.extras.forEach(function(extra) {
+                            extrasHtml += `<p class="text-muted mb-0 small">+ ${extra.quantidade}x ${extra.nome}</p>`;
+                        });
+                    }
+
+                    // Lógica para observações
+                    let observacaoHtml = '';
+                    if (item.observacoes) {
+                        observacaoHtml = `<p class="text-info mb-0 small">Obs: ${item.observacoes}</p>`;
+                    }
+
                     itensHtml += `
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 ${item['quantidade']}x <strong>${item['produto_nome']}</strong>
                                 <small class="text-muted d-block">${item['medida_nome'] || ''}</small>
+                                ${extrasHtml}
+                                ${observacaoHtml}
                             </div>
                             <span class="fw-bold">R$ ${totalItem}</span>
                         </li>`;
@@ -369,25 +386,26 @@ $(document).ready(function() {
 
                 // LÓGICA DE ENDEREÇO ATUALIZADA
                 let enderecoHtml = '';
-                // Verificamos se o campo 'logradouro' foi retornado. Se sim, montamos o endereço.
                 if (response.pedido.logradouro) {
                     const rua = response.pedido.logradouro;
-                    const numero = response.pedido.numero || 'S/N'; // Caso não haja número
+                    const numero = response.pedido.numero || 'S/N';
                     const bairro = response.pedido.bairro;
                     const cidade = response.pedido.cidade;
                     const estado = response.pedido.estado;
+                    const referencia = response.pedido.referencia ? `<p class="text-muted mb-0 small">Referência: ${response.pedido.referencia}</p>` : '';
+                    const complemento = response.pedido.complemento ? `<p class="text-muted mb-0 small">Complemento: ${response.pedido.complemento}</p>` : '';
 
-                    // Usamos a tag <address> para melhor semântica e formatamos com quebras de linha.
                     enderecoHtml = `
                         <h6 class="text-muted"><i class="bi bi-geo-alt-fill me-2"></i>ENDEREÇO DE ENTREGA</h6>
                         <address class="mb-0" style="font-style: normal; line-height: 1.6;">
                             <strong>${rua}, ${numero}</strong><br>
                             ${bairro}<br>
-                            ${cidade} - ${estado}
+                            ${cidade} - ${estado}<br>
+                            ${referencia}
+                            ${complemento}
                         </address>
                     `;
                 } else {
-                    // Se 'logradouro' for nulo, significa que o endereço não foi encontrado no banco.
                     enderecoHtml = `
                         <h6 class="text-muted"><i class="bi bi-geo-alt-fill me-2"></i>ENDEREÇO DE ENTREGA</h6>
                         <strong>Endereço não informado no pedido.</strong>

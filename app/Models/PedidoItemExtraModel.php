@@ -24,9 +24,12 @@ class PedidoItemExtraModel extends Model
 
     public function recuperaExtrasDoItem(int $pedido_item_id): array
     {
-        return $this->select('extras.nome')
-            ->join('extras', 'extras.id = pedidos_itens_extras.extra_id')
-            ->where('pedidos_itens_extras.pedido_item_id', $pedido_item_id)
-            ->findAll();
+        return $this->select([
+            'pedidos_itens_extras.quantidade',
+            'extras.nome'
+        ])
+        ->join('extras', 'extras.id = pedidos_itens_extras.extra_id')
+        ->where('pedidos_itens_extras.pedido_item_id', $pedido_item_id)
+        ->findAll();
     }
 }

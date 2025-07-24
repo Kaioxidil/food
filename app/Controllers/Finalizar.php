@@ -156,7 +156,7 @@ class Finalizar extends BaseController
                 'preco_unitario'   => $precoUnitario,
                 'preco_extras'     => $precoExtras,
                 'subtotal'         => $subtotal,
-                'observacao'       => $item['customizacao'] ?? null,
+                'observacao'       => $item['customizacao'] ?? null, // ✅ CORREÇÃO AQUI
             ];
             
             $pedidoItemModel->insert($itemData);
@@ -178,7 +178,7 @@ class Finalizar extends BaseController
     /**
      * Monta a mensagem formatada para enviar via WhatsApp
      */
-    private function _montaMensagemWhatsApp(int $pedidoId, array $carrinhoData, array $pedidoData, object $endereco, object $bairro): string
+     private function _montaMensagemWhatsApp(int $pedidoId, array $carrinhoData, array $pedidoData, object $endereco, object $bairro): string
     {
         $mensagem = "📦 *Novo Pedido Recebido!* 📦\n";
         $mensagem .= "🆔 *ID do Pedido:* {$pedidoId}\n";
@@ -187,9 +187,19 @@ class Finalizar extends BaseController
         $mensagem .= "🛒 *Itens do Pedido:*\n\n";
         foreach ($carrinhoData['itens'] as $item) {
             $mensagem .= "➡️ *{$item['produto']->nome}* (x{$item['quantidade']})\n";
+            
             if ($item['especificacao']) {
                 $mensagem .= "   📏 *Tamanho:* {$item['especificacao']->medida_nome}\n";
             }
+            
+            // ✅ CORREÇÃO: Adicionando os extras ao loop
+            if (!empty($item['extras'])) {
+                $mensagem .= "   ➕ *Extras:*\n";
+                foreach ($item['extras'] as $extra) {
+                    $mensagem .= "    - {$extra['extra']->nome} (x{$extra['quantidade']})\n";
+                }
+            }
+
             if (!empty($item['customizacao'])) {
                 $mensagem .= "   📝 _Observação do item: {$item['customizacao']}_\n";
             }
