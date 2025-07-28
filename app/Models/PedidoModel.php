@@ -13,7 +13,7 @@ class PedidoModel extends Model
     protected $allowedFields    = [
         'usuario_id',
         'entregador_id', 
-        'codigo',
+        'id',
         'forma_pagamento_id',
         'status',
         'observacoes',
@@ -256,5 +256,126 @@ class PedidoModel extends Model
     }
 
 
-    
+
+        // ------------------ MÉTODO PARA PEDIDOS DO ENTREGADOR ------------------ //
+
+     /**
+      * Recupera os pedidos atribuídos a um entregador específico.
+      *
+      * @param int $entregador_id O ID do entregador logado.
+      * @return array
+      */
+   public function recuperaPedidosParaEntregador(int $entregador_id): array
+     {
+        return $this->select([
+                                'pedidos.id',
+                                'pedidos.status',
+                                'usuarios.nome AS cliente_nome',
+                                'usuarios_enderecos.logradouro',
+                                'usuarios_enderecos.numero',
+                                'bairros.nome AS bairro_nome',
+                            ])
+                            ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left')
+                            ->join('usuarios_enderecos', 'usuarios_enderecos.id = pedidos.endereco_id', 'left')
+                            ->join('bairros', 'bairros.id = usuarios_enderecos.bairro', 'left')
+                            ->where('pedidos.entregador_id', $entregador_id)
+                            ->whereIn('pedidos.status', ['preparando', 'em_transito', 'saiu_para_entrega'])
+                            ->orderBy('pedidos.criado_em', 'ASC')
+                            ->findAll();
+     }
+
+    /**
+     * PONTO-CHAVE: Recupera todos os detalhes para o modal.
+     * Esta função também precisa de todos os JOINs.
+     */
+    public function recuperaDetalhesDoPedidoParaEntregador(int $pedido_id, int $entregador_id)
+    {
+        $pedido = $this->select([
+                                'pedidos.*',
+                                'formas_pagamento.nome AS forma_pagamento_nome',
+                                'usuarios.nome AS cliente_nome',
+                                'usuarios.telefone AS telefone_cliente',
+                                'usuarios_enderecos.logradouro', 'usuarios_enderecos.numero', 'usuarios_enderecos.complemento',
+                                'usuarios_enderecos.referencia', 'usuarios_enderecos.cidade', 'usuarios_enderecos.estado',
+                                'usuarios_enderecos.cep',
+                                'bairros.nome AS bairro_nome',
+                            ])
+                            ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left')
+                            ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left')
+                            ->join('usuarios_enderecos', 'usuarios_enderecos.id = pedidos.endereco_id', 'left')
+                            ->join('bairros', 'bairros.id = usuarios_enderecos.bairro', 'left')
+                            ->where('pedidos.id', $pedido_id)
+                            ->where('pedidos.entregador_id', $entregador_id)
+                            ->first();
+
+        if ($pedido) {
+            $pedidoItemModel = new \App\Models\PedidoItemModel();
+            
+            $pedido->produtos = $pedidoItemModel->select('quantidade, produto_nome, preco_unitario')
+                                               ->where('pedido_id', $pedido->id)
+                                               ->findAll();
+        }
+
+        return $pedido;
+    }
+
+    /**
+     * Novo método para atualizar o status do pedido.
+     * @param int $pedidoId O ID do pedido a ser atualizado.
+     * @param string $novoStatus O novo status ('saiu_para_entrega' ou 'entregue').
+     * @param int $entregadorId O ID do entregador logado para validação de segurança.
+     * @return bool Retorna true em caso de sucesso, false caso contrário.
+     */
+    public function atualizarStatusDoPedido(int $pedidoId, string $novoStatus, int $entregadorId): bool
+    {
+        // Validação adicional: garante que o entregador só pode mudar pedidos que são dele
+        // e para status permitidos.
+        $allowedStatuses = ['saiu_para_entrega', 'entregue'];
+        
+        if (!in_array($novoStatus, $allowedStatuses)) {
+            log_message('warning', "Tentativa de atualizar pedido para status inválido: {$novoStatus}");
+            return false; // Status não permitido
+        }
+
+        // Busca o pedido para verificar se ele pertence ao entregador
+        $pedido = $this->where('id', $pedidoId)
+                         ->where('entregador_id', $entregadorId)
+                         ->first();
+
+        if (!$pedido) {
+            log_message('warning', "Tentativa de atualização de status para pedido não encontrado ou não atribuído ao entregador. Pedido ID: {$pedidoId}, Entregador ID: {$entregadorId}");
+            return false; // Pedido não encontrado ou não atribuído
+        }
+
+        // Verifica a transição de status permitida
+        $currentStatus = $pedido->status;
+        $canUpdate = false;
+
+        switch ($currentStatus) {
+            case 'preparando':
+            case 'em_transito': // Adicionei 'em_transito' como um status de onde pode sair para entrega
+                if ($novoStatus === 'saiu_para_entrega') {
+                    $canUpdate = true;
+                }
+                break;
+            case 'saiu_para_entrega':
+                if ($novoStatus === 'entregue') {
+                    $canUpdate = true;
+                }
+                break;
+            // Para outros status como 'entregue', 'cancelado', 'finalizado', etc., não permitimos a mudança por aqui.
+            default:
+                $canUpdate = false;
+                break;
+        }
+
+        if (!$canUpdate) {
+            log_message('warning', "Transição de status inválida para Pedido ID {$pedidoId}: de {$currentStatus} para {$novoStatus}");
+            return false;
+        }
+
+        // Atualiza o status
+        return $this->update($pedidoId, ['status' => $novoStatus]);
+    }
+
 }

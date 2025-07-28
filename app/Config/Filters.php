@@ -27,6 +27,7 @@ class Filters extends BaseConfig
         'admin' => \App\Filters\AdminFilter::class,
         'visitante' => \App\Filters\VisitanteFilter::class,
         'throttle' => \App\Filters\ThrottlerFilter::class,
+         'authEntregador' => \App\Filters\AuthEntregadorFilter::class,
     ];
 
     /**
@@ -83,5 +84,7 @@ class Filters extends BaseConfig
                 'admin/*',
             ]
         ],
+
+         'authEntregador' => ['before' => ['entregador/painel']],
     ];
 }

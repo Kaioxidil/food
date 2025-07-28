@@ -49,6 +49,20 @@ $routes->group('carrinho', function ($routes) {
 
 });
 
+// Rota para a área do entregador
+$routes->group('entregador', static function ($routes) {
+    // Redireciona a raiz /entregador para o método login
+    $routes->get('/', 'Entregador::login');
+    $routes->get('login', 'Entregador::login');
+    $routes->post('autenticar', 'Entregador::autenticar');
+    $routes->get('painel', 'Entregador::painel', ['filter' => 'authEntregador']); // Rota protegida
+    $routes->get('logout', 'Entregador::logout');
+    
+    // Rota corrigida para a mudança de status do pedido
+    // Agora está dentro do grupo 'entregador'
+    $routes->post('mudarStatusPedido', 'Entregador::mudarStatusPedido', ['filter' => 'authEntregador']);
+});
+
 $routes->get('/finalizar', 'Finalizar::index'); 
 $routes->post('/finalizar/enviar', 'Finalizar::enviar');
 
