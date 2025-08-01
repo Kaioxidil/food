@@ -217,6 +217,30 @@ class PedidoModel extends Model
         return $pedido;
     }
 
+    // ------------------ MÉTODOS PARA PEDIDOS  ------------------ //
+
+    public function recuperaPedidosPaginados(array $filtros, int $quantidade_paginacao)
+    {
+        $this->select('pedidos.*, usuarios.nome AS cliente_nome, entregadores.nome AS entregador_nome');
+        $this->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left');
+        $this->join('entregadores', 'entregadores.id = pedidos.entregador_id', 'left');
+
+        if (!empty($filtros['busca'])) {
+            $this->groupStart();
+            $this->like('usuarios.nome', $filtros['busca']);
+            $this->orLike('entregadores.nome', $filtros['busca']);
+            $this->orWhere('pedidos.codigo', $filtros['busca']);
+            $this->groupEnd();
+        }
+
+        if (!empty($filtros['status'])) {
+            $this->where('pedidos.status', $filtros['status']);
+        }
+
+        $this->orderBy('pedidos.criado_em', 'DESC');
+
+        return $this->paginate($quantidade_paginacao);
+    }
 
 
         // ------------------ MÉTODO PARA PEDIDOS DO ENTREGADOR ------------------ //

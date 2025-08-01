@@ -622,3 +622,27 @@ CRITICAL - 2025-08-01 12:38:09 --> Call to undefined method App\Models\PedidoMod
 #4 C:\xampp\htdocs\Food\public\index.php(37): CodeIgniter\CodeIgniter->run()
 #5 C:\xampp\htdocs\Food\system\Commands\Server\rewrite.php(43): require_once('C:\\xampp\\htdocs...')
 #6 {main}
+CRITICAL - 2025-08-01 12:44:22 --> Call to undefined method App\Models\PedidoModel::recuperaPedidosPaginados
+#0 C:\xampp\htdocs\Food\app\Controllers\Admin\Pedidos.php(46): CodeIgniter\Model->__call('recuperaPedidos...', Array)
+#1 C:\xampp\htdocs\Food\system\CodeIgniter.php(832): App\Controllers\Admin\Pedidos->index()
+#2 C:\xampp\htdocs\Food\system\CodeIgniter.php(419): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Pedidos))
+#3 C:\xampp\htdocs\Food\system\CodeIgniter.php(326): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\Food\public\index.php(37): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\Food\system\Commands\Server\rewrite.php(43): require_once('C:\\xampp\\htdocs...')
+#6 {main}
+CRITICAL - 2025-08-01 12:44:26 --> Call to undefined method App\Models\PedidoModel::recuperaPedidosPaginados
+#0 C:\xampp\htdocs\Food\app\Controllers\Admin\Pedidos.php(46): CodeIgniter\Model->__call('recuperaPedidos...', Array)
+#1 C:\xampp\htdocs\Food\system\CodeIgniter.php(832): App\Controllers\Admin\Pedidos->index()
+#2 C:\xampp\htdocs\Food\system\CodeIgniter.php(419): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Pedidos))
+#3 C:\xampp\htdocs\Food\system\CodeIgniter.php(326): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\Food\public\index.php(37): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\Food\system\Commands\Server\rewrite.php(43): require_once('C:\\xampp\\htdocs...')
+#6 {main}
+CRITICAL - 2025-08-01 12:45:28 --> Call to undefined method App\Models\PedidoModel::recuperaPedidosPaginados
+#0 C:\xampp\htdocs\Food\app\Controllers\Admin\Pedidos.php(46): CodeIgniter\Model->__call('recuperaPedidos...', Array)
+#1 C:\xampp\htdocs\Food\system\CodeIgniter.php(832): App\Controllers\Admin\Pedidos->index()
+#2 C:\xampp\htdocs\Food\system\CodeIgniter.php(419): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Admin\Pedidos))
+#3 C:\xampp\htdocs\Food\system\CodeIgniter.php(326): CodeIgniter\CodeIgniter->handleRequest(NULL, Object(Config\Cache), false)
+#4 C:\xampp\htdocs\Food\public\index.php(37): CodeIgniter\CodeIgniter->run()
+#5 C:\xampp\htdocs\Food\system\Commands\Server\rewrite.php(43): require_once('C:\\xampp\\htdocs...')
+#6 {main}
