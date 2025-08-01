@@ -104,4 +104,7 @@ class EntregadorModel extends Model
             ->update();
     }
 
+
+    
+
 }

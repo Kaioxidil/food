@@ -126,4 +126,24 @@ class ProdutoModel extends Model
         ->orderBy('produtos.nome', 'ASC') // Adicionado para ordenar produtos dentro da categoria
         ->findAll();
     }
+
+
+    public function BuscaProdutosPdv()
+    {
+        return $this->select([
+            'produtos.id',
+            'produtos.nome',
+            'produtos.slug',
+            'produtos.descricao',
+            'produtos.ingredientes',
+            'produtos.ativo',
+            'produtos.imagem',
+            'MIN(produtos_especificacoes.preco) AS preco_minimo',
+        ])
+        ->join('produtos_especificacoes', 'produtos_especificacoes.produto_id = produtos.id')
+        ->where('produtos.ativo', true)
+        ->groupBy('produtos.id, produtos.nome, produtos.slug, produtos.descricao, produtos.ingredientes', 'produtos.ativo', 'produtos.imagem')
+        ->orderBy('produtos.nome', 'ASC')
+        ->findAll();
+    }
 }

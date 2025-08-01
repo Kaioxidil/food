@@ -5,12 +5,9 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\EntregadorModel;
 use App\Models\PedidoModel;
-use CodeIgniter\API\ResponseTrait;
 
 class Entregador extends BaseController
 {
-    use ResponseTrait;
-
     private $entregadorModel;
     private $pedidoModel;
 
@@ -61,14 +58,17 @@ class Entregador extends BaseController
 
         $agent = $this->request->getUserAgent();
         if (!$agent->isMobile()) {
-            // Se você quer que seja acessível apenas via mobile, mantenha isso.
-            // Caso contrário, remova ou ajuste a mensagem de erro.
             return view('errors/html/error_403_mobile_only');
         }
 
+        $entregadorId = session()->get('entregador_id');
+        $pedidos = $this->pedidoModel->recuperaPedidosParaEntregador($entregadorId);
+        
         $data = [
-            'titulo'            => 'Painel do Entregador',
-            'entregador_nome'   => session()->get('entregador_nome'),
+            'titulo'          => 'SeuDelivery | Painel do Entregador',
+            'entregador_nome' => session()->get('entregador_nome'),
+            'pedidos'         => $pedidos,
+            'googleApiKey'    => getenv('google.maps.apiKey'),
         ];
 
         return view('entregador/painel', $data);
@@ -80,86 +80,32 @@ class Entregador extends BaseController
         return redirect()->to(site_url('entregador/login'))->with('info', 'Você foi desconectado(a).');
     }
 
-
-    // ------------------ MÉTODOS AJAX PARA O PAINEL ------------------ //
-
-    public function atualizarPedidos()
-    {
-        // Garante que só requisições AJAX de entregadores logados cheguem aqui
-        if (!$this->request->isAJAX() || !session()->get('entregador_logado')) {
-            return $this->failUnauthorized('Acesso negado.');
-        }
-
-        // Obtém o ID do entregador da sessão
-        $entregadorId = session()->get('entregador_id');
-        
-        // Recupera os pedidos que pertencem a este entregador
-        $data['pedidos'] = $this->pedidoModel->recuperaPedidosParaEntregador($entregadorId);
-
-        // Retorna a view parcial com os pedidos para ser inserida no DOM
-        return view('entregador/_tabela_pedidos', $data);
-    }
-    
-    public function detalhesPedidoModal(int $pedido_id)
-    {
-        if (!$this->request->isAJAX() || !session()->get('entregador_logado')) {
-            return $this->failUnauthorized('Acesso negado.');
-        }
-
-        $pedido = $this->pedidoModel->recuperaDetalhesDoPedidoParaEntregador($pedido_id, session()->get('entregador_id'));
-        
-        if (!$pedido) {
-            return $this->failNotFound('Pedido não encontrado ou não atribuído a você.');
-        }
-
-        // Retorna a view parcial do modal de detalhes
-        return view('entregador/detalhes_pedido_modal', ['pedido' => $pedido]);
+    // Método para processar a atualização do status do pedido
+    // Método para processar a atualização do status do pedido
+public function atualizarStatusPedido()
+{
+    // Verifica se a requisição é um POST
+    if ($this->request->getMethod() != 'post') {
+        return redirect()->back()->with('error', 'Ação inválida.');
     }
 
-    public function mapaRotaModal(int $pedido_id)
-    {
-        if (!$this->request->isAJAX() || !session()->get('entregador_logado')) {
-            return $this->failUnauthorized('Acesso negado.');
-        }
+    // Pega os dados do formulário
+    $pedidoId = $this->request->getPost('pedido_id');
+    $novoStatus = $this->request->getPost('novo_status');
+    $entregadorId = session()->get('entregador_id');
 
-        $pedido = $this->pedidoModel->recuperaDetalhesDoPedidoParaEntregador($pedido_id, session()->get('entregador_id'));
-
-        if (!$pedido || !$pedido->logradouro) {
-            return $this->failNotFound('Endereço do pedido não encontrado.');
-        }
-
-        // Retorna a view parcial do modal do mapa
-        return view('entregador/mapa_rota_modal', ['pedido' => $pedido]);
+    // Validação básica
+    if (empty($pedidoId) || empty($novoStatus) || empty($entregadorId)) {
+        return redirect()->back()->with('error', 'Dados insuficientes para a atualização.');
     }
 
-    /**
-     * Método para alterar o status do pedido via POST (AJAX).
-     * Recebe o ID do pedido e o novo status.
-     */
-    public function mudarStatusPedido()
-    {
-        // Garante que a requisição é um POST e que o entregador está logado
-        if (!$this->request->isAJAX() || $this->request->getMethod() !== 'post' || !session()->get('entregador_logado')) {
-            return $this->failUnauthorized('Ação não permitida.');
-        }
+    // Chama o método do Model para tentar a atualização
+    $sucesso = $this->pedidoModel->AppEntregadoratualizarStatusDoPedido((int)$pedidoId, $novoStatus, (int)$entregadorId);
 
-        $pedidoId = $this->request->getPost('pedido_id');
-        $novoStatus = $this->request->getPost('novo_status');
-        $entregadorId = session()->get('entregador_id');
-
-        if (empty($pedidoId) || empty($novoStatus)) {
-            return $this->failValidationErrors('Dados do pedido ou novo status inválidos.');
-        }
-
-        // Tenta atualizar o status do pedido usando o Model
-        $success = $this->pedidoModel->atualizarStatusDoPedido($pedidoId, $novoStatus, $entregadorId);
-
-        if ($success) {
-            // Se foi sucesso, retorna uma resposta JSON para o JS
-            return $this->respondUpdated(['message' => 'Status do pedido atualizado com sucesso!', 'status_atualizado' => $novoStatus]);
-        } else {
-            // Se falhou (pedido não encontrado, status inválido, transição inválida)
-            return $this->failForbidden('Não foi possível atualizar o status do pedido. Verifique o status atual ou se o pedido lhe pertence.');
-        }
+    if ($sucesso) {
+        return redirect()->to(site_url('entregador/painel'))->with('sucesso', 'Status do pedido atualizado com sucesso!');
+    } else {
+        return redirect()->back()->with('error', 'Não foi possível atualizar o status do pedido. A transição de status pode ser inválida ou o pedido não pertence a você.');
     }
+}
 }

@@ -8,6 +8,7 @@ use App\Models\FormaPagamentoModel;
 use App\Models\PedidoItemExtraModel;
 use App\Models\PedidoItemModel;
 use App\Models\PedidoModel;
+use App\Models\EmpresaModel; 
 use App\Models\UsuarioEnderecoModel;
 use App\Services\CarrinhoService;
 
@@ -19,6 +20,7 @@ class Finalizar extends BaseController
     private $session;
     private $autenticacao;
     private $carrinhoService;
+    private $empresaModel;
 
     public function __construct()
     {
@@ -28,6 +30,7 @@ class Finalizar extends BaseController
         $this->session = session();
         $this->autenticacao = service('autenticacao');
         $this->carrinhoService = new CarrinhoService();
+        $this->empresaModel = new EmpresaModel();
     }
 
     public function index()
@@ -122,7 +125,18 @@ class Finalizar extends BaseController
         }
 
         $this->session->remove('carrinho');
-        $numeroWhatsapp = '5544997249833'; // Coloque seu número aqui
+        
+        // ✅ CORREÇÃO: Buscando o número da empresa do banco de dados
+        $empresa = $this->empresaModel->getDadosEmpresa();
+        
+        // Verificamos se a empresa e o número existem para evitar erros
+        if (!empty($empresa) && !empty($empresa->celular)) {
+            $numeroWhatsapp = '55' . preg_replace('/[^0-9]/', '', $empresa->celular);
+        } else {
+            // Se não encontrar o número, usa um valor padrão ou lança um erro
+            return redirect()->back()->with('erro', 'Número de WhatsApp da empresa não encontrado.')->withInput();
+        }
+        
         $urlWhatsapp = "https://wa.me/{$numeroWhatsapp}?text=" . rawurlencode($mensagem);
 
         return redirect()->to($urlWhatsapp);

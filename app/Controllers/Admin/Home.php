@@ -21,45 +21,54 @@ class Home extends BaseController
     }
 
     /**
-     * Exibe a página principal do Dashboard com os dados iniciais.
-     * Continuamos buscando os dados aqui para a primeira carga da página.
+     * Exibe a página principal do Dashboard com dados iniciais.
      */
     public function index()
     {
+        // Os valores iniciais serão preenchidos pelo AJAX,
+        // então podemos passar valores padrão para evitar erros na view.
         $data = [
-            'titulo'              => 'Painel Principal',
-            'valorPedidosMes'     => $this->pedidoModel->valorPedidosDoMes(),
-            'totalPedidosMes'     => $this->pedidoModel->totalPedidosDoMes(),
+            'titulo' => 'Painel Principal',
+            'valorPedidosMes' => 0.0,
+            'totalPedidosMes' => 0,
             'totalClientesAtivos' => $this->usuarioModel->recuperaTotalClientesAtivos(),
-            // Não precisamos mais de 'pedidos', 'entregadores', 'statusDisponiveis'
-            // diretamente para a tabela na carga inicial, pois ela não existirá.
         ];
 
         return view('Admin/Home/index', $data);
     }
-    
-    /**
-     * Responde às requisições AJAX do dashboard com os dados atualizados para gráficos e cards.
-     */
-    public function atualizarDashboard()
-    {
-        if (!$this->request->isAJAX()) {
-            return redirect()->back();
-        }
-        
-        // Removemos a lógica de preparação de dados para a tabela.
-        // A _tabela_pedidos.php não será mais incluída ou renderizada.
 
-        // Monta o array de dados para a resposta JSON
-        $data = [
-            'valorPedidosMes'     => number_format($this->pedidoModel->valorPedidosDoMes(), 2, ',', '.'),
-            'totalPedidosMes'     => $this->pedidoModel->totalPedidosDoMes(),
-            'totalClientesAtivos' => $this->usuarioModel->recuperaTotalClientesAtivos(),
-            'statusPedidos'       => $this->pedidoModel->getStatusPedidosParaGrafico(),
-            'faturamento'         => $this->pedidoModel->getFaturamentoParaGrafico(),
-            'token'               => csrf_hash(), // Importante para segurança
-        ];
-        
-        return $this->response->setJSON($data);
+    /**
+     * Responde às requisições AJAX com os dados atualizados do dashboard.
+     * Recebe uma data via GET para filtrar os dados.
+     * @return \CodeIgniter\HTTP\ResponseInterface
+     */
+    // ...
+public function atualizarDashboard()
+{
+    if (!$this->request->isAJAX()) {
+        return redirect()->back();
     }
+
+    // Obtém as datas da requisição GET, ou usa o mês atual como padrão se não for fornecida.
+    $dataInicio = $this->request->getGet('data_inicio');
+    $dataFim = $this->request->getGet('data_fim');
+    
+    if (!$dataInicio || !$dataFim) {
+        $dataInicio = date('Y-m-01');
+        $dataFim = date('Y-m-d');
+    }
+
+    $data = [
+        // Chamaremos métodos novos ou ajustados no Model para passar o período
+        'valorPedidosPeriodo' => number_format($this->pedidoModel->valorPedidosDoPeriodo($dataInicio, $dataFim), 2, ',', '.'),
+        'totalPedidosPeriodo' => $this->pedidoModel->totalPedidosDoPeriodo($dataInicio, $dataFim),
+        'totalClientesAtivos' => $this->usuarioModel->recuperaTotalClientesAtivos(),
+        'statusPedidos' => $this->pedidoModel->getStatusPedidosParaGrafico($dataInicio, $dataFim),
+        'faturamento' => $this->pedidoModel->getFaturamentoParaGrafico($dataInicio, $dataFim),
+        'token' => csrf_hash(),
+    ];
+
+    return $this->response->setJSON($data);
+}
+
 }

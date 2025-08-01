@@ -62,12 +62,7 @@
                                     <?php endif;?>
                                 </td>
 
-                                <td>
-                                    
-                                    <a href="<?= site_url('admin/produtos/cupom') ?>" target="_blank" class="btn btn-sm btn-dark" onclick="event.stopPropagation();">
-                                        <i class="mdi mdi-printer"></i> 
-                                    </a>
-                                </td>
+                       
                             </tr>
                             <?php endforeach;?>
                         </tbody>

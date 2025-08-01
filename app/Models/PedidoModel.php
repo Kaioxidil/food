@@ -28,117 +28,79 @@ class PedidoModel extends Model
     protected $updatedField  = 'atualizado_em';
 
 
-    // ------------------ MÉTODO CORRIGIDO PARA A DASHBOARD ------------------ //
+   // ------------------ MÉTODOS PARA O DASHBOARD (CORRIGIDOS) ------------------ //
 
     /**
-     * [CORRIGIDO] Recupera os últimos 10 pedidos com todos os dados necessários para o dashboard.
+     * Retorna o valor total de pedidos faturados no mês da data base.
+     * @param string|null $dataBase A data base para o filtro no formato 'Y-m-d'.
+     * @return float
      */
-    public function recuperaUltimosPedidosParaDashboard(): array
+     public function valorPedidosDoPeriodo(string $dataInicio, string $dataFim): float
     {
-        // A mágica acontece aqui! Adicionamos o JOIN com 'formas_pagamento'
-        // e selecionamos o seu nome, exatamente como na outra função.
-        return $this->select([
-                        'pedidos.*', // Usamos pedidos.* para garantir todos os campos do pedido
-                        'usuarios.nome AS cliente_nome',
-                        'formas_pagamento.nome AS forma_pagamento_nome', // CAMPO ADICIONADO
-                    ])
-                    ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left')
-                    ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left') // JOIN ADICIONADO
-                    ->orderBy('pedidos.id', 'DESC')
-                    ->limit(10)
-                    ->findAll();
-    }
-
-
-    /**
-     * Recupera os pedidos para a view principal com filtros e paginação.
-     */
-      public function recuperaPedidosPaginados(array $filtros, int $perPage = 10): array
-    {
-        $builder = $this->select([
-            'pedidos.id',
-            'pedidos.status',
-            'pedidos.valor_total',
-            'pedidos.entregador_id',
-            'pedidos.criado_em',
-            'usuarios.nome AS cliente_nome',
-            'formas_pagamento.nome AS forma_pagamento_nome',
-        ])
-        ->join('usuarios', 'usuarios.id = pedidos.usuario_id', 'left') // Usar 'left' join é mais seguro
-        ->join('formas_pagamento', 'formas_pagamento.id = pedidos.forma_pagamento_id', 'left');
-
-        if (!empty($filtros['busca'])) {
-            $builder->like('pedidos.id', $filtros['busca']); // Pesquisar por código é mais comum
-        }
-
-        if (!empty($filtros['status'])) {
-            $builder->where('pedidos.status', $filtros['status']);
-        }
-
-        return $builder->orderBy('pedidos.id', 'DESC')->paginate($perPage);
-    }
-    
-    /**
-     * Retorna o valor total de pedidos faturados no mês corrente.
-     * Considera o status 'entregue' como faturado.
-     */
-    public function valorPedidosDoMes(): float
-    {
-        $primeiroDiaDoMes = date('Y-m-01 00:00:00');
-        $ultimoDiaDoMes   = date('Y-m-t 23:59:59');
+        $primeiroDia = $dataInicio . ' 00:00:00';
+        $ultimoDia = $dataFim . ' 23:59:59';
 
         $resultado = $this->selectSum('valor_total')
-                          ->where('status', 'entregue') // Mudei para 'entregue', que é um status mais comum para faturamento. Ajuste se o seu for 'finalizado'.
-                          ->where('criado_em >=', $primeiroDiaDoMes)
-                          ->where('criado_em <=', $ultimoDiaDoMes)
+                          ->where('status', 'entregue')
+                          ->where('criado_em >=', $primeiroDia)
+                          ->where('criado_em <=', $ultimoDia)
                           ->get()->getRow();
 
         return (float) ($resultado->valor_total ?? 0.0);
     }
 
     /**
-     * Retorna o faturamento por dia dos últimos 30 dias para o gráfico.
-     * Considera o status 'entregue' como faturado.
+     * Retorna o total de pedidos em um período de tempo.
+     * @param string $dataInicio Data de início no formato 'Y-m-d'.
+     * @param string $dataFim Data de fim no formato 'Y-m-d'.
+     * @return int
      */
-    public function getFaturamentoParaGrafico(): array
+    public function totalPedidosDoPeriodo(string $dataInicio, string $dataFim): int
     {
-        $trintaDiasAtras = date('Y-m-d 00:00:00', strtotime('-30 days'));
+        $primeiroDia = $dataInicio . ' 00:00:00';
+        $ultimoDia = $dataFim . ' 23:59:59';
 
+        return $this->where('criado_em >=', $primeiroDia)
+                    ->where('criado_em <=', $ultimoDia)
+                    ->countAllResults();
+    }
+
+    /**
+     * Retorna o status dos pedidos para o gráfico de pizza em um período de tempo.
+     * @param string $dataInicio Data de início no formato 'Y-m-d'.
+     * @param string $dataFim Data de fim no formato 'Y-m-d'.
+     * @return array
+     */
+    public function getStatusPedidosParaGrafico(string $dataInicio, string $dataFim): array
+    {
+        $primeiroDia = $dataInicio . ' 00:00:00';
+        $ultimoDia = $dataFim . ' 23:59:59';
+
+        return $this->select('status, COUNT(id) as total')
+                    ->where('criado_em >=', $primeiroDia)
+                    ->where('criado_em <=', $ultimoDia)
+                    ->groupBy('status')
+                    ->orderBy('total', 'DESC')
+                    ->findAll();
+    }
+    
+    /**
+     * Retorna o faturamento por dia em um período de tempo para o gráfico.
+     * @param string $dataInicio Data de início no formato 'Y-m-d'.
+     * @param string $dataFim Data de fim no formato 'Y-m-d'.
+     * @return array
+     */
+    public function getFaturamentoParaGrafico(string $dataInicio, string $dataFim): array
+    {
         $db = \Config\Database::connect();
         return $db->query(
             "SELECT DATE_FORMAT(criado_em, '%d/%m') as dia, SUM(valor_total) as faturamento 
              FROM pedidos 
-             WHERE status = 'entregue' AND criado_em >= ? 
+             WHERE status = 'entregue' AND criado_em BETWEEN ? AND ?
              GROUP BY dia 
              ORDER BY criado_em ASC",
-            [$trintaDiasAtras]
-        )->getResultObject();
-    }
-
-
-    // --- Demais métodos do seu model (totalPedidosDoMes, getStatusPedidosParaGrafico) podem continuar como estão ---
-    
-    public function totalPedidosDoMes(): int
-    {
-        $primeiroDiaDoMes = date('Y-m-01 00:00:00');
-        $ultimoDiaDoMes   = date('Y-m-t 23:59:59');
-
-        return $this->where('criado_em >=', $primeiroDiaDoMes)
-                    ->where('criado_em <=', $ultimoDiaDoMes)
-                    ->countAllResults();
-    }
-    
-    public function getStatusPedidosParaGrafico(): array
-    {
-        $primeiroDiaDoMes = date('Y-m-01 00:00:00');
-        $ultimoDiaDoMes   = date('Y-m-t 23:59:59');
-
-        return $this->select('status, COUNT(id) as total')
-                    ->where('criado_em >=', $primeiroDiaDoMes)
-                    ->where('criado_em <=', $ultimoDiaDoMes)
-                    ->groupBy('status')
-                    ->orderBy('total', 'DESC')
-                    ->findAll();
+            [$dataInicio . ' 00:00:00', $dataFim . ' 23:59:59']
+        )->getResultArray();
     }
 
     public function recuperaPedidosDoUsuario(int $usuario_id): array
@@ -326,7 +288,7 @@ class PedidoModel extends Model
      * @param int $entregadorId O ID do entregador logado para validação de segurança.
      * @return bool Retorna true em caso de sucesso, false caso contrário.
      */
-    public function atualizarStatusDoPedido(int $pedidoId, string $novoStatus, int $entregadorId): bool
+    public function AppEntregadoratualizarStatusDoPedido(int $pedidoId, string $novoStatus, int $entregadorId): bool
     {
         // Validação adicional: garante que o entregador só pode mudar pedidos que são dele
         // e para status permitidos.
@@ -378,4 +340,6 @@ class PedidoModel extends Model
         return $this->update($pedidoId, ['status' => $novoStatus]);
     }
 
+
+    
 }

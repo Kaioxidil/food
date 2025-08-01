@@ -189,6 +189,12 @@
                             <span class="menu-title">Pedidos</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo site_url("admin/pdv") ?>">
+                            <i class="mdi mdi-cash-register menu-icon"></i>
+                            <span class="menu-title">Pdv</span>
+                        </a>
+                    </li>
 
                     <li class="nav-item">
                         <a class="nav-link" href="<?php echo site_url("admin/usuarios") ?>">
@@ -252,6 +258,41 @@
                             <span class="menu-title">Bairros</span>
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="abrirEntregadorEExtensao(event)">
+                            <i class="mdi mdi-truck-delivery menu-icon"></i>
+                            <span class="menu-title">App do Entregador</span>
+                            <i class="mdi mdi-open-in-new menu-icon" style="margin-left: auto;"></i>
+                        </a>
+                    </li>
+
+                    <script>
+                    function abrirEntregadorEExtensao(e) {
+                        e.preventDefault();
+
+                        const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+                        const urlApp = "<?php echo site_url('entregador') ?>";
+                        const urlExtensao = "https://chromewebstore.google.com/detail/simulador-m%C3%B3vel-ferrament/ckejmhbmlajgoklhgbapkiccekfoccmk";
+
+                        if (isMobile) {
+                            // Dispositivo móvel: abre apenas o app
+                            window.open(urlApp, "_blank");
+                        } else {
+                            // Desktop: abre o app E a extensão (duas abas)
+                            const novaAba1 = window.open(urlApp, "_blank");
+                            const novaAba2 = window.open(urlExtensao, "_blank");
+                             alert("⚠️ Este app é feito para celulares.\n\nVamos abrir o app e também a extensão Mobile Simulator para você instalar.");
+
+                            if (!novaAba1 || !novaAba2) {
+                                alert("⚠️ Seu navegador bloqueou a abertura automática das abas.\n\nPor favor, permita pop-ups ou clique novamente.");
+                            }
+                        }
+                    }
+                    </script>
+
+
 
                     
                 </ul>

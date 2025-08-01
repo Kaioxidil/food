@@ -50,6 +50,8 @@ $routes->group('carrinho', function ($routes) {
 });
 
 // Rota para a área do entregador
+
+// app/Config/Routes.php
 $routes->group('entregador', static function ($routes) {
     // Redireciona a raiz /entregador para o método login
     $routes->get('/', 'Entregador::login');
@@ -57,10 +59,7 @@ $routes->group('entregador', static function ($routes) {
     $routes->post('autenticar', 'Entregador::autenticar');
     $routes->get('painel', 'Entregador::painel', ['filter' => 'authEntregador']); // Rota protegida
     $routes->get('logout', 'Entregador::logout');
-    
-    // Rota corrigida para a mudança de status do pedido
-    // Agora está dentro do grupo 'entregador'
-    $routes->post('mudarStatusPedido', 'Entregador::mudarStatusPedido', ['filter' => 'authEntregador']);
+    $routes->post('atualizar_status', 'Entregador::atualizarStatusPedido');
 });
 
 $routes->get('/finalizar', 'Finalizar::index'); 
@@ -68,7 +67,7 @@ $routes->post('/finalizar/enviar', 'Finalizar::enviar');
 
 $routes->group('admin', function($routes){
 
-    // Rotas de Formas de Pagamento (sem alterações)
+     // Rotas de Formas de Pagamento (sem alterações)
     $routes->get('formas', 'Admin\FormasPagamentos::index');
     $routes->add('formas/criar', 'Admin\FormasPagamentos::criar');
     $routes->post('formas/cadastrar', 'Admin\FormasPagamentos::cadastrar');
@@ -125,6 +124,14 @@ $routes->group('admin', function($routes){
     $routes->get('empresa/fotos/(:num)', 'Admin\EmpresaController::fotos/$1');
     $routes->post('empresa/uploadFotos', 'Admin\EmpresaController::uploadFotos');
     $routes->get('empresa/deleteFoto/(:num)/(:segment)', 'Admin\EmpresaController::deleteFoto/$1/$2');
+
+
+     $routes->group('pdv', function($routes){
+        $routes->get('/', 'Admin\PdvController::index', ['as' => 'pdv']);
+        $routes->post('buscarusuarios', 'Admin\PdvController::buscarUsuarios', ['as' => 'pdv.buscar.usuarios']);
+        $routes->get('buscaropcoes/(:num)', 'Admin\PdvController::buscarOpcoes/$1', ['as' => 'pdv.buscar.opcoes']);
+        $routes->post('salvarvenda', 'Admin\PdvController::salvarVenda', ['as' => 'pdv.salvar.venda']);
+    });
 
 });
 
