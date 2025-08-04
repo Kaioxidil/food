@@ -56,23 +56,29 @@
         <div class="container-fluid page-body-wrapper">
             <nav class="sidebar sidebar-offcanvas sidebar-fixed" id="sidebar">
                 <ul class="nav">
-                    
-                    <!-- Home -->
-                    <li class="nav-item">
+
+                    <?php $uri = service('uri'); ?>
+
+                    <li class="nav-item <?= $uri->getSegment(2) == 'home' || $uri->getSegment(2) == '' ? 'active' : '' ?>">
                         <a class="nav-link" href="<?= site_url('admin/home') ?>">
                             <i class="mdi mdi-view-dashboard menu-icon"></i> 
                             <span class="menu-title">Dashboard</span>
                         </a>
                     </li>
 
-                    <!-- Dados da Empresa -->
-                    <li class="nav-item ">
+                    <li class="nav-item <?= $uri->getSegment(2) == 'empresa' ? 'active' : '' ?>">
                         <a class="nav-link" href="<?= site_url('admin/empresa') ?>">
-                            <i class="mdi mdi-domain menu-icon"></i> 
+                            <i class="mdi mdi-settings menu-icon"></i> 
                             <span class="menu-title">Dados da Empresa</span>
                         </a>
                     </li>
-                    
+
+                    <li class="nav-item <?= $uri->getSegment(2) == 'integracoes' ? 'active' : '' ?>">
+                        <a class="nav-link" href="<?= site_url('admin/integracoes') ?>">
+                            <i class="mdi mdi-cloud-sync menu-icon"></i> 
+                            <span class="menu-title">Integrações</span>
+                        </a>
+                    </li>
                     
                 </ul>
             </nav>

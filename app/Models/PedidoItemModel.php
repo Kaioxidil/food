@@ -95,5 +95,20 @@ class PedidoItemModel extends Model
         return $itens;
     }
 
-     
+    public function RecuperaDadosDoProdutoPdv(){
+        return $this->select([
+            'produtos.id',
+            'produtos.nome',
+            'produtos.preco_minimo',
+            'produtos.preco_maximo',
+            'produtos.imagem_capa',
+            'produtos.descricao',
+            'produtos.ativo',
+            'produtos.created_at',
+            'produtos.updated_at',
+        ])
+        ->join('produtos', 'produtos.id = pedidos_itens.produto_id')
+        ->findAll();
+    }
+
 }

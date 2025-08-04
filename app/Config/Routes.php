@@ -125,14 +125,22 @@ $routes->group('admin', function($routes){
     $routes->post('empresa/uploadFotos', 'Admin\EmpresaController::uploadFotos');
     $routes->get('empresa/deleteFoto/(:num)/(:segment)', 'Admin\EmpresaController::deleteFoto/$1/$2');
 
-
-     $routes->group('pdv', function($routes){
-        $routes->get('/', 'Admin\PdvController::index', ['as' => 'pdv']);
+    $routes->get('integracoes', 'Admin\IntegracoesController::index');
+    $routes->get('integracoes/detalhes/(:num)', 'Admin\IntegracoesController::detalhes/$1');
+    $routes->get('integracoes/form', 'Admin\IntegracoesController::form');
+    $routes->get('integracoes/form/(:num)', 'Admin\IntegracoesController::form/$1');
+    $routes->post('integracoes/save', 'Admin\IntegracoesController::save');
+     
+    $routes->group('pdv', function($routes){
+        $routes->get('/', 'Admin\PdvController::index', ['as' => 'pdv.index']); // Adicionando 'index' para clareza
         $routes->post('buscarusuarios', 'Admin\PdvController::buscarUsuarios', ['as' => 'pdv.buscar.usuarios']);
+
+        // Rota corrigida para capturar o ID do produto
+        // A sua estava quase certa, apenas vamos garantir que o nome da rota seja mais claro
         $routes->get('buscaropcoes/(:num)', 'Admin\PdvController::buscarOpcoes/$1', ['as' => 'pdv.buscar.opcoes']);
+        
         $routes->post('salvarvenda', 'Admin\PdvController::salvarVenda', ['as' => 'pdv.salvar.venda']);
     });
-
 });
 
 

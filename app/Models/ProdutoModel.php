@@ -128,22 +128,28 @@ class ProdutoModel extends Model
     }
 
 
-    public function BuscaProdutosPdv()
-    {
-        return $this->select([
-            'produtos.id',
-            'produtos.nome',
-            'produtos.slug',
-            'produtos.descricao',
-            'produtos.ingredientes',
-            'produtos.ativo',
-            'produtos.imagem',
-            'MIN(produtos_especificacoes.preco) AS preco_minimo',
-        ])
-        ->join('produtos_especificacoes', 'produtos_especificacoes.produto_id = produtos.id')
-        ->where('produtos.ativo', true)
-        ->groupBy('produtos.id, produtos.nome, produtos.slug, produtos.descricao, produtos.ingredientes', 'produtos.ativo', 'produtos.imagem')
-        ->orderBy('produtos.nome', 'ASC')
-        ->findAll();
+     /**
+     * MÉTODO CORRIGIDO
+     * Busca os produtos para a tela do PDV.
+     * Se um ID de categoria for fornecido, filtra os produtos por essa categoria.
+     *
+     * @param int|null $categoria_id O ID da categoria para filtrar (opcional).
+     * @return array
+     */
+     public function buscaProdutosPdv(int $categoria_id = null): array
+     {
+        $this->select('produtos.id, produtos.nome, produtos.imagem, produtos.ingredientes, produtos.categoria_id');
+        $this->select("(SELECT MIN(preco) FROM produtos_especificacoes WHERE produto_id = produtos.id) as preco_minimo");
+        
+        $this->where('produtos.ativo', true);
+
+        if ($categoria_id !== null) {
+            $this->where('produtos.categoria_id', $categoria_id);
+        }
+        
+        // <-- ESTA LINHA ORDENA OS PRODUTOS DE CADA CATEGORIA (A-Z)
+        $this->orderBy('produtos.nome', 'ASC');
+
+        return $this->findAll();
     }
 }

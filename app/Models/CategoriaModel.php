@@ -78,4 +78,33 @@ class CategoriaModel extends Model
             
     }
 
+    public function buscaCategoriasComProdutosPdv(): array
+    {
+        // 1. Busca todas as categorias ativas e as ordena pelo nome em ordem ascendente (A-Z)
+        $categorias = $this->where('ativo', true)
+                           ->orderBy('nome', 'ASC') // <-- ESTA LINHA ORDENA AS CATEGORIAS
+                           ->findAll();
+
+        if (empty($categorias)) {
+            return [];
+        }
+
+        $produtoModel = new \App\Models\ProdutoModel();
+
+        // 2. Para cada categoria...
+        foreach ($categorias as $key => $categoria) {
+            
+            // 3. ...busca os seus produtos.
+            $produtos = $produtoModel->buscaProdutosPdv($categoria->id);
+
+            if (!empty($produtos)) {
+                $categoria->produtos = $produtos;
+            } else {
+                unset($categorias[$key]);
+            }
+        }
+
+        return array_values($categorias); 
+    }
+
 }

@@ -69,13 +69,14 @@ class UsuarioModel extends Model
             return [];
         }
 
-        return $this->select('id, nome')
-            ->like('nome', $term)
-            ->withDeleted(true)
-            ->get()
-            ->getResult();
+        return $this->select('id, nome, cpf, email')
+            ->where('deletado_em', null) // Garante que estamos buscando apenas usuários ativos
+            ->groupStart() // Agrupa as condições de busca
+                ->like('nome', $term)
+                ->orLike('cpf', $term)
+            ->groupEnd()
+            ->findAll(); // Usar findAll() é uma boa prática aqui
     }
-
 
 
     public function desabilitaValidacaoSenha()
@@ -127,5 +128,18 @@ class UsuarioModel extends Model
     public function recuperaTotalClientesAtivos(): int
     {
         return $this->where('ativo', true)->countAllResults();
+    }
+
+     public function redefineRegrasDeValidacaoParaPdv()
+    {
+        // Remove a obrigatoriedade da senha para o cadastro rápido
+        unset($this->validationRules['password']);
+        unset($this->validationRules['password_confirmation']);
+
+        // Torna o e-mail único, mas não obrigatório
+        $this->validationRules['email'] = 'permit_empty|valid_email|is_unique[usuarios.email]';
+
+        // Torna o CPF único, mas não obrigatório
+        $this->validationRules['cpf'] = 'permit_empty|exact_length[14]|validaCpf|is_unique[usuarios.cpf]';
     }
 }
